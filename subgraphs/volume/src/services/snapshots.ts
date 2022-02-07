@@ -12,7 +12,6 @@ import {
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
-import { ChainlinkAggregator } from '../../../curve-pools/generated/Booster/ChainlinkAggregator'
 import {
   BIG_DECIMAL_1E8,
   BIG_DECIMAL_ONE,
@@ -23,9 +22,9 @@ import {
   WETH_ADDRESS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
-import { Token } from '../../../locker/generated/schema'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
+import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth

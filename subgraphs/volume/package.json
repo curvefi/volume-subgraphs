@@ -1,5 +1,5 @@
 {
-  "name": "curve-factory-volume",
+  "name": "volume",
   "license": "MIT",
   "version": "1.0.0",
   "files": [
@@ -8,12 +8,12 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ convex-community/curve-factory-volume",
-    "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-factory-volume",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ curvefi/curve-volume",
+    "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-volume",
     "deploy-staging": "graph deploy --product hosted-service convex-community/curve-volume-staging",
-    "deploy-studio": "graph deploy --studio curve-factory-volume",
-    "create-local": "graph create --node http://localhost:8020/ convex/curve-factory-volume",
-    "remove-local": "graph remove --node http://localhost:8020/ convex/curve-factory-volume",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 convex/curve-factory-volume"
+    "deploy-studio": "graph deploy --studio curve-volume",
+    "create-local": "graph create --node http://localhost:8020/ convex/curve-volume",
+    "remove-local": "graph remove --node http://localhost:8020/ convex/curve-volume",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 curvefi/curve-volume"
   }
 }

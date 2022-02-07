@@ -31,7 +31,6 @@ import {
   Add_pool_without_underlyingCall,
   Add_poolCall,
 } from '../generated/CurveRegistryV1/CurveRegistryV1'
-import { AddPoolCall } from '../../curve-pools/generated/Booster/Booster'
 import { ERC20 } from '../generated/CurveRegistryV1/ERC20'
 import { CurvePoolTemplate } from '../generated/templates'
 

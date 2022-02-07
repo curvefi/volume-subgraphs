@@ -25,7 +25,7 @@ dataSources:
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: MetaPoolDeployed(address,address,uint256,uint256,address)
           handler: handleMetaPoolDeployed
@@ -53,7 +53,7 @@ dataSources:
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: PlainPoolDeployed(address[4],uint256,uint256,address)
           handler: handlePlainPoolDeployed
@@ -86,7 +86,7 @@ dataSources:
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: CryptoPoolDeployed(address,address[2],uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)
           handler: handleCryptoPoolDeployed
@@ -120,9 +120,9 @@ dataSources:
         - name: CurveLendingPoolCoin128
           file: ./abis/CurveLendingPoolCoin128.json
         - name: CurvePoolCoin128
-          file: ../../abis/CurvePoolCoin128.json
+          file: ./abis/CurvePoolCoin128.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
       callHandlers:
         - function: add_metapool(address,uint256,address,uint256,string,address)
           handler: handleAddRegistryV1MetaPool
@@ -158,7 +158,7 @@ dataSources:
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
       callHandlers:
         - function: add_pool(address,uint256,address,uint256,string)
           handler: handleAddRegistryV2Pool
@@ -191,19 +191,19 @@ templates:
         - name: CurveLendingPoolCoin128
           file: ./abis/CurveLendingPoolCoin128.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
         - name: Factory
-          file: ../../abis/UniswapV2Factory.json
+          file: ./abis/UniswapV2Factory.json
         - name: Pair
-          file: ../../abis/UniswapV2Pair.json
+          file: ./abis/UniswapV2Pair.json
         - name: FactoryV3
-          file: ../../abis/UniswapV3Factory.json
+          file: ./abis/UniswapV3Factory.json
         - name: Quoter
-          file: ../../abis/UniswapV3Quoter.json
+          file: ./abis/UniswapV3Quoter.json
         - name: ChainlinkAggregator
-          file: ../../abis/CLAggregator.json
+          file: ./abis/CLAggregator.json
         - name: CurvePoolCoin128
-          file: ../../abis/CurvePoolCoin128.json
+          file: ./abis/CurvePoolCoin128.json
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
@@ -244,19 +244,19 @@ templates:
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
-          file: ../../abis/ERC20.json
+          file: ./abis/ERC20.json
         - name: Factory
-          file: ../../abis/UniswapV2Factory.json
+          file: ./abis/UniswapV2Factory.json
         - name: Pair
-          file: ../../abis/UniswapV2Pair.json
+          file: ./abis/UniswapV2Pair.json
         - name: FactoryV3
-          file: ../../abis/UniswapV3Factory.json
+          file: ./abis/UniswapV3Factory.json
         - name: Quoter
-          file: ../../abis/UniswapV3Quoter.json
+          file: ./abis/UniswapV3Quoter.json
         - name: ChainlinkAggregator
-          file: ../../abis/CLAggregator.json
+          file: ./abis/CLAggregator.json
         - name: CurvePoolCoin128
-          file: ../../abis/CurvePoolCoin128.json
+          file: ./abis/CurvePoolCoin128.json
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2

@@ -14,12 +14,12 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
 } from 'const'
-import { Factory } from 'curve-pools/generated/Booster/Factory'
-import { Pair } from 'curve-pools/generated/Booster/Pair'
-import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
+import { Factory } from 'volume/generated/templates/CurvePoolTemplateV2/Factory'
+import { Pair } from 'volume/generated/templates/CurvePoolTemplateV2/Pair'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
-import { FactoryV3 } from 'curve-pools/generated/Booster/FactoryV3'
-import { Quoter } from 'curve-pools/generated/Booster/Quoter'
+import { FactoryV3 } from 'volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
+import { Quoter } from 'volume/generated/templates/CurvePoolTemplateV2/Quoter'
+import { ERC20 } from 'volume/generated/templates/CurvePoolTemplateV2/ERC20'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
