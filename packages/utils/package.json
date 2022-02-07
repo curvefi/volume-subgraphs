@@ -1,0 +1,12 @@
+{
+  "name": "utils",
+  "version": "1.0.0",
+  "description": "Utility functions",
+  "license": "MIT",
+  "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "codegen": "true",
+    "build": "true"
+  }
+}

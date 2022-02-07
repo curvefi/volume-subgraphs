@@ -1,0 +1,34 @@
+{
+  "name": "convex-subgraph",
+  "private": true,
+  "workspaces": [
+    "subgraphs/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "codegen": "yarn workspaces run codegen",
+    "deploy": "yarn workspaces run deploy",
+    "deploy-hosted": "yarn workspaces run deploy-hosted",
+    "deploy-studio": "yarn workspaces run deploy-studio",
+    "deploy-local": "yarn workspaces run deploy-local",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "0.22.1",
+    "@graphprotocol/graph-ts": "0.22.1",
+    "@protofire/subgraph-toolkit": "^0.1.2",
+    "@typescript-eslint/eslint-plugin": "^4.0.0",
+    "@typescript-eslint/parser": "^4.0.0",
+    "eslint": "^7.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "husky": ">=6",
+    "lint-staged": ">=10",
+    "prettier": "^2.0.0",
+    "typescript": "^4.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix",
+    "*.{js,ts,css,md}": "prettier --write"
+  }
+}

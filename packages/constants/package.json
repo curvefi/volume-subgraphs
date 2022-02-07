@@ -1,0 +1,12 @@
+{
+  "name": "const",
+  "version": "1.0.0",
+  "description": "Constants",
+  "license": "MIT",
+  "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "codegen": "true",
+    "build": "true"
+  }
+}
