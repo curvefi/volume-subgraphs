@@ -33,6 +33,7 @@ import {
 } from '../generated/CurveRegistryV1/CurveRegistryV1'
 import { ERC20 } from '../generated/CurveRegistryV1/ERC20'
 import { CurvePoolTemplate } from '../generated/templates'
+import { MetaPool } from '../generated/CurveRegistryV1/MetaPool'
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   log.debug('New factory plain pool deployed at {}', [event.transaction.hash.toHexString()])
@@ -64,14 +65,17 @@ export function handleAddRegistryV1MetaPool(call: Add_metapoolCall): void {
   )
 }
 
-export function handleAddRegistryV1MetaPoolTriPool(call: Add_metapoolCall): void {
+export function handleAddRegistryV1MetaPoolUnspecified(call: Add_metapoolCall): void {
   log.debug('New meta pool {} added from registry at {}', [
     call.inputs._pool.toHexString(),
     call.transaction.hash.toHexString(),
   ])
+  const metapool = MetaPool.bind(call.inputs._pool)
+  const basePoolResult = metapool.try_base_pool()
+  const basePool = basePoolResult.reverted ? TRIPOOL_ADDRESS : basePoolResult.value
   createNewRegistryPool(
     call.inputs._pool,
-    TRIPOOL_ADDRESS,
+    basePool,
     call.inputs._lp_token,
     true,
     EARLY_V2_POOLS.includes(call.inputs._pool) ? true : false,
