@@ -1,0 +1,265 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CurveFactoryV10
+    network: mainnet
+    source:
+      address: "0x0959158b6040d32d04c301a72cbfd6b39e21c9ae"
+      abi: CurveFactoryV10
+      startBlock: 11942404
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Pool
+        - BasePool
+      abis:
+        - name: CurveFactoryV10
+          file: ./abis/CurveFactoryV10.json
+        - name: CurveFactoryV12
+          file: ./abis/CurveFactoryV12.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: MetaPoolDeployed(address,address,uint256,uint256,address)
+          handler: handleMetaPoolDeployed
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: CurveFactoryV12
+    network: mainnet
+    source:
+      address: "0xb9fc157394af804a3578134a6585c0dc9cc990d4"
+      abi: CurveFactoryV12
+      startBlock: 12903979
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Pool
+        - BasePool
+      abis:
+        - name: CurveFactoryV10
+          file: ./abis/CurveFactoryV10.json
+        - name: CurveFactoryV12
+          file: ./abis/CurveFactoryV12.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: PlainPoolDeployed(address[4],uint256,uint256,address)
+          handler: handlePlainPoolDeployed
+        - event: MetaPoolDeployed(address,address,uint256,uint256,address)
+          handler: handleMetaPoolDeployed
+      callHandlers:
+        - function: add_existing_metapools(address[10])
+          handler: handleAddExistingMetaPools
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: CurveFactoryV20
+    network: mainnet
+    source:
+      address: "0xf18056bbd320e96a48e3fbf8bc061322531aac99"
+      abi: CurveFactoryV20
+      startBlock: 14005321
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Pool
+        - BasePool
+      abis:
+        - name: CurveFactoryV20
+          file: ./abis/CurveFactoryV20.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: CryptoPoolDeployed(address,address[2],uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)
+          handler: handleCryptoPoolDeployed
+      file: ./src/mappingV2.ts
+  - kind: ethereum/contract
+    name: CurveRegistryV1
+    network: mainnet
+    source:
+      address: "0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5"
+      abi: CurveRegistryV1
+      startBlock: 12195750
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Pool
+        - BasePool
+      abis:
+        - name: CurveRegistryV1
+          file: ./abis/CurveRegistry.json
+        - name: CurveFactoryV10
+          file: ./abis/CurveFactoryV10.json
+        - name: CurveFactoryV12
+          file: ./abis/CurveFactoryV12.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurveLendingPoolCoin128
+          file: ./abis/CurveLendingPoolCoin128.json
+        - name: CurvePoolCoin128
+          file: ./abis/CurvePoolCoin128.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: add_metapool(address,uint256,address,uint256,string,address)
+          handler: handleAddRegistryV1MetaPool
+        - function: add_metapool(address,uint256,address,uint256,string)
+          handler: handleAddRegistryV1MetaPoolUnspecified
+        - function: add_pool_without_underlying(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
+          handler: handleAddRegistryV1PlainPool
+        - function: add_pool(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
+          handler: handleAddRegistryV1LendingPool
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: CurveRegistryV2
+    network: mainnet
+    source:
+      address: "0x4AacF35761d06Aa7142B9326612A42A2b9170E33"
+      abi: CurveRegistryV2
+      startBlock: 13660722
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Platform
+        - Pool
+        - BasePool
+      abis:
+        - name: CurveRegistryV2
+          file: ./abis/CurveRegistryV2.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: add_pool(address,uint256,address,uint256,string)
+          handler: handleAddRegistryV2Pool
+      file: ./src/mappingV2.ts
+templates:
+  - name: CurvePoolTemplate
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: CurvePool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - TokenSnapshot
+        - HourlyVolumeSnapshot
+        - DailyVolumeSnapshot
+        - WeeklyVolumeSnapshot
+      abis:
+        - name: CurveFactoryV10
+          file: ./abis/CurveFactoryV10.json
+        - name: CurveFactoryV12
+          file: ./abis/CurveFactoryV12.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurveLendingPoolCoin128
+          file: ./abis/CurveLendingPoolCoin128.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Factory
+          file: ./abis/UniswapV2Factory.json
+        - name: Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ./abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ./abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ./abis/CLAggregator.json
+        - name: CurvePoolCoin128
+          file: ./abis/CurvePoolCoin128.json
+      eventHandlers:
+        - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
+          handler: handleTokenExchange
+        - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
+          handler: handleTokenExchangeUnderlying
+        - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[2],uint256[2],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityImbalance(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleRemoveLiquidityImbalance
+      callHandlers:
+        - function: remove_liquidity_one_coin(uint256, int128, uint256, indexed address)
+          handler: handleRemoveLiquidityOne
+      file: ./src/mapping.ts
+  - name: CurvePoolTemplateV2
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: CurvePoolV2
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - TokenSnapshot
+        - HourlyVolumeSnapshot
+        - DailyVolumeSnapshot
+        - WeeklyVolumeSnapshot
+      abis:
+        - name: CurveFactoryV10
+          file: ./abis/CurveFactoryV10.json
+        - name: CurveFactoryV12
+          file: ./abis/CurveFactoryV12.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Factory
+          file: ./abis/UniswapV2Factory.json
+        - name: Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ./abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ./abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ./abis/CLAggregator.json
+        - name: CurvePoolCoin128
+          file: ./abis/CurvePoolCoin128.json
+      eventHandlers:
+        - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleTokenExchangeV2
+      file: ./src/mappingV2.ts
