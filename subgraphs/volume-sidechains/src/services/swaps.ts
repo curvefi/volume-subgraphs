@@ -8,7 +8,7 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING } from '../../../../packages/constants'
+import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING, STABLE_FACTORY } from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -59,7 +59,7 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    if (pool.assetType == 2 || (pool.assetType == 0 && pool.poolType == FACTORY_V12)) {
+    if (pool.assetType == 2 || (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
       tokenSoldDecimals = BigInt.fromI32(18)
