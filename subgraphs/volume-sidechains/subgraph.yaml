@@ -115,6 +115,8 @@ templates:
       abis:
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: CurvePoolV2

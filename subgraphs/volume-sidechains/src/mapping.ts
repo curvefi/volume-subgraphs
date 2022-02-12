@@ -2,6 +2,7 @@ import { NewAddressIdentifier, AddressModified } from '../generated/AddressProvi
 import {
   ADDRESS_ZERO,
   BIG_INT_ZERO,
+  CURVE_FACTORY_V1_2,
   CURVE_PLATFORM_ID,
   EARLY_V2_POOLS,
   LENDING,
@@ -17,13 +18,15 @@ import {
 } from '../generated/templates'
 import { Address, log } from '@graphprotocol/graph-ts'
 import { MainRegistry, PoolAdded } from '../generated/AddressProvider/MainRegistry'
-import { createNewPool } from './services/pools'
+import { createNewFactoryPool, createNewPool } from './services/pools'
 import { createNewRegistryPool } from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
 import { ERC20 } from '../generated/templates/CurvePoolTemplate/ERC20'
 import { CurveLendingPool } from '../generated/templates/RegistryTemplate/CurveLendingPool'
 import { TokenExchange, TokenExchangeUnderlying } from '../generated/templates/CurvePoolTemplate/CurvePool'
 import { handleExchange } from './services/swaps'
+import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
+import { getFactory } from './services/factory'
 
 export function addAddress(providedId: BigInt, addedAddress: Address): void {
   if (providedId == BIG_INT_ZERO) {
@@ -38,15 +41,15 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
     let stableFactory = Factory.load(addedAddress.toHexString())
     if (!stableFactory) {
       log.info('New stable factory added: {}', [addedAddress.toHexString()])
-      stableFactory = new Factory(addedAddress.toHexString())
+      stableFactory = getFactory(addedAddress, 12)
       stableFactory.save()
       StableFactoryTemplate.create(addedAddress)
     }
   } else if (providedId == BigInt.fromString('5')) {
-    let cryptoRegistry = Factory.load(addedAddress.toHexString())
+    let cryptoRegistry = Registry.load(addedAddress.toHexString())
     if (!cryptoRegistry) {
-      log.info('New crypto factory added: {}', [addedAddress.toHexString()])
-      cryptoRegistry = new Factory(addedAddress.toHexString())
+      log.info('New crypto registry added: {}', [addedAddress.toHexString()])
+      cryptoRegistry = new Registry(addedAddress.toHexString())
       cryptoRegistry.save()
       CryptoRegistryTemplate.create(addedAddress)
     }
@@ -73,11 +76,12 @@ export function getLpToken(pool: Address, registryAddress: Address): Address {
 
 export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   const pool = event.params.pool
+  log.info('New pool {} added to registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
   const testLending = CurveLendingPool.bind(pool)
   const testLendingResult = testLending.try_offpeg_fee_multiplier()
   if (!testLendingResult.reverted) {
     // Lending pool
-    log.debug('New lending pool {} added from registry at {}', [
+    log.info('New lending pool {} added from registry at {}', [
       pool.toHexString(),
       event.transaction.hash.toHexString(),
     ])
@@ -102,7 +106,7 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   const testMetaPool = MetaPool.bind(pool)
   const testMetaPoolResult = testMetaPool.try_base_pool()
   if (!testMetaPoolResult.reverted) {
-    log.debug('New meta pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
+    log.info('New meta pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
     const basePool = testMetaPoolResult.value
     createNewRegistryPool(
       pool,
@@ -115,7 +119,7 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
       event.transaction.hash
     )
   } else {
-    log.debug('New plain pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
+    log.info('New plain pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
     createNewRegistryPool(
       pool,
       ADDRESS_ZERO,
@@ -130,7 +134,7 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
 }
 
 export function handleTokenExchange(event: TokenExchange): void {
-  log.debug('Plain swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  log.info('Plain swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
   handleExchange(
     trade.buyer,
@@ -147,7 +151,7 @@ export function handleTokenExchange(event: TokenExchange): void {
 }
 
 export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): void {
-  log.debug('Underlying swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  log.info('Underlying swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
   handleExchange(
     trade.buyer,
@@ -160,5 +164,37 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
     event.address,
     event.transaction.hash,
     true
+  )
+}
+
+export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
+  log.info('New factory plain pool deployed at {}', [event.transaction.hash.toHexString()])
+  createNewFactoryPool(
+    12,
+    event.address,
+    false,
+    ADDRESS_ZERO,
+    ADDRESS_ZERO,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
+}
+
+export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
+  log.info('New meta pool (version {}), basepool: {}, deployed at {}', [
+    '12',
+    event.params.base_pool.toHexString(),
+    event.transaction.hash.toHexString(),
+  ])
+  createNewFactoryPool(
+    12,
+    event.address,
+    true,
+    event.params.base_pool,
+    ADDRESS_ZERO,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
   )
 }

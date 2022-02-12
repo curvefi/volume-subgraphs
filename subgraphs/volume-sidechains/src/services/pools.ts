@@ -3,12 +3,28 @@ import { getDecimals } from '../../../../packages/utils/pricing'
 import { BasePool, Pool } from '../../generated/schema'
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
-import { REGISTRY_V1, REGISTRY_V2 } from '../../../../packages/constants'
+import {
+  ADDRESS_ZERO,
+  BIG_INT_ONE,
+  CRYPTO_FACTORY,
+  CURVE_FACTORY_V1,
+  CURVE_FACTORY_V1_2,
+  CURVE_FACTORY_V2,
+  FACTORY_V10,
+  FACTORY_V12,
+  FACTORY_V20,
+  REGISTRY_V1,
+  REGISTRY_V2,
+  STABLE_FACTORY,
+} from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
 import { CurveLendingPoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurveLendingPoolCoin128'
 import { ERC20 } from '../../generated/templates/CurvePoolTemplate/ERC20'
 import { getPlatform } from './platform'
+import { StableFactory } from '../../generated/AddressProvider/StableFactory'
+import { getFactory } from './factory'
+import { CryptoFactory } from '../../generated/templates/CryptoRegistryTemplate/CryptoFactory'
 
 export function createNewPool(
   poolAddress: Address,
@@ -85,6 +101,65 @@ export function createNewPool(
   pool.coins = coins
   pool.coinDecimals = coinDecimals
   pool.save()
+}
+
+export function createNewFactoryPool(
+  version: i32,
+  factoryContract: Address,
+  metapool: boolean,
+  basePool: Address,
+  lpToken: Address,
+  timestamp: BigInt,
+  block: BigInt,
+  tx: Bytes
+): void {
+  let factoryPool: Address
+  let poolType: string
+  const factoryEntity = getFactory(factoryContract, version)
+  const poolCount = factoryEntity.poolCount
+  if (version == 12) {
+    const factory = StableFactory.bind(factoryContract)
+    poolType = STABLE_FACTORY
+    factoryPool = factory.pool_list(poolCount)
+    log.info('New factory pool (metapool: {}) added {} with id {}', [
+      metapool.toString(),
+      factoryPool.toHexString(),
+      poolCount.toString(),
+    ])
+  } else {
+    const factory = CryptoFactory.bind(factoryContract)
+    poolType = CRYPTO_FACTORY
+    factoryPool = factory.pool_list(poolCount)
+    log.info('New factory pool added (v2.0) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
+  }
+  factoryEntity.poolCount = factoryEntity.poolCount.plus(BIG_INT_ONE)
+  factoryEntity.save()
+
+  let name: string, symbol: string
+  if (version == 20) {
+    CurvePoolTemplateV2.create(factoryPool)
+    const lpTokenContract = ERC20.bind(lpToken)
+    name = lpTokenContract.name()
+    symbol = lpTokenContract.symbol()
+  } else {
+    CurvePoolTemplate.create(factoryPool)
+    const poolContract = CurvePool.bind(factoryPool)
+    name = poolContract.name()
+    symbol = poolContract.symbol()
+  }
+  createNewPool(
+    factoryPool,
+    lpToken == ADDRESS_ZERO ? factoryPool : lpToken,
+    name,
+    symbol,
+    poolType,
+    metapool,
+    version == 20,
+    block,
+    tx,
+    timestamp,
+    basePool
+  )
 }
 
 export function createNewRegistryPool(

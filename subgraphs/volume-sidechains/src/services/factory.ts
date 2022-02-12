@@ -4,7 +4,7 @@ import { Address } from '@graphprotocol/graph-ts'
 import { StableFactory } from '../../generated/AddressProvider/StableFactory'
 import { CryptoFactory } from '../../generated/templates/CryptoRegistryTemplate/CryptoFactory'
 
-export function getFactory(factoryAddress: Address, version: int32): Factory {
+export function getFactory(factoryAddress: Address, version: i32): Factory {
   let factory = Factory.load(factoryAddress.toHexString())
   if (!factory) {
     factory = new Factory(factoryAddress.toHexString())

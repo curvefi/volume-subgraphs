@@ -1,7 +1,6 @@
 enum PoolType {
-  FACTORY_V10
-  FACTORY_V12
-  FACTORY_V20
+  STABLE_FACTORY
+  CRYPTO_FACTORY
   REGISTRY_V1
   REGISTRY_V2
   LENDING
@@ -9,9 +8,6 @@ enum PoolType {
 
 type Platform @entity {
   id: ID!
-  poolCountV10: BigInt!
-  poolCountV12: BigInt!
-  poolCountV20: BigInt!
   pools: [Pool!]! @derivedFrom(field: "platform")
   poolAddresses: [Bytes!]!
   latestPoolSnapshot: BigInt!
@@ -25,6 +21,7 @@ type Registry @entity {
 
 type Factory @entity {
   id: ID!
+  poolCount: BigInt!
   txhash: Bytes!
   timestamp: BigInt!
 }
