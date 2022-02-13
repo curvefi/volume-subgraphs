@@ -16,6 +16,11 @@ export const NATIVE_PLACEHOLDER = Address.fromString(NATIVE_PLACEHOLDER_ADDRESS)
 export const NATIVE_TOKEN_ADDRESS = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7'
 export const NATIVE_TOKEN = Address.fromString(NATIVE_TOKEN_ADDRESS)
 export const ADDRESS_ZERO = Address.fromString('0x0000000000000000000000000000000000000000')
+
+// export const THREE_CRV_TOKEN = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
+export const THREE_CRV_TOKEN = '0x1337bedc9d22ecbe766df105c9623922a27963ec'
+export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
+
 // export const WETH_ADDRESS = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
 // export const USDT_ADDRESS = Address.fromString('0xdac17f958d2ee523a2206206994597c13d831ec7')
 // export const WBTC_ADDRESS = Address.fromString('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599')
@@ -40,6 +45,11 @@ export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 // Mixed USDT-forex (USDT-Forex) pools
 export const EURS_USDC_LP_TOKEN = '0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b'
 export const EURT_USDT_LP_TOKEN = '0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833'
+
+export const SIDECHAIN_SUBSTITUTES = new Map<string, Address>()
+SIDECHAIN_SUBSTITUTES.set('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase(), NATIVE_TOKEN)
+SIDECHAIN_SUBSTITUTES.set('0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d', WBTC_ADDRESS)
+SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADDRESS)
 
 export const FOREX_ORACLES = new Map<string, Address>()
 FOREX_ORACLES.set(EURT_USDT_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
@@ -83,8 +93,6 @@ export const EURS_USDC_POOL = Address.fromString('0x98a7F18d4E56Cfe84E3D081B4000
 export const TRICRYPTO_V1_POOL = Address.fromString('0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5')
 export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD_POOL]
 
-export const THREE_CRV_TOKEN = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
-export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
 export const EURT_TOKEN = '0xC581b735A1688071A1746c968e0798D642EDE491'
 export const EURT_ADDRESS = Address.fromString(EURT_TOKEN)
 export const EURS_TOKEN = '0xdB25f211AB05b1c97D595516F45794528a807ad8'

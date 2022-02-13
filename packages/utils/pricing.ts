@@ -5,6 +5,7 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
+  SIDECHAIN_SUBSTITUTES,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
   UNI_FACTORY_ADDRESS,
@@ -104,7 +105,9 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
 
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
-
+  if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
+    token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
+  }
   if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     return getTokenAValueInTokenB(token, USDT_ADDRESS)
   }

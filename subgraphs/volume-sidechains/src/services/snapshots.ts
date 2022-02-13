@@ -14,9 +14,6 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   FOREX_ORACLES,
-  NATIVE_PLACEHOLDER,
-  NATIVE_PLACEHOLDER_ADDRESS,
-  NATIVE_TOKEN,
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -24,14 +21,34 @@ import {
 import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
+import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 
-export function getTokenSnapshot(token: Address, timestamp: BigInt): TokenSnapshot {
+export function getForexUsdRate(token: string): BigDecimal {
+  // returns the amount of USD 1 unit of the foreign currency is worth
+  const priceOracle = ChainlinkAggregator.bind(FOREX_ORACLES[token])
+  const conversionRateReponse = priceOracle.try_latestAnswer()
+  const conversionRate = conversionRateReponse.reverted
+    ? BIG_DECIMAL_ONE
+    : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
+  log.debug('Answer from Forex oracle {} for token {}: {}', [
+    FOREX_ORACLES[token].toHexString(),
+    token,
+    conversionRate.toString(),
+  ])
+  return conversionRate
+}
+
+export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
   const snapshotId = token.toHexString() + '-' + hour.toString()
   let snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
-    snapshot.price = getUsdRate(token)
+    if (forex) {
+      snapshot.price = getForexUsdRate(token.toHexString())
+    } else {
+      snapshot.price = getUsdRate(token)
+    }
     snapshot.save()
   }
   return snapshot
@@ -48,8 +65,7 @@ export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): Tok
     snapshot = new TokenSnapshot(snapshotId)
     let price = BIG_DECIMAL_ZERO
     for (let i = 0; i < pool.coins.length; ++i) {
-      const coin = pool.coins[i] == NATIVE_PLACEHOLDER ? NATIVE_TOKEN : pool.coins[i]
-      price = getUsdRate(bytesToAddress(coin))
+      price = getUsdRate(bytesToAddress(pool.coins[i]))
       if (price != BIG_DECIMAL_ZERO) {
         break
       }
@@ -75,12 +91,14 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): Token
 }
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
-  if (pool.assetType == 1) {
-    return getTokenSnapshot(WETH_ADDRESS, timestamp)
+  if (FOREX_ORACLES.has(pool.id)) {
+    return getTokenSnapshot(bytesToAddress(pool.address), timestamp, true)
+  } else if (pool.assetType == 1) {
+    return getTokenSnapshot(WETH_ADDRESS, timestamp, false)
   } else if (pool.assetType == 2) {
-    return getTokenSnapshot(WBTC_ADDRESS, timestamp)
+    return getTokenSnapshot(WBTC_ADDRESS, timestamp, false)
   } else if (pool.assetType == 0) {
-    return getTokenSnapshot(USDT_ADDRESS, timestamp)
+    return getTokenSnapshot(USDT_ADDRESS, timestamp, false)
   } else {
     return getStableCryptoTokenSnapshot(pool, timestamp)
   }
