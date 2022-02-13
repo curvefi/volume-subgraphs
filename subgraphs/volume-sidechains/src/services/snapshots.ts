@@ -21,22 +21,6 @@ import {
 import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
-import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
-
-export function getForexUsdRate(token: string): BigDecimal {
-  // returns the amount of USD 1 unit of the foreign currency is worth
-  const priceOracle = ChainlinkAggregator.bind(FOREX_ORACLES[token])
-  const conversionRateReponse = priceOracle.try_latestAnswer()
-  const conversionRate = conversionRateReponse.reverted
-    ? BIG_DECIMAL_ONE
-    : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
-  log.debug('Answer from Forex oracle {} for token {}: {}', [
-    FOREX_ORACLES[token].toHexString(),
-    token,
-    conversionRate.toString(),
-  ])
-  return conversionRate
-}
 
 export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
@@ -44,11 +28,7 @@ export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boole
   let snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
-    if (forex) {
-      snapshot.price = getForexUsdRate(token.toHexString())
-    } else {
-      snapshot.price = getUsdRate(token)
-    }
+    snapshot.price = getUsdRate(token)
     snapshot.save()
   }
   return snapshot
@@ -91,9 +71,7 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): Token
 }
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
-  if (FOREX_ORACLES.has(pool.id)) {
-    return getTokenSnapshot(bytesToAddress(pool.address), timestamp, true)
-  } else if (pool.assetType == 1) {
+  if (pool.assetType == 1) {
     return getTokenSnapshot(WETH_ADDRESS, timestamp, false)
   } else if (pool.assetType == 2) {
     return getTokenSnapshot(WBTC_ADDRESS, timestamp, false)
