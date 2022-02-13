@@ -14,6 +14,9 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   FOREX_ORACLES,
+  NATIVE_PLACEHOLDER,
+  NATIVE_PLACEHOLDER_ADDRESS,
+  NATIVE_TOKEN,
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -22,7 +25,7 @@ import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
 
-export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
+export function getTokenSnapshot(token: Address, timestamp: BigInt): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
   const snapshotId = token.toHexString() + '-' + hour.toString()
   let snapshot = TokenSnapshot.load(snapshotId)
@@ -45,7 +48,8 @@ export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): Tok
     snapshot = new TokenSnapshot(snapshotId)
     let price = BIG_DECIMAL_ZERO
     for (let i = 0; i < pool.coins.length; ++i) {
-      price = getUsdRate(bytesToAddress(pool.coins[i]))
+      const coin = pool.coins[i] == NATIVE_PLACEHOLDER ? NATIVE_TOKEN : pool.coins[i]
+      price = getUsdRate(bytesToAddress(coin))
       if (price != BIG_DECIMAL_ZERO) {
         break
       }
@@ -72,11 +76,11 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): Token
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
   if (pool.assetType == 1) {
-    return getTokenSnapshot(WETH_ADDRESS, timestamp, false)
+    return getTokenSnapshot(WETH_ADDRESS, timestamp)
   } else if (pool.assetType == 2) {
-    return getTokenSnapshot(WBTC_ADDRESS, timestamp, false)
+    return getTokenSnapshot(WBTC_ADDRESS, timestamp)
   } else if (pool.assetType == 0) {
-    return getTokenSnapshot(USDT_ADDRESS, timestamp, false)
+    return getTokenSnapshot(USDT_ADDRESS, timestamp)
   } else {
     return getStableCryptoTokenSnapshot(pool, timestamp)
   }

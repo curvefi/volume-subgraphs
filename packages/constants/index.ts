@@ -11,10 +11,10 @@ export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
-export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
-export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
-export const CRV_TOKEN = '0xD533a949740bb3306d119CC777fa900bA034cd52'
-export const CRV_ADDRESS = Address.fromString(CRV_TOKEN)
+export const NATIVE_PLACEHOLDER_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+export const NATIVE_PLACEHOLDER = Address.fromString(NATIVE_PLACEHOLDER_ADDRESS)
+export const NATIVE_TOKEN_ADDRESS = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7'
+export const NATIVE_TOKEN = Address.fromString(NATIVE_TOKEN_ADDRESS)
 export const ADDRESS_ZERO = Address.fromString('0x0000000000000000000000000000000000000000')
 // export const WETH_ADDRESS = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
 // export const USDT_ADDRESS = Address.fromString('0xdac17f958d2ee523a2206206994597c13d831ec7')
