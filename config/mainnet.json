@@ -1,6 +1,7 @@
 {
   "key": "mainnet",
   "network": "mainnet",
+  "starting_block": 11153725,
   "weth_token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   "usdt_token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
   "wbtc_token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",

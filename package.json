@@ -10,7 +10,8 @@
     "codegen": "yarn workspaces run codegen",
     "prepare": "husky install",
     "prepare:mainnet": "yarn workspaces run prepare:mainnet",
-    "prepare:avalanche": "yarn workspaces run prepare:avalanche"
+    "prepare:avalanche": "yarn workspaces run prepare:avalanche",
+    "prepare:fantom": "yarn workspaces run prepare:fantom"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",

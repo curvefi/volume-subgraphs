@@ -9,6 +9,7 @@
     "codegen": "true",
     "build": "true",
     "prepare:mainnet": "mustache ../../config/mainnet.json index.template.ts > index.ts",
-    "prepare:avalanche": "mustache ../../config/avalanche.json index.template.ts > index.ts"
+    "prepare:avalanche": "mustache ../../config/avalanche.json index.template.ts > index.ts",
+    "prepare:fantom": "mustache ../../config/fantom.json index.template.ts > index.ts"
   }
 }

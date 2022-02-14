@@ -9,6 +9,7 @@
     "codegen": "true",
     "build": "true",
     "prepare:mainnet": "true",
-    "prepare:avalanche": "true"
+    "prepare:avalanche": "true",
+    "prepare:fantom": "true"
   }
 }
