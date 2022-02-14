@@ -7,6 +7,8 @@
   "private": true,
   "scripts": {
     "codegen": "true",
-    "build": "true"
+    "build": "true",
+    "prepare:mainnet": "true",
+    "prepare:avalanche": "true"
   }
 }

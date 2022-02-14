@@ -7,6 +7,8 @@
   "private": true,
   "scripts": {
     "codegen": "true",
-    "build": "true"
+    "build": "true",
+    "prepare:mainnet": "mustache ../../config/mainnet.json index.template.ts > index.ts",
+    "prepare:avalanche": "mustache ../../config/avalanche.json index.template.ts > index.ts"
   }
 }

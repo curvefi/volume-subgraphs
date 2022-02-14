@@ -1,13 +1,5 @@
 import { NewAddressIdentifier, AddressModified } from '../generated/AddressProvider/AddressProvider'
-import {
-  ADDRESS_ZERO,
-  BIG_INT_ZERO,
-  CURVE_FACTORY_V1_2,
-  CURVE_PLATFORM_ID,
-  EARLY_V2_POOLS,
-  LENDING,
-  TRIPOOL_ADDRESS,
-} from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_INT_ZERO, EARLY_V2_POOLS, LENDING } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
 import {

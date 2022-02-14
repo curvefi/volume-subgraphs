@@ -10,7 +10,7 @@ import {
   THREE_CRV_ADDRESS,
   UNI_FACTORY_ADDRESS,
   UNI_V3_FACTORY_ADDRESS,
-  UNI_V3_QUOTER,
+  UNI_V3_QUOTER_ADDRESS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -72,7 +72,7 @@ export function getEthRateUniV3(token: Address): BigDecimal {
       return BIG_DECIMAL_ZERO
     }
   }
-  const quoter = Quoter.bind(UNI_V3_QUOTER)
+  const quoter = Quoter.bind(UNI_V3_QUOTER_ADDRESS)
   const decimals = getDecimals(token)
   const rate = quoter.try_quoteExactInputSingle(token, WETH_ADDRESS, fee, exponentToBigInt(decimals), BIG_INT_ZERO)
   if (!rate.reverted) {

@@ -8,11 +8,9 @@
   "scripts": {
     "build": "yarn workspaces run build",
     "codegen": "yarn workspaces run codegen",
-    "deploy": "yarn workspaces run deploy",
-    "deploy-hosted": "yarn workspaces run deploy-hosted",
-    "deploy-studio": "yarn workspaces run deploy-studio",
-    "deploy-local": "yarn workspaces run deploy-local",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prepare:mainnet": "yarn workspaces run prepare:mainnet",
+    "prepare:avalanche": "yarn workspaces run prepare:avalanche"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",
@@ -30,5 +28,8 @@
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",
     "*.{js,ts,css,md}": "prettier --write"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0"
   }
 }
