@@ -16,6 +16,7 @@ import {
   REGISTRY_V1,
   REGISTRY_V2,
   STABLE_FACTORY,
+  UNKNOWN_METAPOOLS,
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
@@ -179,7 +180,8 @@ export function createNewRegistryPool(
       lpToken.toHexString(),
       tx.toHexString(),
     ])
-    const poolType = isV2 ? REGISTRY_V2 : REGISTRY_V1
+    let poolType = isV2 ? REGISTRY_V2 : REGISTRY_V1
+    poolType = UNKNOWN_METAPOOLS.has(poolAddress.toHexString()) ? STABLE_FACTORY : poolType
     if (!isV2) {
       CurvePoolTemplate.create(poolAddress)
     } else {

@@ -1,5 +1,5 @@
 import { NewAddressIdentifier, AddressModified } from '../generated/AddressProvider/AddressProvider'
-import { ADDRESS_ZERO, BIG_INT_ZERO, EARLY_V2_POOLS, LENDING } from '../../../packages/constants'
+import { ADDRESS_ZERO, UNKNOWN_METAPOOLS, BIG_INT_ZERO, EARLY_V2_POOLS, LENDING } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
 import {
@@ -97,9 +97,10 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
 
   const testMetaPool = MetaPool.bind(pool)
   const testMetaPoolResult = testMetaPool.try_base_pool()
-  if (!testMetaPoolResult.reverted) {
+  const unknownMetapool = UNKNOWN_METAPOOLS.has(pool.toHexString())
+  if (!testMetaPoolResult.reverted || unknownMetapool) {
     log.info('New meta pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
-    const basePool = testMetaPoolResult.value
+    const basePool = unknownMetapool ? UNKNOWN_METAPOOLS[pool.toHexString()] : testMetaPoolResult.value
     createNewRegistryPool(
       pool,
       basePool,

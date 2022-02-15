@@ -44,10 +44,20 @@ export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 export const EURS_USDC_LP_TOKEN = '0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b'
 export const EURT_USDT_LP_TOKEN = '0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833'
 
+// On chains like avalanche, pools use aave synthetics instead of the wrapped tokens
 export const SIDECHAIN_SUBSTITUTES = new Map<string, Address>()
 SIDECHAIN_SUBSTITUTES.set('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase(), NATIVE_TOKEN_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADDRESS)
+
+// On certain chains, metapools were created by the deployer, not the factory
+// and don't implement the `base_pool` method, so the graph has no way of knowing
+// they're metapools. need a manual mapping
+export const UNKNOWN_METAPOOLS = new Map<string, Address>()
+UNKNOWN_METAPOOLS.set(
+  '0x92d5ebf3593a92888c25c0abef126583d4b5312e',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
 
 export const FOREX_ORACLES = new Map<string, Address>()
 FOREX_ORACLES.set(EURT_USDT_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
