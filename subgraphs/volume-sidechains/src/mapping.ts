@@ -70,8 +70,11 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   const pool = event.params.pool
   log.info('New pool {} added to registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
   const testLending = CurveLendingPool.bind(pool)
+  // Note: neither of these tests would work on mainnet because there are no
+  // specific functions for lending pools there.
   const testLendingResult = testLending.try_offpeg_fee_multiplier()
-  if (!testLendingResult.reverted) {
+  const testLendingResult2 = testLending.try_previous_balances(BIG_INT_ZERO)
+  if (!testLendingResult.reverted || !testLendingResult2.reverted) {
     // Lending pool
     log.info('New lending pool {} added from registry at {}', [
       pool.toHexString(),
