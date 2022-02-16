@@ -47,8 +47,12 @@ export const EURT_USDT_LP_TOKEN = '0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833'
 // On chains like avalanche, pools use aave synthetics instead of the wrapped tokens
 export const SIDECHAIN_SUBSTITUTES = new Map<string, Address>()
 SIDECHAIN_SUBSTITUTES.set('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase(), NATIVE_TOKEN_ADDRESS)
+// avalanche
 SIDECHAIN_SUBSTITUTES.set('0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADDRESS)
+// polygon
+SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100A66B82b78a1791B101C9D61', WBTC_ADDRESS)
+SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8E9D3860F56504E4e5f5f390', WETH_ADDRESS)
 
 // On certain chains, metapools were created by the deployer, not the factory
 // and don't implement the `base_pool` method, so the graph has no way of knowing
