@@ -11,6 +11,7 @@
     "prepare:mainnet": "true",
     "prepare:avalanche": "true",
     "prepare:fantom": "true",
+    "prepare:arbitrum": "true",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ curvefi/curve-volume",
     "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-volume",
     "deploy-staging": "graph deploy --product hosted-service convex-community/curve-volume-staging",

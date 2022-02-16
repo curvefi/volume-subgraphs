@@ -11,7 +11,8 @@
     "prepare": "husky install",
     "prepare:mainnet": "yarn workspaces run prepare:mainnet",
     "prepare:avalanche": "yarn workspaces run prepare:avalanche",
-    "prepare:fantom": "yarn workspaces run prepare:fantom"
+    "prepare:fantom": "yarn workspaces run prepare:fantom",
+    "prepare:arbitrum": "yarn workspaces run prepare:arbitrum"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",
