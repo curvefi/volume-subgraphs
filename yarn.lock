@@ -74,6 +74,35 @@
     which "2.0.2"
     yaml "^1.5.1"
 
+"@graphprotocol/graph-cli@0.22.3":
+  version "0.22.3"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.22.3.tgz#b937e50170381b4002e838f8a235197ff15acac3"
+  integrity sha512-vM5oBieTnAgqzxvaCB/iG6F7eFMOuGfxyDJ/9g+UHGfcEQQhElNV3vWLIk4l06/sShASqAwctOTo+3s5wuWhqg==
+  dependencies:
+    assemblyscript "0.19.10"
+    binary-install-raw "0.0.13"
+    chalk "^3.0.0"
+    chokidar "^3.0.2"
+    debug "^4.1.1"
+    docker-compose "^0.23.2"
+    dockerode "^2.5.8"
+    fs-extra "^9.0.0"
+    glob "^7.1.2"
+    gluegun "^4.3.1"
+    graphql "^15.5.0"
+    immutable "^3.8.2"
+    ipfs-http-client "^34.0.0"
+    jayson "^3.0.2"
+    js-yaml "^3.13.1"
+    node-fetch "^2.3.0"
+    pkginfo "^0.4.1"
+    prettier "^1.13.5"
+    request "^2.88.0"
+    semver "7.3.5"
+    tmp-promise "^3.0.2"
+    which "2.0.2"
+    yaml "^1.5.1"
+
 "@graphprotocol/graph-ts@0.22.1":
   version "0.22.1"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.22.1.tgz#3189b2495b33497280f617316cce68074d48e236"
