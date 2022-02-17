@@ -177,6 +177,8 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - Candle
+        - SwapEvent
         - TokenSnapshot
         - HourlyVolumeSnapshot
         - DailyVolumeSnapshot
@@ -232,6 +234,8 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - Candle
+        - SwapEvent
         - TokenSnapshot
         - HourlyVolumeSnapshot
         - DailyVolumeSnapshot

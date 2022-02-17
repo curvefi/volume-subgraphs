@@ -169,3 +169,21 @@ type LiquidityEvent @entity {
   volumeUSD: BigDecimal!
   removal: Boolean!
 }
+
+
+type Candle @entity {
+  id: ID! # time + period + srcToken + dstToken
+  pool: Pool!
+  time: BigInt!
+  period: Int!
+  lastBlock: BigInt!
+  token0: Bytes!
+  token1: Bytes!
+
+  token0TotalAmount: BigDecimal!
+  token1TotalAmount: BigDecimal!
+  open: BigDecimal!
+  close: BigDecimal!
+  low: BigDecimal!
+  high: BigDecimal!
+}

@@ -8,10 +8,11 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING } from '../../../../packages/constants'
+import { BIG_DECIMAL_TWO, BIG_DECIMAL_ZERO, BIG_INT_ONE, FACTORY_V12, LENDING } from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { updateCandles } from './candles'
 
 export function handleExchange(
   buyer: Address,
@@ -136,6 +137,9 @@ export function handleExchange(
   swapEvent.amountSoldUSD = amountSoldUSD
   swapEvent.timestamp = timestamp
   swapEvent.save()
+
+  const price = amountBought == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : amountSold.div(amountBought)
+  updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, price, blockNumber)
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
