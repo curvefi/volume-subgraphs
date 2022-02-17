@@ -174,11 +174,12 @@ type LiquidityEvent @entity {
 type Candle @entity {
   id: ID! # time + period + srcToken + dstToken
   pool: Pool!
-  time: BigInt!
+  timestamp: BigInt!
   period: Int!
   lastBlock: BigInt!
   token0: Bytes!
   token1: Bytes!
+  txs: BigInt!
 
   token0TotalAmount: BigDecimal!
   token1TotalAmount: BigDecimal!
