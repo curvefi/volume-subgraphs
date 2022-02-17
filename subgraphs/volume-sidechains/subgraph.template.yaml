@@ -85,6 +85,8 @@ templates:
       abis:
         - name: StableFactory
           file: ./abis/StableFactory.json
+        - name: MainRegistry
+          file: ./abis/MainRegistry.json
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: ERC20
@@ -117,8 +119,12 @@ templates:
           file: ./abis/CryptoRegistry.json
         - name: CryptoFactory
           file: ./abis/CryptoFactory.json
+        - name: MainRegistry
+          file: ./abis/MainRegistry.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
@@ -145,6 +151,8 @@ templates:
       abis:
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
+        - name: MainRegistry
+          file: ./abis/MainRegistry.json
         - name: StableFactory
           file: ./abis/StableFactory.json
         - name: CurvePool
@@ -167,6 +175,8 @@ templates:
           file: ./abis/CLAggregator.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
@@ -191,6 +201,8 @@ templates:
       abis:
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
+        - name: MainRegistry
+          file: ./abis/MainRegistry.json
         - name: StableFactory
           file: ./abis/StableFactory.json
         - name: CurvePool
@@ -211,6 +223,8 @@ templates:
           file: ./abis/CLAggregator.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2
