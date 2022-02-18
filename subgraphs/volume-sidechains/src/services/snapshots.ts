@@ -14,6 +14,7 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   FOREX_ORACLES,
+  FOREX_TOKENS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -84,7 +85,8 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): Token
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
     snapshot.timestamp = hour
-    snapshot.price = getUsdRate(asset)
+    const price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
+    snapshot.price = price
     snapshot.save()
   }
   return snapshot
