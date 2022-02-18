@@ -13,7 +13,8 @@
     "prepare:avalanche": "yarn workspaces run prepare:avalanche",
     "prepare:fantom": "yarn workspaces run prepare:fantom",
     "prepare:arbitrum": "yarn workspaces run prepare:arbitrum",
-    "prepare:matic": "yarn workspaces run prepare:matic"
+    "prepare:matic": "yarn workspaces run prepare:matic",
+    "prepare:xdai": "yarn workspaces run prepare:xdai"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",

@@ -10,11 +10,13 @@
     "prepare:fantom": "mustache ../../config/fantom.json subgraph.template.yaml > subgraph.yaml",
     "prepare:arbitrum": "mustache ../../config/arbitrum.json subgraph.template.yaml > subgraph.yaml",
     "prepare:matic": "mustache ../../config/matic.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:xdai": "mustache ../../config/xdai.json subgraph.template.yaml > subgraph.yaml",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche",
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche",
     "deploy:fantom": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-fantom",
     "deploy:arbitrum": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-arbitrum",
-    "deploy:matic": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-matic"
+    "deploy:matic": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-matic",
+    "deploy:xdai": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-xdai"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.22.3",

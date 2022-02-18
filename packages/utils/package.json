@@ -12,6 +12,7 @@
     "prepare:avalanche": "true",
     "prepare:fantom": "true",
     "prepare:arbitrum": "true",
-    "prepare:matic": "true"
+    "prepare:matic": "true",
+    "prepare:xdai": "true"
   }
 }
