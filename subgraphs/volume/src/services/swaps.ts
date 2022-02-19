@@ -141,8 +141,7 @@ export function handleExchange(
   swapEvent.timestamp = timestamp
   swapEvent.save()
 
-  const price = amountBought == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : amountSold.div(amountBought)
-  updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, price, blockNumber)
+  updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, blockNumber)
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)

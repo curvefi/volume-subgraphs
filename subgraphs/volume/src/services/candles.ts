@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { Candle, Pool } from '../../generated/schema'
 import { BIG_DECIMAL_ZERO, BIG_INT_ONE } from '../../../../packages/constants'
 
@@ -9,22 +9,29 @@ export function updateCandles(
   token0Amount: BigDecimal,
   token1: Bytes,
   token1Amount: BigDecimal,
-  price: BigDecimal,
   block: BigInt
 ): void {
+  if (token1Amount == BIG_DECIMAL_ZERO || token0Amount == BIG_DECIMAL_ZERO) {
+    return
+  }
   const periods: i32[] = [15 * 60, 60 * 60, 24 * 60 * 60, 7 * 24 * 60 * 60]
-  const pair = [token0.toHexString(), token1.toHexString()].sort().join('')
+  const pair = [token0.toHexString(), token1.toHexString()].sort()
+  const orderedToken0 = Address.fromString(pair[0])
+  const orderedToken1 = Address.fromString(pair[1])
+  // make sure that we always record the same price
+  // front end can inverse the pair and prices on the fly
+  const price = token0 == orderedToken0 ? token0Amount.div(token1Amount) : token1Amount.div(token0Amount)
   for (let i = 0; i < periods.length; i++) {
     const time_id = timestamp.toI32() / periods[i]
-    const candle_id = pool.id + '-' + pair + '-' + time_id.toString() + '-' + periods[i].toString()
+    const candle_id = pool.id + '-' + pair.join('-') + '-' + time_id.toString() + '-' + periods[i].toString()
     let candle = Candle.load(candle_id)
     if (!candle) {
       candle = new Candle(candle_id)
       candle.pool = pool.id
       candle.timestamp = timestamp
       candle.period = periods[i]
-      candle.token0 = token0
-      candle.token1 = token1
+      candle.token0 = orderedToken0
+      candle.token1 = orderedToken1
       candle.open = price
       candle.low = price
       candle.high = price
