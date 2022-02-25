@@ -3,6 +3,7 @@ import { ADDRESS_ZERO, UNKNOWN_METAPOOLS, BIG_INT_ZERO, EARLY_V2_POOLS, LENDING 
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
 import {
+  CryptoFactoryTemplate,
   CryptoRegistryTemplate,
   CurvePoolTemplate,
   RegistryTemplate,
@@ -44,6 +45,14 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
       cryptoRegistry = new Registry(addedAddress.toHexString())
       cryptoRegistry.save()
       CryptoRegistryTemplate.create(addedAddress)
+    }
+  } else if (providedId == BigInt.fromString('6')) {
+    let cryptoFactory = Factory.load(addedAddress.toHexString())
+    if (!cryptoFactory) {
+      log.info('New crypto v2 factory added: {}', [addedAddress.toHexString()])
+      cryptoFactory = getFactory(addedAddress, 20)
+      cryptoFactory.save()
+      CryptoFactoryTemplate.create(addedAddress)
     }
   }
 }

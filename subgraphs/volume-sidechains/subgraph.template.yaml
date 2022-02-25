@@ -18,6 +18,8 @@ dataSources:
         - Registry
         - Factory
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: AddressProvider
           file: ./abis/AddressProvider.json
         - name: StableFactory
@@ -47,6 +49,8 @@ templates:
         - Registry
         - Pool
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: CurvePool
@@ -83,6 +87,8 @@ templates:
         - Pool
         - BasePool
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: StableFactory
           file: ./abis/StableFactory.json
         - name: MainRegistry
@@ -115,6 +121,8 @@ templates:
         - Pool
         - BasePool
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
         - name: CryptoFactory
@@ -149,6 +157,8 @@ templates:
         - DailyVolumeSnapshot
         - WeeklyVolumeSnapshot
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
         - name: MainRegistry
@@ -183,6 +193,54 @@ templates:
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
       file: ./src/mapping.ts
+  - name: CryptoFactoryTemplate
+    kind: ethereum/contract
+    network: {{ network }}
+    source:
+      abi: CryptoFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - TokenSnapshot
+        - HourlyVolumeSnapshot
+        - DailyVolumeSnapshot
+        - WeeklyVolumeSnapshot
+      abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
+        - name: CryptoRegistry
+          file: ./abis/CryptoRegistry.json
+        - name: MainRegistry
+          file: ./abis/MainRegistry.json
+        - name: StableFactory
+          file: ./abis/StableFactory.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Factory
+          file: ./abis/UniswapV2Factory.json
+        - name: Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ./abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ./abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ./abis/CLAggregator.json
+        - name: CurvePoolCoin128
+          file: ./abis/CurvePoolCoin128.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
+      eventHandlers:
+        - event: CryptoPoolDeployed(address,address[2],uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)
+          handler: handleCryptoPoolDeployed
+      file: ./src/mappingV2.ts
   - name: CurvePoolTemplateV2
     kind: ethereum/contract
     network: {{ network }}
@@ -199,6 +257,8 @@ templates:
         - DailyVolumeSnapshot
         - WeeklyVolumeSnapshot
       abis:
+        - name: CryptoFactory
+          file: ./abis/CryptoFactory.json
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
         - name: MainRegistry

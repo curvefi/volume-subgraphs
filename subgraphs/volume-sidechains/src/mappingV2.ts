@@ -2,10 +2,11 @@ import { log } from '@graphprotocol/graph-ts/index'
 import { PoolAdded } from '../generated/AddressProvider/CryptoRegistry'
 import { ADDRESS_ZERO } from '../../../packages/constants'
 import { TokenExchange } from '../generated/templates/RegistryTemplate/CurvePoolV2'
-import { createNewRegistryPool } from './services/pools'
+import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
 import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
+import { CryptoPoolDeployed } from '../generated/templates/CryptoFactory/CryptoFactory'
 
 export function handleCryptoPoolAdded(event: PoolAdded): void {
   log.debug('New V2 factory crypto pool {} deployed at {}', [
@@ -40,6 +41,20 @@ export function handleCryptoPoolAdded(event: PoolAdded): void {
       event.transaction.hash
     )
   }
+}
+
+export function handleCryptoPoolDeployed(event: CryptoPoolDeployed): void {
+  log.debug('New V2 factory crypto pool deployed at {}', [event.transaction.hash.toHexString()])
+  createNewFactoryPool(
+    20,
+    event.address,
+    false,
+    ADDRESS_ZERO,
+    event.params.token,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
 }
 
 export function handleTokenExchangeV2(event: TokenExchange): void {
