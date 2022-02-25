@@ -162,7 +162,7 @@ dataSources:
         - name: ERC20
           file: ./abis/ERC20.json
       callHandlers:
-        - function: add_pool(address,uint256,address,uint256,string)
+        - function: add_pool(address,uint256,address,address,address,uint256,string)
           handler: handleAddRegistryV2Pool
       file: ./src/mappingV2.ts
 templates:
