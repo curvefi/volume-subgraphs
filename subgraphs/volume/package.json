@@ -15,7 +15,7 @@
     "prepare:matic": "true",
     "prepare:xdai": "true",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ curvefi/curve-volume",
-    "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-volume",
+    "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-factory-volume",
     "deploy-staging": "graph deploy --product hosted-service convex-community/curve-volume-staging",
     "deploy-studio": "graph deploy --studio curve-volume",
     "create-local": "graph create --node http://localhost:8020/ convex/curve-volume",
