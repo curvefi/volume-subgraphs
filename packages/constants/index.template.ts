@@ -68,6 +68,26 @@ UNKNOWN_METAPOOLS.set(
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
 )
 
+// Early lending pools have no distinctive features in their ABI
+// And since we can not rely on calls to determine when one is added
+// We have to keep a manual registry
+export const LENDING_POOLS = [
+  // MAINNET
+  Address.fromString('0x83f252f036761a1e3d10daca8e16d7b21e3744d7'),
+  Address.fromString('0x06364f10b501e868329afbc005b3492902d6c763'),
+  Address.fromString('0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf'),
+  Address.fromString('0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51'),
+  Address.fromString('0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c'),
+  Address.fromString('0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27'),
+  Address.fromString('0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56'),
+  Address.fromString('0xa5407eae9ba41422680e2e00537571bcc53efbfd'),
+  Address.fromString('0xdebf20617708857ebe4f679508e7b7863a8a8eee'),
+  Address.fromString('0xeb16ae0052ed37f479f7fe63849198df1765a733'),
+  Address.fromString('0x8925d9d9b4569d737a48499def3f67baa5a144b9'),
+  // FANTOM
+  Address.fromString('0x4fc8d635c3cb1d0aa123859e2b2587d0ff2707b1'),
+]
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'

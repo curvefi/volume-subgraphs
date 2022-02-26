@@ -1,5 +1,12 @@
 import { NewAddressIdentifier, AddressModified } from '../generated/AddressProvider/AddressProvider'
-import { ADDRESS_ZERO, UNKNOWN_METAPOOLS, BIG_INT_ZERO, EARLY_V2_POOLS, LENDING } from '../../../packages/constants'
+import {
+  ADDRESS_ZERO,
+  UNKNOWN_METAPOOLS,
+  BIG_INT_ZERO,
+  EARLY_V2_POOLS,
+  LENDING,
+  LENDING_POOLS,
+} from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
 import {
@@ -79,11 +86,10 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   const pool = event.params.pool
   log.info('New pool {} added to registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
   const testLending = CurveLendingPool.bind(pool)
-  // Note: neither of these tests would work on mainnet because there are no
+  // The test would not work on mainnet because there are no
   // specific functions for lending pools there.
   const testLendingResult = testLending.try_offpeg_fee_multiplier()
-  const testLendingResult2 = testLending.try_previous_balances(BIG_INT_ZERO)
-  if (!testLendingResult.reverted || !testLendingResult2.reverted) {
+  if (!testLendingResult.reverted || LENDING_POOLS.includes(pool)) {
     // Lending pool
     log.info('New lending pool {} added from registry at {}', [
       pool.toHexString(),
