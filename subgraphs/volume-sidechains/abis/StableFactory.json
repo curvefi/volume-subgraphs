@@ -12,6 +12,24 @@
     "type": "event"
   },
   {
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "name": "add_existing_metapools",
+    "inputs": [
+      {
+        "name": "_pools",
+        "type": "address[10]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "gas": 8610792
+  },
+  {
     "name": "PlainPoolDeployed",
     "inputs": [
       {

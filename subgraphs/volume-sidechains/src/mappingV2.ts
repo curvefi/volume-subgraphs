@@ -6,7 +6,7 @@ import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
 import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
-import { CryptoPoolDeployed } from '../generated/templates/CryptoFactory/CryptoFactory'
+import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate/CryptoFactory'
 
 export function handleCryptoPoolAdded(event: PoolAdded): void {
   log.debug('New V2 factory crypto pool {} deployed at {}', [

@@ -11,5 +11,12 @@
   "unifork_2_factory": "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
   "uni_v3_factory": "0x0000000000000000000000000000000000000000",
   "uni_v3_quoter": "0x0000000000000000000000000000000000000000",
-  "tricrypto2_pool": "0xb755b949c126c04e0348dd881a5cf55d424742b2"
+  "tricrypto2_pool": "0xb755b949c126c04e0348dd881a5cf55d424742b2",
+  "callHandler": "",
+  "function1": "",
+  "handler1": "",
+  "addExistingMetaPoolsCallParams": "",
+  "poolAssignedValue": "[ADDRESS_ZERO]",
+  "importExistingMetaPools": "",
+  "transactionHash": "LENDING"
 }

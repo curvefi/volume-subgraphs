@@ -5,7 +5,7 @@ import {
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
   LENDING,
-  LENDING_POOLS,
+  LENDING_POOLS, BIG_INT_ONE
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
@@ -27,6 +27,8 @@ import { TokenExchange, TokenExchangeUnderlying } from '../generated/templates/C
 import { handleExchange } from './services/swaps'
 import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
 import { getFactory } from './services/factory'
+{{{ importExistingMetaPools }}}
+import { getPlatform } from '../../volume/src/services/platform'
 
 export function addAddress(providedId: BigInt, addedAddress: Address): void {
   if (providedId == BIG_INT_ZERO) {
@@ -208,4 +210,32 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
     event.block.number,
     event.transaction.hash
   )
+}
+
+// This is needed because we keep an internal count of the number of pools in
+// each factory contract's pool_list. The internal accounting, in turn, is
+// needed because events don't give the address of newly deployed pool and we
+// can't use pool_count to grab the latest deployed pool, because several
+// pools may be deployed in the same block (in which case we'd miss all the
+// previous pools aand only record the last.
+// When metapools are added with this function to the regitsry, there is no
+// event emitted. So we need a call handler. But this is only (so far) a mainnet
+// problem - and only mainnet can handle call triggers. Hence why we need to hack
+// around with mustache to avoid issues
+export function handleAddExistingMetaPools({{ addExistingMetaPoolsCallParams }}): void {
+
+  const pools = {{ poolAssignedValue }}
+  const platform = getPlatform()
+  for (let i = 0; i < pools.length; i++) {
+    if (pools[i] == ADDRESS_ZERO) {
+      break
+    }
+    platform.poolCountV12 = platform.poolCountV12.plus(BIG_INT_ONE)
+    log.info('Existing meta pool {} added to v1.2 factory contract at {} ({})', [
+      pools[i].toHexString(),
+      {{ transactionHash }},
+      i.toString(),
+    ])
+  }
+  platform.save()
 }

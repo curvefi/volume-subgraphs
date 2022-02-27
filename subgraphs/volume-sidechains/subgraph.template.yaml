@@ -106,6 +106,9 @@ templates:
           handler: handlePlainPoolDeployed
         - event: MetaPoolDeployed(address,address,uint256,uint256,address)
           handler: handleMetaPoolDeployed
+      {{ callHandler }}
+        {{ function1 }}
+          {{ handler1 }}
       file: ./src/mapping.ts
   - name: CryptoRegistryTemplate
     kind: ethereum/contract
