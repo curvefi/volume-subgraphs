@@ -54,10 +54,14 @@ SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADD
 SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100a66b82b78a1791b101c9d61', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADDRESS)
 
-// On certain chains, metapools were created by the deployer, not the factory
-// and don't implement the `base_pool` method, so the graph has no way of knowing
-// they're metapools. need a manual mapping
+// Some metapools don't implement the `base_pool` method, so the graph has no way
+// of knowing that they're metapools without a manual mapping
+// We can track whether a pool is metapool or not on deployment via the factory
+// but not for metapools that are added to the registry (metapools deployed by
+// the deployer "manually" or factory metapools deployed before the factory
+// contract was indexed on the address indexer)
 export const UNKNOWN_METAPOOLS = new Map<string, Address>()
+// Fantom
 UNKNOWN_METAPOOLS.set(
   '0x92d5ebf3593a92888c25c0abef126583d4b5312e',
   Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
@@ -66,6 +70,19 @@ UNKNOWN_METAPOOLS.set(
 UNKNOWN_METAPOOLS.set(
   '0x30df229cefa463e991e29d42db0bae2e122b2ac7',
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Mainnet
+UNKNOWN_METAPOOLS.set(
+  '0xd632f22692fac7611d2aa1c0d552930d43caed3b',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x43b4fdfd4ff969587185cdb6f0bd875c5fc83f8c',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x87650d7bbfc3a9f10587d7778206671719d9910d',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 )
 
 // Early lending pools have no distinctive features in their ABI
