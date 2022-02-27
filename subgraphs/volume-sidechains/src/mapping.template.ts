@@ -28,7 +28,7 @@ import { handleExchange } from './services/swaps'
 import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
 import { getFactory } from './services/factory'
 {{{ importExistingMetaPools }}}
-import { getPlatform } from '../../volume/src/services/platform'
+
 
 export function addAddress(providedId: BigInt, addedAddress: Address): void {
   if (providedId == BIG_INT_ZERO) {
@@ -225,17 +225,21 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
 export function handleAddExistingMetaPools({{ addExistingMetaPoolsCallParams }}): void {
 
   const pools = {{ poolAssignedValue }}
-  const platform = getPlatform()
+  const factory = Factory.load(call.to.toHexString())
+  if (!factory) {
+    return
+  }
   for (let i = 0; i < pools.length; i++) {
     if (pools[i] == ADDRESS_ZERO) {
       break
     }
-    platform.poolCountV12 = platform.poolCountV12.plus(BIG_INT_ONE)
-    log.info('Existing meta pool {} added to v1.2 factory contract at {} ({})', [
+    factory.poolCount = factory.poolCount.plus(BIG_INT_ONE)
+    log.info('Existing meta pool {} added to factory contract {} at {} ({})', [
       pools[i].toHexString(),
-      {{ transactionHash }},
+      call.to.toHexString(),
+      call.transaction.hash.toHexString(),
       i.toString(),
     ])
   }
-  platform.save()
+  factory.save()
 }
