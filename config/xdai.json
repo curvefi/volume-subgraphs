@@ -1,7 +1,7 @@
 {
   "key": "xdai",
   "network": "xdai",
-  "starting_block": 16852766,
+  "starting_block": 20755000,
   "weth_token": "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
   "usdt_token": "0x4ECaBa5870353805a9F068101A40E0f32ed605C6",
   "wbtc_token": "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252",
