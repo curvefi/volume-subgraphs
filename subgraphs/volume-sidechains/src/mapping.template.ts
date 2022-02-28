@@ -225,7 +225,7 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
 export function handleAddExistingMetaPools({{ addExistingMetaPoolsCallParams }}): void {
 
   const pools = {{ poolAssignedValue }}
-  const factory = Factory.load(call.to.toHexString())
+  const factory = Factory.load({{{ factoryAddress }}})
   if (!factory) {
     return
   }
@@ -234,11 +234,10 @@ export function handleAddExistingMetaPools({{ addExistingMetaPoolsCallParams }})
       break
     }
     factory.poolCount = factory.poolCount.plus(BIG_INT_ONE)
-    log.info('Existing meta pool {} added to factory contract {} at {} ({})', [
+    log.info('Existing meta pool {} added to factory contract ({}) at {}', [
       pools[i].toHexString(),
-      call.to.toHexString(),
-      call.transaction.hash.toHexString(),
       i.toString(),
+      {{ transactionHash }}
     ])
   }
   factory.save()

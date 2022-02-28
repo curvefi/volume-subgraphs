@@ -18,5 +18,6 @@
   "addExistingMetaPoolsCallParams": "",
   "poolAssignedValue": "[ADDRESS_ZERO]",
   "importExistingMetaPools": "",
-  "transactionHash": "LENDING"
+  "transactionHash": "LENDING",
+  "factoryAddress": "'0x0000000000000000000000000000000000000001'"
 }
