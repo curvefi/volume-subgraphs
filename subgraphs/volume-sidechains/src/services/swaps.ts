@@ -8,7 +8,7 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING, STABLE_FACTORY } from '../../../../packages/constants'
+import { BIG_DECIMAL_TWO, BIG_INT_ONE, LENDING, STABLE_FACTORY } from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -38,7 +38,7 @@ export function handleExchange(
 
   if (exchangeUnderlying && pool.poolType == LENDING) {
     const basePool = getVirtualBaseLendingPool(bytesToAddress(pool.basePool))
-    if (soldId > basePool.coins.length) {
+    if (soldId > basePool.coins.length - 1) {
       log.error('Undefined underlying sold Id {} for lending pool {} at tx {}', [
         soldId.toString(),
         pool.id,
@@ -51,7 +51,7 @@ export function handleExchange(
   } else if (exchangeUnderlying && soldId != 0) {
     const underlyingSoldIndex = soldId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
-    if (underlyingSoldIndex > basePool.coins.length) {
+    if (underlyingSoldIndex > basePool.coins.length - 1) {
       log.error('Undefined underlying sold Id {} for pool {} at tx {}', [
         soldId.toString(),
         pool.id,
@@ -68,7 +68,7 @@ export function handleExchange(
       tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
     }
   } else {
-    if (soldId > pool.coins.length) {
+    if (soldId > pool.coins.length - 1) {
       log.error('Undefined sold Id {} for pool {} at tx {}', [soldId.toString(), pool.id, txhash.toHexString()])
       return
     }
@@ -78,7 +78,7 @@ export function handleExchange(
 
   if (exchangeUnderlying && pool.poolType == LENDING) {
     const basePool = getVirtualBaseLendingPool(bytesToAddress(pool.basePool))
-    if (boughtId > basePool.coins.length) {
+    if (boughtId > basePool.coins.length - 1) {
       log.error('Undefined underlying bought Id {} for lending pool {} at tx {}', [
         boughtId.toString(),
         pool.id,
@@ -91,7 +91,7 @@ export function handleExchange(
   } else if (exchangeUnderlying && boughtId != 0) {
     const underlyingBoughtIndex = boughtId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
-    if (underlyingBoughtIndex > basePool.coins.length) {
+    if (underlyingBoughtIndex > basePool.coins.length - 1) {
       log.error('Undefined underlying bought Id {} for pool {} at tx {}', [
         boughtId.toString(),
         pool.id,
@@ -101,7 +101,7 @@ export function handleExchange(
     tokenBought = basePool.coins[underlyingBoughtIndex]
     tokenBoughtDecimals = basePool.coinDecimals[underlyingBoughtIndex]
   } else {
-    if (boughtId > pool.coins.length) {
+    if (boughtId > pool.coins.length - 1) {
       log.error('Undefined bought Id {} for pool {} at tx {}', [boughtId.toString(), pool.id, txhash.toHexString()])
       return
     }
