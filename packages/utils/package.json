@@ -13,6 +13,12 @@
     "prepare:fantom": "true",
     "prepare:arbitrum": "true",
     "prepare:matic": "true",
-    "prepare:xdai": "true"
+    "prepare:xdai": "true",
+    "deploy:mainnet": "true",
+    "deploy:avalanche": "true",
+    "deploy:fantom": "true",
+    "deploy:arbitrum": "true",
+    "deploy:matic": "true",
+    "deploy:xdai": "true"
   }
 }
