@@ -155,6 +155,7 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - Candle
         - TokenSnapshot
         - HourlyVolumeSnapshot
         - DailyVolumeSnapshot
@@ -207,6 +208,7 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - Candle
         - TokenSnapshot
         - HourlyVolumeSnapshot
         - DailyVolumeSnapshot
@@ -255,6 +257,7 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Pool
+        - Candle
         - TokenSnapshot
         - HourlyVolumeSnapshot
         - DailyVolumeSnapshot

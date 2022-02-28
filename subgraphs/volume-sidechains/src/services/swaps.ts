@@ -12,6 +12,7 @@ import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING, STABLE_FACTORY } fr
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { updateCandles } from './candles'
 
 export function handleExchange(
   buyer: Address,
@@ -136,6 +137,8 @@ export function handleExchange(
   swapEvent.amountSoldUSD = amountSoldUSD
   swapEvent.timestamp = timestamp
   swapEvent.save()
+
+  updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, blockNumber)
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
