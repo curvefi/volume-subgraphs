@@ -11,12 +11,12 @@
     "prepare:arbitrum": "mustache ../../config/arbitrum.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/arbitrum.json src/mapping.template.ts > src/mapping.ts",
     "prepare:matic": "mustache ../../config/matic.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/matic.json src/mapping.template.ts > src/mapping.ts",
     "prepare:xdai": "mustache ../../config/xdai.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/xdai.json src/mapping.template.ts > src/mapping.ts",
-    "deploy:mainnet": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-mainnet",
-    "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-avalanche",
-    "deploy:fantom": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-fantom",
-    "deploy:arbitrum": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-arbitrum",
-    "deploy:matic": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-matic",
-    "deploy:xdai": "graph deploy --node https://api.thegraph.com/deploy/convex-community/volume-xdai"
+    "deploy:mainnet": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-mainnet",
+    "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche",
+    "deploy:fantom": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-fantom",
+    "deploy:arbitrum": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-arbitrum",
+    "deploy:matic": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-matic",
+    "deploy:xdai": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-xdai"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.22.3",

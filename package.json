@@ -14,7 +14,13 @@
     "prepare:fantom": "yarn workspaces run prepare:fantom",
     "prepare:arbitrum": "yarn workspaces run prepare:arbitrum",
     "prepare:matic": "yarn workspaces run prepare:matic",
-    "prepare:xdai": "yarn workspaces run prepare:xdai"
+    "prepare:xdai": "yarn workspaces run prepare:xdai",
+    "deploy:mainnet": "yarn workspaces run deploy:mainnet",
+    "deploy:avalanche": "yarn workspaces run deploy:avalanche",
+    "deploy:fantom": "yarn workspaces run deploy:fantom",
+    "deploy:arbitrum": "yarn workspaces run deploy:arbitrum",
+    "deploy:matic": "yarn workspaces run deploy:matic",
+    "deploy:xdai": "yarn workspaces run deploy:xdai"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",
