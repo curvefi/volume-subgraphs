@@ -119,8 +119,8 @@ export function handleExchange(
     amountBoughtUSD = amountBought.times(latestPrice)
     amountSoldUSD = amountSold.times(latestPrice)
   } else {
-    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp)
-    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp)
+    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, pool)
+    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, pool)
     amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
     amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
   }
