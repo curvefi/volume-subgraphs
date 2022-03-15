@@ -10,6 +10,7 @@ import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
+  BIG_DECIMAL_1E18,
   BIG_DECIMAL_1E8,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
@@ -17,12 +18,14 @@ import {
   FOREX_TOKENS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
+  SYNTH_TOKENS,
   WETH_ADDRESS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
+import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -78,14 +81,25 @@ export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): Tok
   return snapshot
 }
 
-export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): TokenSnapshot {
+export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: Pool): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
   const snapshotId = asset.toHexString() + '-' + hour.toString()
   let snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
     snapshot.timestamp = hour
-    const price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
+    let price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
+    if (price == BIG_DECIMAL_ZERO && SYNTH_TOKENS.has(asset.toHexString())) {
+      log.warning('Invalid price found for {}', [asset.toHexString()])
+      price = getUsdRate(SYNTH_TOKENS[asset.toHexString()])
+      const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
+      const priceOracleResult = poolContract.try_price_oracle()
+      if (!priceOracleResult.reverted) {
+        price = price.times(priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18))
+      } else {
+        log.warning('Price oracle reverted {}', [asset.toHexString()])
+      }
+    }
     snapshot.price = price
     snapshot.save()
   }

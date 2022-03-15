@@ -26,6 +26,8 @@ export const USDT_TOKEN = '{{ usdt_token }}'
 export const WETH_ADDRESS = Address.fromString(WETH_TOKEN)
 export const USDT_ADDRESS = Address.fromString(USDT_TOKEN)
 export const WBTC_ADDRESS = Address.fromString(WBTC_TOKEN)
+export const FXS_TOKEN = '0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0'
+export const CVXFXS_TOKEN = '0xfeef77d3f69374f66429c91d732a244f074bdf74'
 
 // for Forex and EUR pool, map lp token to Chainlink price feed
 export const EURT_LP_TOKEN = '0xfd5db7463a3ab53fd211b4af195c5bccc1a03890'
@@ -53,6 +55,11 @@ SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADD
 // polygon
 SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100a66b82b78a1791b101c9d61', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADDRESS)
+
+// handle wrapped tokens and synths in v2 pools
+export const SYNTH_TOKENS = new Map<string, Address>()
+SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
+
 
 // Some metapools don't implement the `base_pool` method, so the graph has no way
 // of knowing that they're metapools without a manual mapping
