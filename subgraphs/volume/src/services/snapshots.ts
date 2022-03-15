@@ -20,6 +20,8 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
+  BIG_INT_ZERO,
+  BIG_DECIMAL_TWO,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
@@ -170,6 +172,31 @@ export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, time
   return rate
 }
 
+export function getV2PoolBaseApr(
+  pool: Pool,
+  currentXcpProfit: BigDecimal,
+  currentXcpProfitA: BigDecimal,
+  timestamp: BigInt
+): BigDecimal {
+  const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
+  const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+  const previousSnapshotXcpProfit = previousSnapshot ? previousSnapshot.xcpProfit : BIG_DECIMAL_ZERO
+  const previousSnapshotXcpProfitA = previousSnapshot ? previousSnapshot.xcpProfitA : BIG_DECIMAL_ZERO
+  const currentProfit = currentXcpProfit
+    .div(BIG_DECIMAL_TWO)
+    .plus(currentXcpProfitA.div(BIG_DECIMAL_TWO))
+    .plus(BIG_DECIMAL_1E18)
+    .div(BIG_DECIMAL_TWO)
+  const previousProfit = previousSnapshotXcpProfit
+    .div(BIG_DECIMAL_TWO)
+    .plus(previousSnapshotXcpProfitA.div(BIG_DECIMAL_TWO))
+    .plus(BIG_DECIMAL_1E18)
+    .div(BIG_DECIMAL_TWO)
+  const rate =
+    previousProfit == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : currentProfit.minus(previousProfit).div(previousProfit)
+  return rate
+}
+
 export function takePoolSnapshots(timestamp: BigInt): void {
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -186,7 +213,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = new DailyPoolSnapshot(snapId)
       dailySnapshot.pool = pool.id
-      const poolContract = CurvePool.bind(Address.fromString(pool.id))
+      const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
       let vPrice = BIG_DECIMAL_ZERO
       if (virtualPriceResult.reverted) {
@@ -195,7 +222,15 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }
       dailySnapshot.virtualPrice = vPrice
-      dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+      if (pool.isV2) {
+        const xcpProfitResult = poolContract.try_xcp_profit()
+        const xcpProfitAResult = poolContract.try_xcp_profit_a()
+        dailySnapshot.xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
+        dailySnapshot.xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
+        dailySnapshot.baseApr = getV2PoolBaseApr(pool, dailySnapshot.xcpProfit, dailySnapshot.xcpProfitA, timestamp)
+      } else {
+        dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+      }
       dailySnapshot.timestamp = time
 
       pool.virtualPrice = vPrice
