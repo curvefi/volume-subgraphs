@@ -28,6 +28,8 @@ dataSources:
           file: ./abis/CryptoRegistry.json
         - name: MainRegistry
           file: ./abis/MainRegistry.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
       eventHandlers:
         - event: NewAddressIdentifier(indexed uint256,address,string)
           handler: handleNewAddressIdentifier
@@ -101,6 +103,8 @@ templates:
           file: ./abis/MetaPool.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
       eventHandlers:
         - event: PlainPoolDeployed(address[4],uint256,uint256,address)
           handler: handlePlainPoolDeployed
@@ -191,6 +195,8 @@ templates:
           file: ./abis/CurvePoolCoin128.json
         - name: MetaPool
           file: ./abis/MetaPool.json
+        - name: CurvePoolV2
+          file: ./abis/CurvePoolV2.json
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
