@@ -28,6 +28,7 @@ import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
+import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -232,6 +233,16 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
       }
       dailySnapshot.timestamp = time
+
+      const reserves = dailySnapshot.reserves
+      const reservesUsd = dailySnapshot.reservesUsd
+      for (let j = 0; j < pool.coins.length; j++) {
+        const balance = poolContract.balances(BigInt.fromI32(j))
+        reserves.push(balance)
+        const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool)
+        const price = priceSnapshot.price
+        reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
+      }
 
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr
