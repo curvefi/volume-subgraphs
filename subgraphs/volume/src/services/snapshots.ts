@@ -20,7 +20,6 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
-  BIG_INT_ZERO,
   BIG_DECIMAL_TWO,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
@@ -243,6 +242,8 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
       }
+      dailySnapshot.reserves = reserves
+      dailySnapshot.reservesUsd = reservesUsd
 
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr

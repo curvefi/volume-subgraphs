@@ -60,7 +60,11 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    if (pool.assetType == 2 || (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) {
+    if (
+      (pool.assetType == 2 || (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
+      soldId != 0 &&
+      boughtId != 0
+    ) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
       tokenSoldDecimals = BigInt.fromI32(18)
