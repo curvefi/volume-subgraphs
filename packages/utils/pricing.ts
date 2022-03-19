@@ -46,6 +46,10 @@ export function getEthRate(token: Address): BigDecimal {
 
     const reserves = pair.getReserves()
 
+    if (reserves.value1 == BIG_INT_ZERO || reserves.value0 == BIG_INT_ZERO) {
+      return eth
+    }
+
     eth =
       pair.token0() == WETH_ADDRESS
         ? reserves.value0.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value1.toBigDecimal())
@@ -99,7 +103,14 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
   const decimalsB = getDecimals(tokenB)
   const ethRateA = getEthRate(tokenA).times(BIG_DECIMAL_1E18)
   const ethRateB = getEthRate(tokenB).times(BIG_DECIMAL_1E18)
-
+  if (ethRateB == BIG_DECIMAL_ZERO) {
+    log.error('Error calculating rate for token A {} ({}) and token B {} ({})', [
+      tokenA.toHexString(),
+      ethRateA.toString(),
+      tokenB.toHexString(),
+      ethRateB.toString(),
+    ])
+  }
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
 
