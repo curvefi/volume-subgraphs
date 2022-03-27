@@ -6,17 +6,11 @@ import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
 import {
   ADDRESS_ZERO,
   BIG_INT_ONE,
-  CRYPTO_FACTORY,
-  CURVE_FACTORY_V1,
-  CURVE_FACTORY_V1_2,
-  CURVE_FACTORY_V2,
-  FACTORY_V10,
-  FACTORY_V12,
-  FACTORY_V20,
+  CRYPTO_FACTORY, METAPOOL_FACTORY, METAPOOL_FACTORY_ADDRESS,
   REGISTRY_V1,
   REGISTRY_V2,
   STABLE_FACTORY,
-  UNKNOWN_METAPOOLS,
+  UNKNOWN_METAPOOLS
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
@@ -118,9 +112,9 @@ export function createNewFactoryPool(
   let poolType: string
   const factoryEntity = getFactory(factoryContract, version)
   const poolCount = factoryEntity.poolCount
-  if (version == 12) {
+  if (version == 1) {
     const factory = StableFactory.bind(factoryContract)
-    poolType = STABLE_FACTORY
+    poolType = factoryContract == Address.fromString(METAPOOL_FACTORY_ADDRESS) ? METAPOOL_FACTORY : STABLE_FACTORY
     factoryPool = factory.pool_list(poolCount)
     log.info('New factory pool (metapool: {}) added {} with id {}', [
       metapool.toString(),
@@ -137,7 +131,7 @@ export function createNewFactoryPool(
   factoryEntity.save()
 
   let name: string, symbol: string
-  if (version == 20) {
+  if (version == 2) {
     CurvePoolTemplateV2.create(factoryPool)
     const lpTokenContract = ERC20.bind(lpToken)
     name = lpTokenContract.name()
@@ -155,7 +149,7 @@ export function createNewFactoryPool(
     symbol,
     poolType,
     metapool,
-    version == 20,
+    version == 2,
     block,
     tx,
     timestamp,

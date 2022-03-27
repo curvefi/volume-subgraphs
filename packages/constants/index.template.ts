@@ -42,9 +42,13 @@ export const GBP_LP_TOKEN = '0xd6ac1cb9019137a896343da59dde6d097f710538'
 export const AUD_LP_TOKEN = '0x3f1b0278a9ee595635b61817630cc19de792f506'
 export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 
+export const CURVE_DEPLOYER_ADDRESS = '0xC447FcAF1dEf19A583F97b3620627BF69c05b5fB'
+export const METAPOOL_FACTORY_ADDRESS = '0x0959158b6040D32d04c301A72CBFD6b39E21c9AE'
+
 // Mixed USDT-forex (USDT-Forex) pools
 export const EURS_USDC_LP_TOKEN = '0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b'
 export const EURT_USDT_LP_TOKEN = '0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833'
+
 
 // On chains like avalanche, pools use aave synthetics instead of the wrapped tokens
 export const SIDECHAIN_SUBSTITUTES = new Map<string, Address>()
@@ -176,9 +180,7 @@ export const EURS_USDC_POOL = Address.fromString('0x98a7F18d4E56Cfe84E3D081B4000
 export const TRICRYPTO_V1_POOL = Address.fromString('0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5')
 export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD_POOL]
 
-export const FACTORY_V10 = 'FACTORY_V10'
-export const FACTORY_V12 = 'FACTORY_V12'
-export const FACTORY_V20 = 'FACTORY_V20'
+export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
 export const CRYPTO_FACTORY = 'CRYPTO_FACTORY'
 export const STABLE_FACTORY = 'STABLE_FACTORY'
 export const REGISTRY_V1 = 'REGISTRY_V1'

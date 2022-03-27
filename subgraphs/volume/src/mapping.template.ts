@@ -43,7 +43,7 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
     let stableFactory = Factory.load(addedAddress.toHexString())
     if (!stableFactory) {
       log.info('New stable factory added: {}', [addedAddress.toHexString()])
-      stableFactory = getFactory(addedAddress, 12)
+      stableFactory = getFactory(addedAddress, 1)
       stableFactory.save()
       StableFactoryTemplate.create(addedAddress)
     }
@@ -59,7 +59,7 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
     let cryptoFactory = Factory.load(addedAddress.toHexString())
     if (!cryptoFactory) {
       log.info('New crypto v2 factory added: {}', [addedAddress.toHexString()])
-      cryptoFactory = getFactory(addedAddress, 20)
+      cryptoFactory = getFactory(addedAddress, 2)
       cryptoFactory.save()
       CryptoFactoryTemplate.create(addedAddress)
     }
@@ -183,7 +183,7 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   log.info('New factory plain pool deployed at {}', [event.transaction.hash.toHexString()])
   createNewFactoryPool(
-    12,
+    1,
     event.address,
     false,
     ADDRESS_ZERO,
@@ -196,12 +196,12 @@ export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
 
 export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
   log.info('New meta pool (version {}), basepool: {}, deployed at {}', [
-    '12',
+    '1',
     event.params.base_pool.toHexString(),
     event.transaction.hash.toHexString(),
   ])
   createNewFactoryPool(
-    12,
+    1,
     event.address,
     true,
     event.params.base_pool,

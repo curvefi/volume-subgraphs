@@ -46,7 +46,7 @@ export function handleCryptoPoolAdded(event: PoolAdded): void {
 export function handleCryptoPoolDeployed(event: CryptoPoolDeployed): void {
   log.debug('New V2 factory crypto pool deployed at {}', [event.transaction.hash.toHexString()])
   createNewFactoryPool(
-    20,
+    2,
     event.address,
     false,
     ADDRESS_ZERO,

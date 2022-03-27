@@ -1,6 +1,7 @@
 enum PoolType {
   STABLE_FACTORY
   CRYPTO_FACTORY
+  METAPOOL_FACTORY
   REGISTRY_V1
   REGISTRY_V2
   LENDING
@@ -15,15 +16,11 @@ type Platform @entity {
 
 type Registry @entity {
   id: ID!
-  txhash: Bytes!
-  timestamp: BigInt!
 }
 
 type Factory @entity {
   id: ID!
   poolCount: BigInt!
-  txhash: Bytes!
-  timestamp: BigInt!
 }
 
 type Pool @entity {
