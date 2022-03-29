@@ -19,5 +19,6 @@
   "poolAssignedValue": "call.inputs._pools",
   "importExistingMetaPools": "import { Add_existing_metapoolsCall } from '../generated/templates/CryptoFactoryTemplate/StableFactory'",
   "transactionHash": "call.transaction.hash.toHexString()",
-  "factoryAddress": "call.to.toHexString()"
+  "factoryAddress": "call.to.toHexString()",
+  "unknownMetapoolType": "METAPOOL_FACTORY"
 }

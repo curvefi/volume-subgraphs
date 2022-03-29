@@ -5,7 +5,7 @@ import {
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
   LENDING,
-  LENDING_POOLS, BIG_INT_ONE
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, METAPOOL_FACTORY, STABLE_FACTORY
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Registry } from '../generated/schema'
@@ -127,6 +127,9 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
       getLpToken(pool, event.address),
       true,
       EARLY_V2_POOLS.includes(pool) ? true : false,
+      // on mainnet the unknown metapools are legacy metapools deployed before the
+      // contract was added to the address indexer
+      UNKNOWN_METAPOOLS.has(pool.toHexString()) ? {{ unknownMetapoolType }} : STABLE_FACTORY,
       event.block.timestamp,
       event.block.number,
       event.transaction.hash
@@ -139,6 +142,7 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
       getLpToken(pool, event.address),
       false,
       EARLY_V2_POOLS.includes(pool) ? true : false,
+      REGISTRY_V1,
       event.block.timestamp,
       event.block.number,
       event.transaction.hash

@@ -1,6 +1,6 @@
 import { log } from '@graphprotocol/graph-ts/index'
 import { PoolAdded } from '../generated/AddressProvider/CryptoRegistry'
-import { ADDRESS_ZERO } from '../../../packages/constants'
+import { ADDRESS_ZERO, REGISTRY_V2 } from '../../../packages/constants'
 import { TokenExchange } from '../generated/templates/RegistryTemplate/CurvePoolV2'
 import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
@@ -25,6 +25,7 @@ export function handleCryptoPoolAdded(event: PoolAdded): void {
       getLpToken(pool, event.address),
       true,
       true,
+      REGISTRY_V2,
       event.block.timestamp,
       event.block.number,
       event.transaction.hash
@@ -36,6 +37,7 @@ export function handleCryptoPoolAdded(event: PoolAdded): void {
       getLpToken(pool, event.address),
       false,
       true,
+      REGISTRY_V2,
       event.block.timestamp,
       event.block.number,
       event.transaction.hash

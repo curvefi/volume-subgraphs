@@ -19,5 +19,6 @@
   "poolAssignedValue": "[ADDRESS_ZERO]",
   "importExistingMetaPools": "",
   "transactionHash": "LENDING",
-  "factoryAddress": "'0x0000000000000000000000000000000000000001'"
+  "factoryAddress": "'0x0000000000000000000000000000000000000001'",
+  "unknownMetapoolType": "STABLE_FACTORY"
 }

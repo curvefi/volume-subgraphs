@@ -39,7 +39,6 @@ export function createNewPool(
   pools.push(poolAddress)
   platform.poolAddresses = pools
   platform.save()
-
   const pool = new Pool(poolAddress.toHexString())
   const poolContract = CurvePool.bind(poolAddress)
   pool.name = name
@@ -118,7 +117,7 @@ export function createNewFactoryPool(
     factoryPool = factory.pool_list(poolCount)
     log.info('New factory pool (metapool: {}) added {} with id {}', [
       metapool.toString(),
-      factoryPool.toHexString(),
+      factoryPool .toHexString(),
       poolCount.toString(),
     ])
   } else {
@@ -163,6 +162,7 @@ export function createNewRegistryPool(
   lpToken: Address,
   metapool: boolean,
   isV2: boolean,
+  poolType: string,
   timestamp: BigInt,
   block: BigInt,
   tx: Bytes
