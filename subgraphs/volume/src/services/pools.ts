@@ -174,8 +174,6 @@ export function createNewRegistryPool(
       lpToken.toHexString(),
       tx.toHexString(),
     ])
-    let poolType = isV2 ? REGISTRY_V2 : REGISTRY_V1
-    poolType = UNKNOWN_METAPOOLS.has(poolAddress.toHexString()) ? STABLE_FACTORY : poolType
     if (!isV2) {
       CurvePoolTemplate.create(poolAddress)
     } else {
