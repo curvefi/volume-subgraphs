@@ -1,0 +1,152 @@
+enum PoolType {
+  STABLE_FACTORY
+  CRYPTO_FACTORY
+  METAPOOL_FACTORY
+  REGISTRY_V1
+  REGISTRY_V2
+  LENDING
+}
+
+type Platform @entity {
+  id: ID!
+  pools: [Pool!]! @derivedFrom(field: "platform")
+  poolAddresses: [Bytes!]!
+  latestPoolSnapshot: BigInt!
+}
+
+type Registry @entity {
+  id: ID!
+}
+
+type Factory @entity {
+  id: ID!
+  poolCount: BigInt!
+}
+
+type Pool @entity {
+  id: ID!
+  address: Bytes!
+  platform: Platform!
+  name: String!
+  symbol: String!
+  metapool: Boolean!
+  lpToken: Bytes!
+  basePool: Bytes!
+  coins: [Bytes!]!
+  coinDecimals: [BigInt!]!
+  assetType: Int!
+  poolType: PoolType!
+  isV2: Boolean!
+  cumulativeVolume: BigDecimal!
+  cumulativeVolumeUSD: BigDecimal!
+
+  virtualPrice: BigDecimal!
+  baseApr: BigDecimal!
+
+  creationDate: BigInt!
+  creationTx: Bytes!
+  creationBlock: BigInt!
+
+  dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
+
+  hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+
+}
+
+type BasePool @entity {
+  id: ID!
+  coins: [Bytes!]!
+  coinDecimals: [BigInt!]!
+}
+
+type TokenSnapshot @entity {
+  id: ID!
+  price: BigDecimal!
+  timestamp: BigInt!
+}
+
+type DailyPoolSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  virtualPrice: BigDecimal!
+  reserves: [BigInt!]!
+  reservesUsd: [BigDecimal!]!
+  xcpProfit: BigDecimal!
+  xcpProfitA: BigDecimal!
+  baseApr: BigDecimal!
+  timestamp: BigInt!
+}
+
+type HourlySwapVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
+  count: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type DailySwapVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
+  count: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type WeeklySwapVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
+  count: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type SwapEvent @entity {
+  id: ID!
+  pool: Pool!
+  block: BigInt!
+  buyer: Bytes!
+  tokenSold: Bytes!
+  tokenBought: Bytes!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+
+type Candle @entity {
+  id: ID! # time + period + srcToken + dstToken
+  pool: Pool!
+  timestamp: BigInt!
+  period: Int!
+  lastBlock: BigInt!
+  token0: Bytes!
+  token1: Bytes!
+  txs: BigInt!
+
+  token0TotalAmount: BigDecimal!
+  token1TotalAmount: BigDecimal!
+  open: BigDecimal!
+  close: BigDecimal!
+  low: BigDecimal!
+  high: BigDecimal!
+}

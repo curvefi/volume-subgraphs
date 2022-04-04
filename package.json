@@ -1,0 +1,45 @@
+{
+  "name": "curve-volume-subgraph",
+  "private": true,
+  "workspaces": [
+    "subgraphs/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "codegen": "yarn workspaces run codegen",
+    "prepare": "husky install",
+    "prepare:mainnet": "yarn workspaces run prepare:mainnet",
+    "prepare:avalanche": "yarn workspaces run prepare:avalanche",
+    "prepare:fantom": "yarn workspaces run prepare:fantom",
+    "prepare:arbitrum": "yarn workspaces run prepare:arbitrum",
+    "prepare:matic": "yarn workspaces run prepare:matic",
+    "prepare:xdai": "yarn workspaces run prepare:xdai",
+    "deploy:mainnet": "yarn workspaces run deploy:mainnet",
+    "deploy:avalanche": "yarn workspaces run deploy:avalanche",
+    "deploy:fantom": "yarn workspaces run deploy:fantom",
+    "deploy:arbitrum": "yarn workspaces run deploy:arbitrum",
+    "deploy:matic": "yarn workspaces run deploy:matic",
+    "deploy:xdai": "yarn workspaces run deploy:xdai"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "0.22.1",
+    "@graphprotocol/graph-ts": "0.22.1",
+    "@protofire/subgraph-toolkit": "^0.1.2",
+    "@typescript-eslint/eslint-plugin": "^4.0.0",
+    "@typescript-eslint/parser": "^4.0.0",
+    "eslint": "^7.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "husky": ">=6",
+    "lint-staged": ">=10",
+    "prettier": "^2.0.0",
+    "typescript": "^4.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix",
+    "*.{js,ts,css,md}": "prettier --write"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0"
+  }
+}
