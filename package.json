@@ -20,7 +20,13 @@
     "deploy:fantom": "yarn workspaces run deploy:fantom",
     "deploy:arbitrum": "yarn workspaces run deploy:arbitrum",
     "deploy:matic": "yarn workspaces run deploy:matic",
-    "deploy:xdai": "yarn workspaces run deploy:xdai"
+    "deploy:xdai": "yarn workspaces run deploy:xdai",
+    "stage:mainnet": "yarn workspaces run stage:mainnet",
+    "stage:avalanche": "yarn workspaces run stage:avalanche",
+    "stage:fantom": "yarn workspaces run stage:fantom",
+    "stage:arbitrum": "yarn workspaces run stage:arbitrum",
+    "stage:matic": "yarn workspaces run stage:matic",
+    "stage:xdai": "yarn workspaces run stage:xdai"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.22.1",

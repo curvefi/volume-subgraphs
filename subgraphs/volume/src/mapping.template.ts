@@ -8,7 +8,7 @@ import {
   LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, METAPOOL_FACTORY, STABLE_FACTORY
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
-import { Factory, Registry } from '../generated/schema'
+import { Factory, Pool, Registry } from '../generated/schema'
 import {
   CryptoFactoryTemplate,
   CryptoRegistryTemplate,
@@ -16,7 +16,7 @@ import {
   RegistryTemplate,
   StableFactoryTemplate,
 } from '../generated/templates'
-import { Address, log } from '@graphprotocol/graph-ts'
+import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 import { MainRegistry, PoolAdded } from '../generated/AddressProvider/MainRegistry'
 import { createNewFactoryPool, createNewPool } from './services/pools'
 import { createNewRegistryPool } from './services/pools'
@@ -84,6 +84,29 @@ export function getLpToken(pool: Address, registryAddress: Address): Address {
   return lpTokenResult.reverted ? pool : lpTokenResult.value
 }
 
+// Ensures that when starting to track a metapool, we also track its base pool
+// This is mainly due to an issue with 3pool on mainnet where the pool was added
+// to the registry BEFORE the registry was added to the address indexer
+// Note: the assumption is that the base pool has indeed been added to the SAME
+// registry before.
+export function ensureBasePoolTracking(pool: Address, eventAddress: Address, timestamp: BigInt, block: BigInt, tx: Bytes): void {
+  const basePool = Pool.load(pool.toHexString())
+  if (!basePool) {
+    log.info('New missing base pool {} added from registry', [pool.toHexString()])
+    createNewRegistryPool(
+      pool,
+      ADDRESS_ZERO,
+      getLpToken(pool, eventAddress),
+      false,
+      false,
+      REGISTRY_V1,
+      timestamp,
+      block,
+      tx
+    )
+  }
+}
+
 export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   const pool = event.params.pool
   log.info('New pool {} added to registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
@@ -121,6 +144,14 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
   if (!testMetaPoolResult.reverted || unknownMetapool) {
     log.info('New meta pool {} added from registry at {}', [pool.toHexString(), event.transaction.hash.toHexString()])
     const basePool = unknownMetapool ? UNKNOWN_METAPOOLS[pool.toHexString()] : testMetaPoolResult.value
+    // check if we're tracking the base pool
+    ensureBasePoolTracking(
+      basePool,
+      event.address,
+      event.block.timestamp,
+      event.block.number,
+      event.transaction.hash
+    )
     createNewRegistryPool(
       pool,
       basePool,
@@ -204,6 +235,14 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
     event.params.base_pool.toHexString(),
     event.transaction.hash.toHexString(),
   ])
+  // check if we're tracking the base pool
+  ensureBasePoolTracking(
+    event.params.base_pool,
+    event.address,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
   createNewFactoryPool(
     1,
     event.address,
