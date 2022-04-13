@@ -20,7 +20,7 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
-  BIG_DECIMAL_TWO,
+  BIG_DECIMAL_TWO, BIG_INT_ZERO
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
@@ -28,6 +28,9 @@ import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import {
+  CurvePoolCoin128
+} from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -236,7 +239,19 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const reserves = dailySnapshot.reserves
       const reservesUsd = dailySnapshot.reservesUsd
       for (let j = 0; j < pool.coins.length; j++) {
-        const balance = poolContract.balances(BigInt.fromI32(j))
+        let balance = BIG_INT_ZERO
+        let balanceResult = poolContract.try_balances(BigInt.fromI32(j))
+        if (balanceResult.reverted) {
+          log.warning("Unable to fetch balances for {}, trying with int128 ABI", [pool.id])
+          const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
+          balanceResult = poolContract.try_balances(BigInt.fromI32(j))
+          if (!balanceResult.reverted) {
+            balance = balanceResult.value
+          }
+        }
+        else {
+          balance = balanceResult.value
+        }
         reserves.push(balance)
         const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool)
         const price = priceSnapshot.price
