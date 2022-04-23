@@ -253,7 +253,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           balance = balanceResult.value
         }
         reserves.push(balance)
-        const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool)
+        const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool) : getTokenSnapshotByAssetType(pool, timestamp)
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
       }
