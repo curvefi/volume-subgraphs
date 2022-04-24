@@ -12,6 +12,7 @@ type Platform @entity {
   pools: [Pool!]! @derivedFrom(field: "platform")
   poolAddresses: [Bytes!]!
   latestPoolSnapshot: BigInt!
+  catchup: Boolean!
 }
 
 type Registry @entity {

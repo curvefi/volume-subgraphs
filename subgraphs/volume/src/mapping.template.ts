@@ -5,7 +5,8 @@ import {
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
   LENDING,
-  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, METAPOOL_FACTORY, STABLE_FACTORY
+  METAPOOL_FACTORY,
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, CATCHUP_BLOCK, STABLE_FACTORY
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
@@ -27,10 +28,12 @@ import { TokenExchange, TokenExchangeUnderlying } from '../generated/templates/C
 import { handleExchange } from './services/swaps'
 import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
 import { getFactory } from './services/factory'
+import { getPlatform } from './services/platform'
 {{{ importExistingMetaPools }}}
+{{{ importCatchupFunction }}}
 
 
-export function addAddress(providedId: BigInt, addedAddress: Address): void {
+export function addAddress(providedId: BigInt, addedAddress: Address, block: BigInt): void {
   if (providedId == BIG_INT_ZERO) {
     let mainRegistry = Registry.load(addedAddress.toHexString())
     if (!mainRegistry) {
@@ -38,6 +41,12 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
       mainRegistry = new Registry(addedAddress.toHexString())
       mainRegistry.save()
       RegistryTemplate.create(addedAddress)
+      const platform = getPlatform()
+      if (!platform.catchup && (block > CATCHUP_BLOCK)) {
+        platform.catchup = true
+        platform.save()
+        {{{ executeCatchupFunction }}}
+      }
     }
   } else if (providedId == BigInt.fromString('3')) {
     let stableFactory = Factory.load(addedAddress.toHexString())
@@ -69,13 +78,13 @@ export function addAddress(providedId: BigInt, addedAddress: Address): void {
 export function handleNewAddressIdentifier(event: NewAddressIdentifier): void {
   const providedId = event.params.id
   const addedAddress = event.params.addr
-  addAddress(providedId, addedAddress)
+  addAddress(providedId, addedAddress, event.block.number)
 }
 
 export function handleAddressModified(event: AddressModified): void {
   const providedId = event.params.id
   const addedAddress = event.params.new_address
-  addAddress(providedId, addedAddress)
+  addAddress(providedId, addedAddress, event.block.number)
 }
 
 export function getLpToken(pool: Address, registryAddress: Address): Address {
