@@ -182,6 +182,7 @@ export const TRICRYPTO_V1_POOL = Address.fromString('0x80466c64868E1ab14a1Ddf27A
 export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD_POOL]
 
 export const CATCHUP_BLOCK = BigInt.fromI32({{ catchup_block }})
+export const CURVE_REGISTRY_V1 = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5')
 
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
 export const CRYPTO_FACTORY = 'CRYPTO_FACTORY'
