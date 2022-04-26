@@ -244,7 +244,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         if (balanceResult.reverted) {
           log.warning("Unable to fetch balances for {}, trying with int128 ABI", [pool.id])
           const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
-          balanceResult = poolContract.try_balances(BigInt.fromI32(j))
+          balanceResult = poolContract128.try_balances(BigInt.fromI32(j))
           if (!balanceResult.reverted) {
             balance = balanceResult.value
           }
