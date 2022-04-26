@@ -298,7 +298,7 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
 }
 
 export function getAssetType(name: string, symbol: string): i32 {
-  const description = name.toUpperCase() + '-' + name.toUpperCase()
+  const description = name.toUpperCase() + '-' + symbol.toUpperCase()
   const stables = ['USD', 'DAI', 'MIM', 'TETHER']
   for (let i = 0; i < stables.length; i++) {
     if (description.indexOf(stables[i]) >= 0) {
