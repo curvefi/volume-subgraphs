@@ -14,7 +14,7 @@ import {
   CURVE_REGISTRY_V1,
   STABLE_FACTORY,
   REGISTRY_V2,
-  TRICRYPTO2_POOL_ADDRESS
+  TRICRYPTO2_POOL_ADDRESS, ADDRESS_ZERO
 } from '../../../../packages/constants'
 import { createNewFactoryPool, createNewPool } from './pools'
 import { MetaPool } from '../../generated/templates/RegistryTemplate/MetaPool'
@@ -22,6 +22,90 @@ import { BigInt } from '@graphprotocol/graph-ts/index'
 import { CurvePoolTemplate } from '../../generated/templates'
 import { getLpToken } from '../mapping'
 import { ERC20 } from '../../generated/templates/CurvePoolTemplate/ERC20'
+import {
+  MainRegistry,
+  PoolAdded
+} from '../../generated/AddressProvider/MainRegistry'
+import { Pool } from '../../generated/schema'
+import { addRegistryPool } from '../mapping'
+import { addCryptoRegistryPool } from '../mappingV2'
+import { CryptoFactory } from '../../generated/AddressProvider/CryptoFactory'
+
+export function catchUp(registryAddress: Address,
+                                    factory: boolean,
+                                    version: i32,
+                                    block: BigInt,
+                                    timestamp: BigInt,
+                                    hash: Bytes): void {
+
+  // ABI should also work for factories since we're only using pool_count/pool_list
+  const registry = MainRegistry.bind(registryAddress)
+  const cryptoFactory = CryptoFactory.bind(registryAddress)
+  const poolCount = registry.try_pool_count()
+  if (poolCount.reverted) {
+    return
+  }
+  log.info("Found {} pools when registry added to address provider", [poolCount.value.toString()])
+  for (let i = 0; i < poolCount.value.toI32(); i++) {
+    const poolAddress = registry.try_pool_list(poolCount.value)
+    if (poolAddress.reverted) {
+      continue
+    }
+    const pool = Pool.load(poolAddress.value.toHexString())
+    if (pool || poolAddress.value == ADDRESS_ZERO) {
+      continue
+    }
+    if (!factory) {
+      if (version == 1) {
+        log.info("Retro adding stable registry pool: {}", [poolAddress.value.toHexString()])
+        addRegistryPool(poolAddress.value,
+          registryAddress,
+          block,
+          timestamp,
+          hash)
+      }
+      else {
+        log.info("Retro adding crypto registry pool: {}", [poolAddress.value.toHexString()])
+        addCryptoRegistryPool(poolAddress.value,
+          registryAddress,
+          block,
+          timestamp,
+          hash)
+      }
+    }
+    else {
+      // crypto factories are straightforward
+      if (version == 2) {
+        log.info("Retro adding crypto factory pool: {}", [poolAddress.value.toHexString()])
+        createNewFactoryPool(
+          2,
+          registryAddress,
+          false,
+          ADDRESS_ZERO,
+          cryptoFactory.get_token(poolAddress.value),
+          timestamp,
+          block,
+          hash
+        )
+      }
+      else {
+        log.info("Retro adding stable factory pool: {}", [poolAddress.value.toHexString()])
+        const testMetaPool = MetaPool.bind(poolAddress.value)
+        const testMetaPoolResult = testMetaPool.try_base_pool()
+        createNewFactoryPool(
+          1,
+          registryAddress,
+          !testMetaPoolResult.reverted,
+          testMetaPoolResult.reverted ? ADDRESS_ZERO : testMetaPoolResult.value,
+          ADDRESS_ZERO,
+          timestamp,
+          block,
+          hash
+        )
+      }
+    }
+  }
+}
 
 export function catchUpRegistryMainnet(): void {
   const POOLS = [Address.fromString('0x4ca9b3063ec5866a4b82e437059d2c43d1be596f'),
