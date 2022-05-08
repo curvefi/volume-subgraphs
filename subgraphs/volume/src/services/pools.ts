@@ -117,7 +117,7 @@ export function createNewFactoryPool(
     factoryPool = factory.pool_list(poolCount)
     log.info('New factory pool (metapool: {}) added {} with id {}', [
       metapool.toString(),
-      factoryPool .toHexString(),
+      factoryPool.toHexString(),
       poolCount.toString(),
     ])
   } else {

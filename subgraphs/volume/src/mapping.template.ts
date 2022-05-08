@@ -34,6 +34,12 @@ import { getPlatform } from './services/platform'
 
 
 export function addAddress(providedId: BigInt, addedAddress: Address, block: BigInt): void {
+  const platform = getPlatform()
+  if (!platform.catchup && (block > CATCHUP_BLOCK)) {
+    platform.catchup = true
+    platform.save()
+    {{{ executeCatchupFunction }}}
+  }
   if (providedId == BIG_INT_ZERO) {
     let mainRegistry = Registry.load(addedAddress.toHexString())
     if (!mainRegistry) {
@@ -41,12 +47,6 @@ export function addAddress(providedId: BigInt, addedAddress: Address, block: Big
       mainRegistry = new Registry(addedAddress.toHexString())
       mainRegistry.save()
       RegistryTemplate.create(addedAddress)
-      const platform = getPlatform()
-      if (!platform.catchup && (block > CATCHUP_BLOCK)) {
-        platform.catchup = true
-        platform.save()
-        {{{ executeCatchupFunction }}}
-      }
     }
   } else if (providedId == BigInt.fromString('3')) {
     let stableFactory = Factory.load(addedAddress.toHexString())
