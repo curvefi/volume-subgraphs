@@ -95,6 +95,11 @@ UNKNOWN_METAPOOLS.set(
   '0x87650d7bbfc3a9f10587d7778206671719d9910d',
   Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 )
+// AVAX
+UNKNOWN_METAPOOLS.set(
+  '0x30df229cefa463e991e29d42db0bae2e122b2ac7',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
 
 
 // Early lending pools have no distinctive features in their ABI
