@@ -12,7 +12,6 @@ import {
   REGISTRY_V1,
   CATCHUP_BLOCK,
   CURVE_REGISTRY_V1,
-  STABLE_FACTORY,
   REGISTRY_V2,
   TRICRYPTO2_POOL_ADDRESS, ADDRESS_ZERO
 } from '../../../../packages/constants'
@@ -37,18 +36,20 @@ export function catchUp(registryAddress: Address,
                                     block: BigInt,
                                     timestamp: BigInt,
                                     hash: Bytes): void {
-
+  log.error("Adding missing pools on registry {}", [registryAddress.toHexString()])
   // ABI should also work for factories since we're only using pool_count/pool_list
   const registry = MainRegistry.bind(registryAddress)
   const cryptoFactory = CryptoFactory.bind(registryAddress)
   const poolCount = registry.try_pool_count()
   if (poolCount.reverted) {
+    log.error("Error calling pool count on registry {}", [registryAddress.toHexString()])
     return
   }
   log.info("Found {} pools when registry added to address provider", [poolCount.value.toString()])
   for (let i = 0; i < poolCount.value.toI32(); i++) {
     const poolAddress = registry.try_pool_list(poolCount.value)
     if (poolAddress.reverted) {
+      log.error("Unable to get pool {} on registry {}", [i.toString(), registryAddress.toHexString()])
       continue
     }
     const pool = Pool.load(poolAddress.value.toHexString())
