@@ -115,8 +115,9 @@ export function createNewFactoryPool(
     const factory = StableFactory.bind(factoryContract)
     poolType = factoryContract == Address.fromString(METAPOOL_FACTORY_ADDRESS) ? METAPOOL_FACTORY : STABLE_FACTORY
     factoryPool = factory.pool_list(poolCount)
-    log.info('New factory pool (metapool: {}) added {} with id {}', [
+    log.info('New factory pool (metapool: {}, base pool: {}) added {} with id {}', [
       metapool.toString(),
+      basePool.toHexString(),
       factoryPool.toHexString(),
       poolCount.toString(),
     ])
