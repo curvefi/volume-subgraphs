@@ -13,7 +13,7 @@ import {
   CATCHUP_BLOCK,
   CURVE_REGISTRY_V1,
   REGISTRY_V2,
-  TRICRYPTO2_POOL_ADDRESS, ADDRESS_ZERO
+  TRICRYPTO2_POOL_ADDRESS, ADDRESS_ZERO, UNKNOWN_METAPOOLS
 } from '../../../../packages/constants'
 import { createNewFactoryPool, createNewPool } from './pools'
 import { MetaPool } from '../../generated/templates/RegistryTemplate/MetaPool'
@@ -36,7 +36,7 @@ export function catchUp(registryAddress: Address,
                                     block: BigInt,
                                     timestamp: BigInt,
                                     hash: Bytes): void {
-  log.error("Adding missing pools on registry {}", [registryAddress.toHexString()])
+  log.info("Adding missing pools on registry {} at block {}", [registryAddress.toHexString(), block.toString()])
   // ABI should also work for factories since we're only using pool_count/pool_list
   const registry = MainRegistry.bind(registryAddress)
   const cryptoFactory = CryptoFactory.bind(registryAddress)
@@ -45,15 +45,16 @@ export function catchUp(registryAddress: Address,
     log.error("Error calling pool count on registry {}", [registryAddress.toHexString()])
     return
   }
-  log.info("Found {} pools when registry added to address provider", [poolCount.value.toString()])
+  log.error("Found {} pools when registry added to address provider", [poolCount.value.toString()])
   for (let i = 0; i < poolCount.value.toI32(); i++) {
-    const poolAddress = registry.try_pool_list(poolCount.value)
+    const poolAddress = registry.try_pool_list(BigInt.fromI32(i))
     if (poolAddress.reverted) {
       log.error("Unable to get pool {} on registry {}", [i.toString(), registryAddress.toHexString()])
       continue
     }
     const pool = Pool.load(poolAddress.value.toHexString())
     if (pool || poolAddress.value == ADDRESS_ZERO) {
+      log.warning("Pool {} already exists {} or is zero", [poolAddress.value.toHexString(), pool ? "y" : "n"])
       continue
     }
     if (!factory) {
@@ -93,11 +94,13 @@ export function catchUp(registryAddress: Address,
         log.info("Retro adding stable factory pool: {}", [poolAddress.value.toHexString()])
         const testMetaPool = MetaPool.bind(poolAddress.value)
         const testMetaPoolResult = testMetaPool.try_base_pool()
+        const unknownMetapool = UNKNOWN_METAPOOLS.has(poolAddress.value.toHexString())
+        const basePool = unknownMetapool ? UNKNOWN_METAPOOLS[poolAddress.value.toHexString()] : testMetaPoolResult.reverted ? ADDRESS_ZERO : testMetaPoolResult.value
         createNewFactoryPool(
           1,
           registryAddress,
-          !testMetaPoolResult.reverted,
-          testMetaPoolResult.reverted ? ADDRESS_ZERO : testMetaPoolResult.value,
+          (!testMetaPoolResult.reverted || unknownMetapool),
+          basePool,
           ADDRESS_ZERO,
           timestamp,
           block,
