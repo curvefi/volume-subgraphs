@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts/index'
-import { getDecimals } from '../../../../packages/utils/pricing'
+import { getDecimals, getName } from '../../../../packages/utils/pricing'
 import { BasePool, Pool } from '../../generated/schema'
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
@@ -66,6 +66,7 @@ export function createNewPool(
     log.debug('Call to coins reverted for pool ({}), attempting 128 bytes call', [pool.id])
     const poolContract = CurvePoolCoin128.bind(poolAddress)
     const coins = pool.coins
+    const coinNames = pool.coinNames
     const coinDecimals = pool.coinDecimals
     let coinResult = poolContract.try_coins(BigInt.fromI32(i))
     if (coinResult.reverted) {
@@ -73,11 +74,13 @@ export function createNewPool(
     }
     while (!coinResult.reverted) {
       coins.push(coinResult.value)
+      coinNames.push(getName(coinResult.value))
       coinDecimals.push(getDecimals(coinResult.value))
       i += 1
       coinResult = poolContract.try_coins(BigInt.fromI32(i))
     }
     pool.coins = coins
+    pool.coinNames = coinNames
     pool.coinDecimals = coinDecimals
     pool.save()
     return

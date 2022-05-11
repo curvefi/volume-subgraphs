@@ -35,6 +35,7 @@ type Pool @entity {
   basePool: Bytes!
   coins: [Bytes!]!
   coinDecimals: [BigInt!]!
+  coinNames: [String!]!
   assetType: Int!
   poolType: PoolType!
   isV2: Boolean!

@@ -93,6 +93,12 @@ export function getDecimals(token: Address): BigInt {
   return decimalsResult.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalsResult.value)
 }
 
+export function getName(token: Address): string {
+  const tokenContract = ERC20.bind(token)
+  const nameResult = tokenContract.try_name()
+  return nameResult.reverted ? token.toHexString().slice(0, 6) : nameResult.value
+}
+
 // Computes the value of one unit of Token A in units of Token B
 // Only works if both tokens have an ETH pair on Sushi
 export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDecimal {
