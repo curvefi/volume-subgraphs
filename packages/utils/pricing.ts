@@ -95,7 +95,7 @@ export function getDecimals(token: Address): BigInt {
 
 export function getName(token: Address): string {
   const tokenContract = ERC20.bind(token)
-  const nameResult = tokenContract.try_name()
+  const nameResult = tokenContract.try_symbol()
   return nameResult.reverted ? token.toHexString().slice(0, 6) : nameResult.value
 }
 
