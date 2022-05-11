@@ -65,8 +65,9 @@ export const SYNTH_TOKENS = new Map<string, Address>()
 SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
 
 
-// Some metapools don't implement the `base_pool` method, so the graph has no way
-// of knowing that they're metapools without a manual mapping
+// Metapools from the 1st metapool factory don't implement the `base_pool`
+// method, so the graph has no way of knowing that they're metapools
+// when they're retro-added.
 // We can track whether a pool is metapool or not on deployment via the factory
 // but not for metapools that are added to the registry (metapools deployed by
 // the deployer "manually" or factory metapools deployed before the factory
@@ -75,6 +76,26 @@ export const UNKNOWN_METAPOOLS = new Map<string, Address>()
 // Fantom
 UNKNOWN_METAPOOLS.set(
   '0x92d5ebf3593a92888c25c0abef126583d4b5312e',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0x1cb5c03d0585333a6d0578d47a5f9de66c80fd5a',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xad9c5054cc31f8aa822aeb9247298d2ecf48c5cf',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xecf64ba816c75e595ff212391e80b5cd9071e7d5',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xecf64ba816c75e595ff212391e80b5cd9071e7d5',
   Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
 )
 // Arbitrum & Avalanche
