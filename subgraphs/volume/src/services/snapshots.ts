@@ -219,7 +219,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const virtualPriceResult = poolContract.try_get_virtual_price()
       let vPrice = BIG_DECIMAL_ZERO
       if (virtualPriceResult.reverted) {
-        log.error('Unable to fetch virtual price for pool {}', [pool.id])
+        log.warning('Unable to fetch virtual price for pool {}', [pool.id])
       } else {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }

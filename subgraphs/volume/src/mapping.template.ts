@@ -97,29 +97,6 @@ export function getLpToken(pool: Address, registryAddress: Address): Address {
   return lpTokenResult.reverted ? pool : lpTokenResult.value
 }
 
-// Ensures that when starting to track a metapool, we also track its base pool
-// This is mainly due to an issue with 3pool on mainnet where the pool was added
-// to the registry BEFORE the registry was added to the address indexer
-// Note: the assumption is that the base pool has indeed been added to the SAME
-// registry before.
-export function ensureBasePoolTracking(pool: Address, eventAddress: Address, timestamp: BigInt, block: BigInt, tx: Bytes): void {
-  const basePool = Pool.load(pool.toHexString())
-  if (!basePool) {
-    log.info('New missing base pool {} added from registry', [pool.toHexString()])
-    createNewRegistryPool(
-      pool,
-      ADDRESS_ZERO,
-      getLpToken(pool, eventAddress),
-      false,
-      false,
-      REGISTRY_V1,
-      timestamp,
-      block,
-      tx
-    )
-  }
-}
-
 export function addRegistryPool(pool: Address,
                                 registry: Address,
                                 block: BigInt,
@@ -160,14 +137,6 @@ export function addRegistryPool(pool: Address,
   if (!testMetaPoolResult.reverted || unknownMetapool) {
     log.info('New meta pool {} added from registry at {}', [pool.toHexString(), hash.toHexString()])
     const basePool = unknownMetapool ? UNKNOWN_METAPOOLS[pool.toHexString()] : testMetaPoolResult.value
-    // check if we're tracking the base pool
-    ensureBasePoolTracking(
-      basePool,
-      registry,
-      timestamp,
-      block,
-      hash
-    )
     createNewRegistryPool(
       pool,
       basePool,
@@ -259,14 +228,6 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
     event.params.base_pool.toHexString(),
     event.transaction.hash.toHexString(),
   ])
-  // check if we're tracking the base pool
-  ensureBasePoolTracking(
-    event.params.base_pool,
-    event.address,
-    event.block.timestamp,
-    event.block.number,
-    event.transaction.hash
-  )
   createNewFactoryPool(
     1,
     event.address,

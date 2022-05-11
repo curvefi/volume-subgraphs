@@ -103,6 +103,16 @@ UNKNOWN_METAPOOLS.set(
   '0x30df229cefa463e991e29d42db0bae2e122b2ac7',
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
 )
+// Arbitrum & Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xe9dcf2d2a17ead11fab8b198578b20535370be6a',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum & Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xf92c2a3c91bf869f77f9cb221c5ab1b1ada8a586',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
 // Arbitrum
 UNKNOWN_METAPOOLS.set(
   '0x76b44e0cf9bd024dbed09e1785df295d59770138',
@@ -115,22 +125,12 @@ UNKNOWN_METAPOOLS.set(
 )
 // Arbitrum
 UNKNOWN_METAPOOLS.set(
-  '0xf92c2a3c91bf869f77f9cb221c5ab1b1ada8a586',
-  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
-)
-// Arbitrum
-UNKNOWN_METAPOOLS.set(
   '0xf72beacc6fd334e14a7ddac25c3ce1eb8a827e10',
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
 )
 // Arbitrum
 UNKNOWN_METAPOOLS.set(
   '0xaea2e71b631fa93683bcf256a8689dfa0e094fcd',
-  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
-)
-// Arbitrum
-UNKNOWN_METAPOOLS.set(
-  '0xe9dcf2d2a17ead11fab8b198578b20535370be6a',
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
 )
 // Avalanche
