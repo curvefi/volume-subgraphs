@@ -54,6 +54,7 @@ export function createNewPool(
 
   const coins = pool.coins
   const coinDecimals = pool.coinDecimals
+  const coinNames = pool.coinNames
   let i = 0
   let coinResult = poolContract.try_coins(BigInt.fromI32(i))
 
@@ -88,11 +89,13 @@ export function createNewPool(
 
   while (!coinResult.reverted) {
     coins.push(coinResult.value)
+    coinNames.push(getName(coinResult.value))
     coinDecimals.push(getDecimals(coinResult.value))
     i += 1
     coinResult = poolContract.try_coins(BigInt.fromI32(i))
   }
   pool.coins = coins
+  pool.coinNames = coinNames
   pool.coinDecimals = coinDecimals
   pool.save()
 }
