@@ -20,8 +20,5 @@
   "importExistingMetaPools": "",
   "transactionHash": "LENDING",
   "factoryAddress": "'0x0000000000000000000000000000000000000001'",
-  "unknownMetapoolType": "STABLE_FACTORY",
-  "catchup_block": 0,
-  "importCatchupFunction": "",
-  "executeCatchupFunction": ""
+  "unknownMetapoolType": "STABLE_FACTORY"
 }

@@ -6,7 +6,7 @@ import {
   WeeklySwapVolumeSnapshot,
   DailyPoolSnapshot,
 } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
@@ -23,7 +23,6 @@ import {
   BIG_DECIMAL_TWO, BIG_INT_ZERO
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
-import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'

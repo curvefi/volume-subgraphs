@@ -7,10 +7,7 @@ import {
   ADDRESS_ZERO,
   BIG_INT_ONE,
   CRYPTO_FACTORY, METAPOOL_FACTORY, METAPOOL_FACTORY_ADDRESS,
-  REGISTRY_V1,
-  REGISTRY_V2,
   STABLE_FACTORY,
-  UNKNOWN_METAPOOLS
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
@@ -109,7 +106,7 @@ export function createNewFactoryPool(
 ): void {
   let factoryPool: Address
   let poolType: string
-  const factoryEntity = getFactory(factoryContract, version)
+  const factoryEntity = getFactory(factoryContract)
   const poolCount = factoryEntity.poolCount
   if (version == 1) {
     const factory = StableFactory.bind(factoryContract)

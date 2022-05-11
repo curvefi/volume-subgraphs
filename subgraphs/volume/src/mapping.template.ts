@@ -6,7 +6,7 @@ import {
   EARLY_V2_POOLS,
   LENDING,
   METAPOOL_FACTORY,
-  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, CATCHUP_BLOCK, STABLE_FACTORY
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, STABLE_FACTORY
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
@@ -53,7 +53,7 @@ export function addAddress(providedId: BigInt,
     let stableFactory = Factory.load(addedAddress.toHexString())
     if (!stableFactory) {
       log.info('New stable factory added: {}', [addedAddress.toHexString()])
-      stableFactory = getFactory(addedAddress, 1)
+      stableFactory = getFactory(addedAddress)
       stableFactory.save()
       StableFactoryTemplate.create(addedAddress)
       catchUp(addedAddress, true, 1, block, timestamp, hash)
@@ -71,7 +71,7 @@ export function addAddress(providedId: BigInt,
     let cryptoFactory = Factory.load(addedAddress.toHexString())
     if (!cryptoFactory) {
       log.info('New crypto v2 factory added: {}', [addedAddress.toHexString()])
-      cryptoFactory = getFactory(addedAddress, 2)
+      cryptoFactory = getFactory(addedAddress)
       cryptoFactory.save()
       CryptoFactoryTemplate.create(addedAddress)
       catchUp(addedAddress, true, 2, block, timestamp, hash)
