@@ -210,7 +210,25 @@ UNKNOWN_METAPOOLS.set(
   '0xecd5e75afb02efa118af914515d6521aabd189f1',
   Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 )
-
+const POLYGON_METAPOOLS = ['0x9a30e9a76afbdf52f44b8b8bc2dc3cd941282789',
+                     '0x10f38a56720ff3a16bd04754e9b49e1f39d4aa4a',
+    '0xce113ffc5b4c9f088bb0ad9459e10387f232c3e3',
+  '0xc729a8bfebb7f9089112c081565eb4a0031612ba',
+  '0x5e5a23b52cb48f5e70271be83079ca5bc9c9e9ac',
+  '0x4e28a18aff02dd6d4b0986de8d32f9c2ee7cb29a',
+  '0x9da618900fdea8fc300db03254394ed8eb07ef83',
+  '0xe5c9c1782220138f871c48ebfe20be708f948d51',
+  '0xe4eb7e0ecb5099fce9505fa0dae72efaff73c4cb',
+  '0x5a128e53debc0fcd514facc40f01c5d7c39bbbe2',
+  '0x162b21ba1a90dd9384c615192fa4053217d2a8db',
+  '0xfaddd2d1d4902a0eba8678e47102bfa5c5fa1846',
+  '0xe0eb3ca0b2759344477a7d4e0f8f1f3944da1ba7',
+  '0x5e5dd0c68cdab0ecf15100f7debc5ecfc32f06f4',
+  '0xbe9a593092c86be903746a7eba2c8728210b4af4'
+]
+for (let i = 0; i < POLYGON_METAPOOLS.length; i++) {
+  UNKNOWN_METAPOOLS.set(POLYGON_METAPOOLS[i], Address.fromString('0x445FE580eF8d70FF569aB36e80c647af338db351'))
+}
 
 
 // Early lending pools have no distinctive features in their ABI
