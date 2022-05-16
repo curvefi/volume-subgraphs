@@ -152,3 +152,4 @@ type Candle @entity {
   low: BigDecimal!
   high: BigDecimal!
 }
+

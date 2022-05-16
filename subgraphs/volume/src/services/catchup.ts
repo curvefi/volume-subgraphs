@@ -8,7 +8,7 @@
 
 import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 import {
-ADDRESS_ZERO, UNKNOWN_METAPOOLS
+  ADDRESS_ZERO, BIG_INT_ONE, UNKNOWN_METAPOOLS
 } from '../../../../packages/constants'
 import { createNewFactoryPool } from './pools'
 import { MetaPool } from '../../generated/templates/RegistryTemplate/MetaPool'
@@ -16,7 +16,7 @@ import { BigInt } from '@graphprotocol/graph-ts/index'
 import {
   MainRegistry
 } from '../../generated/AddressProvider/MainRegistry'
-import { Pool } from '../../generated/schema'
+import { Factory, Pool } from '../../generated/schema'
 import { addRegistryPool } from '../mapping'
 import { addCryptoRegistryPool } from '../mappingV2'
 import { CryptoFactory } from '../../generated/AddressProvider/CryptoFactory'
@@ -46,6 +46,15 @@ export function catchUp(registryAddress: Address,
     const pool = Pool.load(poolAddress.value.toHexString())
     if (pool || poolAddress.value == ADDRESS_ZERO) {
       log.warning("Pool {} already exists {} or is zero", [poolAddress.value.toHexString(), pool ? "y" : "n"])
+      // still need to increase pool count because pool will be registered
+      if (factory) {
+        const factoryEntity = Factory.load(registryAddress.toHexString())
+        if (!factoryEntity) {
+          return
+        }
+        factoryEntity.poolCount = factoryEntity.poolCount.plus(BIG_INT_ONE)
+        factoryEntity.save()
+      }
       continue
     }
     if (!factory) {
