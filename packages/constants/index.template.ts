@@ -204,19 +204,27 @@ UNKNOWN_METAPOOLS.set(
 )
 UNKNOWN_METAPOOLS.set(
   '0x064841157baddcb2704ca38901d7d754a59b80e8',
-  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+  Address.fromString('0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x99ae07e7ab61dcce4383a86d14f61c68cdccbf27',
+  Address.fromString('0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714')
 )
 UNKNOWN_METAPOOLS.set(
   '0xecd5e75afb02efa118af914515d6521aabd189f1',
   Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 )
+UNKNOWN_METAPOOLS.set(
+  '0x52eeea483ab7a801e2592a904ad209c90e12e471',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+
+// Matic
 const POLYGON_METAPOOLS = ['0x9a30e9a76afbdf52f44b8b8bc2dc3cd941282789',
                      '0x10f38a56720ff3a16bd04754e9b49e1f39d4aa4a',
     '0xce113ffc5b4c9f088bb0ad9459e10387f232c3e3',
   '0xc729a8bfebb7f9089112c081565eb4a0031612ba',
   '0x5e5a23b52cb48f5e70271be83079ca5bc9c9e9ac',
-  '0x4e28a18aff02dd6d4b0986de8d32f9c2ee7cb29a',
-  '0x9da618900fdea8fc300db03254394ed8eb07ef83',
   '0xe5c9c1782220138f871c48ebfe20be708f948d51',
   '0xe4eb7e0ecb5099fce9505fa0dae72efaff73c4cb',
   '0x5a128e53debc0fcd514facc40f01c5d7c39bbbe2',
@@ -224,10 +232,30 @@ const POLYGON_METAPOOLS = ['0x9a30e9a76afbdf52f44b8b8bc2dc3cd941282789',
   '0xfaddd2d1d4902a0eba8678e47102bfa5c5fa1846',
   '0xe0eb3ca0b2759344477a7d4e0f8f1f3944da1ba7',
   '0x5e5dd0c68cdab0ecf15100f7debc5ecfc32f06f4',
-  '0xbe9a593092c86be903746a7eba2c8728210b4af4'
+  '0xbe9a593092c86be903746a7eba2c8728210b4af4',
+  '0xcc3520a1ddb017740f1a7a267ffbed797adf9d49',
+  '0x69fc13493240c274a798e9dc9ce2219bfa1b1235',
+  '0x20e3f345e229be9ce08488ae79e906955183ebab',
+  '0x0e9b542172200df93eaf4c6edc919f9923567517',
+  '0x209ebe1aac73205f1e8aff02db71160ec1dd1abd',
+  '0xf3fc2bba74f0b73f6264e3543e896e0b86f1f257',
+  '0x850e1b0b203f9b0ebfc9648ef8c7a6f211a200ae',
+  '0x4356a01c4f873ae8fa46e1d2cfaee249560c5e6e'
 ]
 for (let i = 0; i < POLYGON_METAPOOLS.length; i++) {
   UNKNOWN_METAPOOLS.set(POLYGON_METAPOOLS[i], Address.fromString('0x445FE580eF8d70FF569aB36e80c647af338db351'))
+}
+
+const POLYGON_BTC_METAPOOLS = ['0xb00680df0b1f3f39ef1fbb9ec1aa0a7fa14b4cd9',
+'0x52296ec05ad119bc77baf48e9c9e7109aae7c276',
+  '0xbefff04ec3e332ca0347a7ad056e8f7945f926cf',
+  '0xf0016fa1b5cb0036425ae47510ac9deb40d3f273',
+  '0x9da618900fdea8fc300db03254394ed8eb07ef83',
+  '0x4e28a18aff02dd6d4b0986de8d32f9c2ee7cb29a',
+
+]
+for (let i = 0; i < POLYGON_BTC_METAPOOLS.length; i++) {
+  UNKNOWN_METAPOOLS.set(POLYGON_BTC_METAPOOLS[i], Address.fromString('0xC2d95EEF97Ec6C17551d45e77B590dc1F9117C67'))
 }
 
 
