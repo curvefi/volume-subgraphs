@@ -1,4 +1,4 @@
-#Curve volume subgraphs
+# Curve volume subgraphs
 
 ### Overview
 
@@ -9,7 +9,7 @@ The subgraph is based on the address provider contract which is located at `0x00
 The subgraph listens to the events on the address provider to track all added Stable Registry, Stable Factory, Crypto Registry and Crypto Factory contracts.
 The registries and factories are then in turn tracked to track all new deployed or added pools.
 
-The subgraph will only be as comprehensive as the original address indexer and associated registries. If the
+The subgraphs are only as comprehensive as the  address indexer and associated registries. If the
 address indexer is not up to date, neither will the subgraph. If a non-factory pool is not added to a
 registry, or if the registry itself is not added to the address provider, the pool will not be tracked by the
 subgraph. Note that if the address of a registry or a factory is updated on the address provider contract the
@@ -23,13 +23,23 @@ Currently supported chains:
 - `matic`
 - `arbitrum`
 - `xdai`
+- `optimism`
 
 Currently unsupported chains with Curve deployments:
 
 - `harmony` (not supported by The Graph)
-- `optimism` (need pricing source, need to run tests with UniV3)
 
-## Installation and deployment
+### Deployment addresses
+
+- Mainnet: https://thegraph.com/hosted-service/subgraph/convex-community/volume-mainnet
+- xDAI: https://thegraph.com/hosted-service/subgraph/convex-community/volume-xdai
+- Arbitrum: https://thegraph.com/hosted-service/subgraph/convex-community/volume-arbitrum
+- Fantom: https://thegraph.com/hosted-service/subgraph/convex-community/volume-fantom
+- Avalanche: https://thegraph.com/hosted-service/subgraph/convex-community/volume-avalanche
+- Matic: https://thegraph.com/hosted-service/subgraph/convex-community/volume-matic
+- Optimism: https://thegraph.com/hosted-service/subgraph/convex-community/volume-optimism
+
+### Installation and deployment
 
 Initial setup:
 
@@ -45,6 +55,13 @@ yarn prepare:[chain]
 yarn deploy:[chain]
 ```
 
+After making changes, deploy to a staging address rather than the production subgraph using `stage`:
+
+```
+yarn prepare:[chain]
+yarn stage:[chain]
+```
+
 Where `[chain]` is any of the chains listed above.
 For instance, for mainnet:
 
@@ -55,7 +72,7 @@ yarn deploy:mainnet
 
 **Note**: You may need to update the `package.json` file in `subgraphs/volume` to change the graph's deployment address.
 
-## Known limitations
+### Known limitations
 
 The subgraphs are dependent on the address provider and registries for information about the pools, so the data will require both to be up to date.
 
@@ -64,14 +81,12 @@ The subgraph currently does not have always a way to detect whether a pool is a 
 - If a non-factory metapool is added to a registry, the data for that pool will often be faulty (unless the pool implements the `base_pool` view method and can be identified as a metapool).
   The solution is to manually add the pool to the `UNKNOWN_METAPOOLS` mapping in the `constants` package (make sure to update the template and not the mustache-generated `index.ts` file). The key added should be the address of the metapool (in lowercase), the value the address of
   its base pool (as an `Address`)
-- If a factory pool is deployed via the factory BEFORE the factory is added to the address provider, the subgraph will not track the metapool. If the metapool is later added manually to the registry,
-  the subgraph will not be able to identify it as a metapool (unless it implements the `base_pool` view method). The solution is, like above, to add the metapool and its base pool to the `UNKNOWN_METAPOOLS` mapping.
 - If a lending pool is added to a registry, the subgraph will not be able to identify it as such (unless it implements the `try_offpeg_fee_multiplier` method) and there will be no data for it. The solution is to manually add the pool's address to the `LENDING_POOLS` array
   in the `constants` package.
 - Forex pools will only be automatically priced properly if they are v2 pools AND the token is trading on one of the dexes used for pricing. Otherwise, the subgraph relies on Chainlink oracles to get the value of the foreign currency.
   Mappings from token to oracle contract address are available in the `constants` package with the `FOREX_ORACLES` map. For sidechains, you may also need to update the `FOREX_TOKENS` array so that the token can be identified as a foreign currency one.
 
-## Available data
+### Available data
 
 The following data can be queried from the subgraph
 
@@ -105,7 +120,8 @@ Sample query:
 #### Pool Base APR
 
 The pools' LP token virtual price as well as base APR (from fees) can be queried.
-The base apr is calculated as ((virtual_price_t - virtual_price_t-1) / virtual_price_t-1)
+The base apr is calculated as `((virtual_price_t - virtual_price_t-1) / virtual_price_t-1)`. 
+The APR is not annualized, to do so, calculate `((1 + APR) ** 365 - 1) * 100`
 
 Sample query:
 

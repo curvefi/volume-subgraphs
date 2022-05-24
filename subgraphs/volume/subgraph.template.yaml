@@ -24,12 +24,26 @@ dataSources:
           file: ./abis/AddressProvider.json
         - name: StableFactory
           file: ./abis/StableFactory.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
         - name: CryptoRegistry
           file: ./abis/CryptoRegistry.json
         - name: MainRegistry
           file: ./abis/MainRegistry.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
+        - name: CurvePoolCoin128
+          file: ./abis/CurvePoolCoin128.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurveLendingPoolCoin128
+          file: ./abis/CurveLendingPoolCoin128.json
       eventHandlers:
         - event: NewAddressIdentifier(indexed uint256,address,string)
           handler: handleNewAddressIdentifier
@@ -55,6 +69,8 @@ templates:
           file: ./abis/CryptoFactory.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: CurvePoolV2
@@ -99,6 +115,8 @@ templates:
           file: ./abis/CurvePool.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
         - name: MetaPool
           file: ./abis/MetaPool.json
         - name: CurvePoolCoin128
@@ -144,6 +162,8 @@ templates:
           file: ./abis/CurvePoolV2.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
       eventHandlers:
         - event: PoolAdded(indexed address)
           handler: handleCryptoPoolAdded
@@ -181,6 +201,8 @@ templates:
           file: ./abis/CurveLendingPoolCoin128.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -234,6 +256,8 @@ templates:
           file: ./abis/CurvePoolV2.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -283,6 +307,8 @@ templates:
           file: ./abis/CurvePoolV2.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: CToken
+          file: ./abis/CToken.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair

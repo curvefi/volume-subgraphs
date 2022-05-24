@@ -7,13 +7,19 @@ import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
 import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
 import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate/CryptoFactory'
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 
-export function handleCryptoPoolAdded(event: PoolAdded): void {
+
+export function addCryptoRegistryPool(pool: Address,
+                                      registry: Address,
+                                      block: BigInt,
+                                      timestamp: BigInt,
+                                      hash: Bytes): void {
+
   log.debug('New V2 factory crypto pool {} deployed at {}', [
-    event.params.pool.toHexString(),
-    event.transaction.hash.toHexString(),
+    pool.toHexString(),
+    hash.toHexString(),
   ])
-  const pool = event.params.pool
 
   // Useless for now, but v2 metapools may be a thing at some point
   const testMetaPool = MetaPool.bind(pool)
@@ -22,27 +28,37 @@ export function handleCryptoPoolAdded(event: PoolAdded): void {
     createNewRegistryPool(
       pool,
       testMetaPoolResult.value,
-      getLpToken(pool, event.address),
+      getLpToken(pool, registry),
       true,
       true,
       REGISTRY_V2,
-      event.block.timestamp,
-      event.block.number,
-      event.transaction.hash
+      timestamp,
+      block,
+      hash
     )
   } else {
     createNewRegistryPool(
       pool,
       ADDRESS_ZERO,
-      getLpToken(pool, event.address),
+      getLpToken(pool, registry),
       false,
       true,
       REGISTRY_V2,
-      event.block.timestamp,
-      event.block.number,
-      event.transaction.hash
+      timestamp,
+      block,
+      hash
     )
   }
+                                      }
+
+export function handleCryptoPoolAdded(event: PoolAdded): void {
+  addCryptoRegistryPool(
+    event.params.pool,
+    event.address,
+    event.block.number,
+    event.block.timestamp,
+    event.transaction.hash
+  )
 }
 
 export function handleCryptoPoolDeployed(event: CryptoPoolDeployed): void {

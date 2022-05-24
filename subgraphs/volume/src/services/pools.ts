@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts/index'
-import { getDecimals } from '../../../../packages/utils/pricing'
+import { getDecimals, getName } from '../../../../packages/utils/pricing'
 import { BasePool, Pool } from '../../generated/schema'
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
@@ -7,10 +7,7 @@ import {
   ADDRESS_ZERO,
   BIG_INT_ONE,
   CRYPTO_FACTORY, METAPOOL_FACTORY, METAPOOL_FACTORY_ADDRESS,
-  REGISTRY_V1,
-  REGISTRY_V2,
   STABLE_FACTORY,
-  UNKNOWN_METAPOOLS
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
@@ -57,6 +54,7 @@ export function createNewPool(
 
   const coins = pool.coins
   const coinDecimals = pool.coinDecimals
+  const coinNames = pool.coinNames
   let i = 0
   let coinResult = poolContract.try_coins(BigInt.fromI32(i))
 
@@ -69,6 +67,7 @@ export function createNewPool(
     log.debug('Call to coins reverted for pool ({}), attempting 128 bytes call', [pool.id])
     const poolContract = CurvePoolCoin128.bind(poolAddress)
     const coins = pool.coins
+    const coinNames = pool.coinNames
     const coinDecimals = pool.coinDecimals
     let coinResult = poolContract.try_coins(BigInt.fromI32(i))
     if (coinResult.reverted) {
@@ -76,11 +75,13 @@ export function createNewPool(
     }
     while (!coinResult.reverted) {
       coins.push(coinResult.value)
+      coinNames.push(getName(coinResult.value))
       coinDecimals.push(getDecimals(coinResult.value))
       i += 1
       coinResult = poolContract.try_coins(BigInt.fromI32(i))
     }
     pool.coins = coins
+    pool.coinNames = coinNames
     pool.coinDecimals = coinDecimals
     pool.save()
     return
@@ -88,11 +89,13 @@ export function createNewPool(
 
   while (!coinResult.reverted) {
     coins.push(coinResult.value)
+    coinNames.push(getName(coinResult.value))
     coinDecimals.push(getDecimals(coinResult.value))
     i += 1
     coinResult = poolContract.try_coins(BigInt.fromI32(i))
   }
   pool.coins = coins
+  pool.coinNames = coinNames
   pool.coinDecimals = coinDecimals
   pool.save()
 }
@@ -109,15 +112,16 @@ export function createNewFactoryPool(
 ): void {
   let factoryPool: Address
   let poolType: string
-  const factoryEntity = getFactory(factoryContract, version)
+  const factoryEntity = getFactory(factoryContract)
   const poolCount = factoryEntity.poolCount
   if (version == 1) {
     const factory = StableFactory.bind(factoryContract)
     poolType = factoryContract == Address.fromString(METAPOOL_FACTORY_ADDRESS) ? METAPOOL_FACTORY : STABLE_FACTORY
     factoryPool = factory.pool_list(poolCount)
-    log.info('New factory pool (metapool: {}) added {} with id {}', [
+    log.info('New factory pool (metapool: {}, base pool: {}) added {} with id {}', [
       metapool.toString(),
-      factoryPool .toHexString(),
+      basePool.toHexString(),
+      factoryPool.toHexString(),
       poolCount.toString(),
     ])
   } else {
@@ -298,7 +302,7 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
 }
 
 export function getAssetType(name: string, symbol: string): i32 {
-  const description = name.toUpperCase() + '-' + name.toUpperCase()
+  const description = name.toUpperCase() + '-' + symbol.toUpperCase()
   const stables = ['USD', 'DAI', 'MIM', 'TETHER']
   for (let i = 0; i < stables.length; i++) {
     if (description.indexOf(stables[i]) >= 0) {

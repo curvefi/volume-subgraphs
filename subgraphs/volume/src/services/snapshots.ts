@@ -6,7 +6,7 @@ import {
   WeeklySwapVolumeSnapshot,
   DailyPoolSnapshot,
 } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
@@ -20,10 +20,9 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
-  BIG_DECIMAL_TWO, BIG_INT_ZERO
+  BIG_DECIMAL_TWO, BIG_INT_ZERO, CTOKENS
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
-import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
@@ -110,6 +109,7 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: 
   }
   return snapshot
 }
+
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
   if (FOREX_ORACLES.has(pool.id)) {
@@ -220,7 +220,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const virtualPriceResult = poolContract.try_get_virtual_price()
       let vPrice = BIG_DECIMAL_ZERO
       if (virtualPriceResult.reverted) {
-        log.error('Unable to fetch virtual price for pool {}', [pool.id])
+        log.warning('Unable to fetch virtual price for pool {}', [pool.id])
       } else {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }
@@ -244,7 +244,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         if (balanceResult.reverted) {
           log.warning("Unable to fetch balances for {}, trying with int128 ABI", [pool.id])
           const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
-          balanceResult = poolContract.try_balances(BigInt.fromI32(j))
+          balanceResult = poolContract128.try_balances(BigInt.fromI32(j))
           if (!balanceResult.reverted) {
             balance = balanceResult.value
           }
@@ -253,7 +253,8 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           balance = balanceResult.value
         }
         reserves.push(balance)
-        const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool)
+        const currentCoin = bytesToAddress(pool.coins[j])
+        const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(currentCoin, timestamp, pool) : CTOKENS.includes(currentCoin.toHexString()) ? getTokenSnapshot(currentCoin, timestamp, false) : getTokenSnapshotByAssetType(pool, timestamp)
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
       }

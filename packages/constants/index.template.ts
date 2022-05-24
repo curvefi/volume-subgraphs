@@ -65,8 +65,9 @@ export const SYNTH_TOKENS = new Map<string, Address>()
 SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
 
 
-// Some metapools don't implement the `base_pool` method, so the graph has no way
-// of knowing that they're metapools without a manual mapping
+// Metapools from the 1st metapool factory don't implement the `base_pool`
+// method, so the graph has no way of knowing that they're metapools
+// when they're retro-added.
 // We can track whether a pool is metapool or not on deployment via the factory
 // but not for metapools that are added to the registry (metapools deployed by
 // the deployer "manually" or factory metapools deployed before the factory
@@ -77,10 +78,80 @@ UNKNOWN_METAPOOLS.set(
   '0x92d5ebf3593a92888c25c0abef126583d4b5312e',
   Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
 )
-// Arbitrum
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0x1cb5c03d0585333a6d0578d47a5f9de66c80fd5a',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xad9c5054cc31f8aa822aeb9247298d2ecf48c5cf',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xecf64ba816c75e595ff212391e80b5cd9071e7d5',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Fantom
+UNKNOWN_METAPOOLS.set(
+  '0xecf64ba816c75e595ff212391e80b5cd9071e7d5',
+  Address.fromString('0x27E611FD27b276ACbd5Ffd632E5eAEBEC9761E40')
+)
+// Arbitrum & Avalanche
 UNKNOWN_METAPOOLS.set(
   '0x30df229cefa463e991e29d42db0bae2e122b2ac7',
   Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum & Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xe9dcf2d2a17ead11fab8b198578b20535370be6a',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum & Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xf92c2a3c91bf869f77f9cb221c5ab1b1ada8a586',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum
+UNKNOWN_METAPOOLS.set(
+  '0x76b44e0cf9bd024dbed09e1785df295d59770138',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum
+UNKNOWN_METAPOOLS.set(
+  '0xf07d553b195080f84f582e88ecdd54baa122b279',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum
+UNKNOWN_METAPOOLS.set(
+  '0xf72beacc6fd334e14a7ddac25c3ce1eb8a827e10',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Arbitrum
+UNKNOWN_METAPOOLS.set(
+  '0xaea2e71b631fa93683bcf256a8689dfa0e094fcd',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xb0d2eb3c2ca3c6916fab8dcbf9d9c165649231ae',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0x6041631c566eb8dc6258a75fa5370761d4873990',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Avalanche
+UNKNOWN_METAPOOLS.set(
+  '0xf72beacc6fd334e14a7ddac25c3ce1eb8a827e10',
+  Address.fromString('0x7f90122BF0700F9E7e1F688fe926940E8839F353')
+)
+// Optimism
+UNKNOWN_METAPOOLS.set(
+  '0x061b87122ed14b9526a813209c8a59a633257bab',
+  Address.fromString('0x1337BedC9D22ecbe766dF105c9623922A27963EC')
 )
 // Mainnet
 UNKNOWN_METAPOOLS.set(
@@ -95,6 +166,97 @@ UNKNOWN_METAPOOLS.set(
   '0x87650d7bbfc3a9f10587d7778206671719d9910d',
   Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 )
+UNKNOWN_METAPOOLS.set(
+  '0x3252efd4ea2d6c78091a1f43982ee2c3659cc3d1',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x6f682319f4ee0320a53cc72341ac28408c4bed19',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x592ae00d0dee274d74faedc6760302f54a5db67e',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0xf5a95ccde486b5fe98852bb02d8ec80a4b9422bd',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0xe0b99f540b3cd69f88b4666c8f39877c79072851',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x11e0ab0561ee271967f70ea0da54fd538ba7a6b0',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x9547429c0e2c3a8b88c6833b58fce962734c0e8c',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x296b9fa08cf80138dfa6c3fcce497152662bc314',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0xe9ab166bc03099d251170d0578fdffb94bcdde6f',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x064841157baddcb2704ca38901d7d754a59b80e8',
+  Address.fromString('0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x99ae07e7ab61dcce4383a86d14f61c68cdccbf27',
+  Address.fromString('0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714')
+)
+UNKNOWN_METAPOOLS.set(
+  '0xecd5e75afb02efa118af914515d6521aabd189f1',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+UNKNOWN_METAPOOLS.set(
+  '0x52eeea483ab7a801e2592a904ad209c90e12e471',
+  Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
+)
+
+// Matic
+const POLYGON_METAPOOLS = ['0x9a30e9a76afbdf52f44b8b8bc2dc3cd941282789',
+                     '0x10f38a56720ff3a16bd04754e9b49e1f39d4aa4a',
+    '0xce113ffc5b4c9f088bb0ad9459e10387f232c3e3',
+  '0xc729a8bfebb7f9089112c081565eb4a0031612ba',
+  '0x5e5a23b52cb48f5e70271be83079ca5bc9c9e9ac',
+  '0xe5c9c1782220138f871c48ebfe20be708f948d51',
+  '0xe4eb7e0ecb5099fce9505fa0dae72efaff73c4cb',
+  '0x5a128e53debc0fcd514facc40f01c5d7c39bbbe2',
+  '0x162b21ba1a90dd9384c615192fa4053217d2a8db',
+  '0xfaddd2d1d4902a0eba8678e47102bfa5c5fa1846',
+  '0xe0eb3ca0b2759344477a7d4e0f8f1f3944da1ba7',
+  '0x5e5dd0c68cdab0ecf15100f7debc5ecfc32f06f4',
+  '0xbe9a593092c86be903746a7eba2c8728210b4af4',
+  '0xcc3520a1ddb017740f1a7a267ffbed797adf9d49',
+  '0x69fc13493240c274a798e9dc9ce2219bfa1b1235',
+  '0x20e3f345e229be9ce08488ae79e906955183ebab',
+  '0x0e9b542172200df93eaf4c6edc919f9923567517',
+  '0x209ebe1aac73205f1e8aff02db71160ec1dd1abd',
+  '0xf3fc2bba74f0b73f6264e3543e896e0b86f1f257',
+  '0x850e1b0b203f9b0ebfc9648ef8c7a6f211a200ae',
+  '0x4356a01c4f873ae8fa46e1d2cfaee249560c5e6e'
+]
+for (let i = 0; i < POLYGON_METAPOOLS.length; i++) {
+  UNKNOWN_METAPOOLS.set(POLYGON_METAPOOLS[i], Address.fromString('0x445FE580eF8d70FF569aB36e80c647af338db351'))
+}
+
+const POLYGON_BTC_METAPOOLS = ['0xb00680df0b1f3f39ef1fbb9ec1aa0a7fa14b4cd9',
+'0x52296ec05ad119bc77baf48e9c9e7109aae7c276',
+  '0xbefff04ec3e332ca0347a7ad056e8f7945f926cf',
+  '0xf0016fa1b5cb0036425ae47510ac9deb40d3f273',
+  '0x9da618900fdea8fc300db03254394ed8eb07ef83',
+  '0x4e28a18aff02dd6d4b0986de8d32f9c2ee7cb29a',
+
+]
+for (let i = 0; i < POLYGON_BTC_METAPOOLS.length; i++) {
+  UNKNOWN_METAPOOLS.set(POLYGON_BTC_METAPOOLS[i], Address.fromString('0xC2d95EEF97Ec6C17551d45e77B590dc1F9117C67'))
+}
 
 
 // Early lending pools have no distinctive features in their ABI
@@ -115,6 +277,20 @@ export const LENDING_POOLS = [
   Address.fromString('0x8925d9d9b4569d737a48499def3f67baa5a144b9'),
   // FANTOM
   Address.fromString('0x4fc8d635c3cb1d0aa123859e2b2587d0ff2707b1'),
+]
+
+// Lending pools using cTokens have their balance labelled in cTokens
+// which must be converted to underlying using each token's exchange
+// rate and decimals. We keep this list to handle these edge cases
+export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
+  "0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c",
+  "0x48759f220ed983db51fa7a8c0d2aab8f3ce4166a",
+  "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+  "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+  // FANTOM
+  "0x04c762a5df2fa02fe868f25359e0c259fb811cfe",
+  "0x328a7b4d538a2b3942653a9983fda3c12c571141",
+  "0x70fac71debfd67394d1278d98a29dea79dc6e57a"
 ]
 
 // some v2 pools can have Forex : Crypto pairs for which we need
@@ -180,6 +356,8 @@ export const EURT_USD_POOL = Address.fromString('0x9838eCcC42659FA8AA7daF2aD134b
 export const EURS_USDC_POOL = Address.fromString('0x98a7F18d4E56Cfe84E3D081B40001B3d5bD3eB8B')
 export const TRICRYPTO_V1_POOL = Address.fromString('0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5')
 export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD_POOL]
+
+export const CURVE_REGISTRY_V1 = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5')
 
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
 export const CRYPTO_FACTORY = 'CRYPTO_FACTORY'
