@@ -2,9 +2,9 @@ import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_ONE,
+  BIG_DECIMAL_ONE, BIG_DECIMAL_TWO,
   BIG_DECIMAL_ZERO,
-  BIG_INT_ZERO,
+  BIG_INT_ZERO, CTOKENS,
   SIDECHAIN_SUBSTITUTES,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
@@ -13,7 +13,7 @@ import {
   UNI_V3_QUOTER_ADDRESS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
-  WETH_ADDRESS,
+  WETH_ADDRESS
 } from 'const'
 import { Factory } from 'volume/generated/templates/CurvePoolTemplateV2/Factory'
 import { Pair } from 'volume/generated/templates/CurvePoolTemplateV2/Pair'
@@ -21,6 +21,7 @@ import { exponentToBigDecimal, exponentToBigInt } from './maths'
 import { FactoryV3 } from 'volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
 import { Quoter } from 'volume/generated/templates/CurvePoolTemplateV2/Quoter'
 import { ERC20 } from 'volume/generated/templates/CurvePoolTemplateV2/ERC20'
+import { CToken } from 'volume/generated/templates/CurvePoolTemplateV2/CToken'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
@@ -120,10 +121,31 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
 
+export function getCTokenExchangeRate(token: Address): BigDecimal {
+  const ctoken = CToken.bind(token)
+  const underlyingResult = ctoken.try_underlying()
+  const exchangeRateResult = ctoken.try_exchangeRateStored()
+  if (underlyingResult.reverted || exchangeRateResult.reverted) {
+    // if fail we use the beginning rate
+    log.error('Failed to get underlying or rate for ctoken {}', [token.toHexString()])
+    return BigDecimal.fromString('0.02')
+  }
+  const underlying = underlyingResult.value
+  const exchangeRate = exchangeRateResult.value
+  const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
+  const underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
+  // scaling formula: https://compound.finance/docs/ctokens
+  const rateScale = exponentToBigDecimal(BigInt.fromI32(10 + underlyingDecimals))
+  return exchangeRate.toBigDecimal().div(rateScale)
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
     token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
+  }
+  if (CTOKENS.includes(token.toHexString())) {
+    return getCTokenExchangeRate(token)
   }
   if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     return getTokenAValueInTokenB(token, USDT_ADDRESS)

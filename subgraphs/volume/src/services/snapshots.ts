@@ -20,7 +20,7 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
-  BIG_DECIMAL_TWO, BIG_INT_ZERO
+  BIG_DECIMAL_TWO, BIG_INT_ZERO, CTOKENS
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -109,6 +109,7 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: 
   }
   return snapshot
 }
+
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
   if (FOREX_ORACLES.has(pool.id)) {
@@ -252,7 +253,8 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           balance = balanceResult.value
         }
         reserves.push(balance)
-        const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, pool) : getTokenSnapshotByAssetType(pool, timestamp)
+        const currentCoin = bytesToAddress(pool.coins[j])
+        const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(currentCoin, timestamp, pool) : CTOKENS.includes(currentCoin.toHexString()) ? getTokenSnapshot(currentCoin, timestamp, false) : getTokenSnapshotByAssetType(pool, timestamp)
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
       }

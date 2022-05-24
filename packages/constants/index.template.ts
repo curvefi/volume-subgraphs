@@ -279,6 +279,20 @@ export const LENDING_POOLS = [
   Address.fromString('0x4fc8d635c3cb1d0aa123859e2b2587d0ff2707b1'),
 ]
 
+// Lending pools using cTokens have their balance labelled in cTokens
+// which must be converted to underlying using each token's exchange
+// rate and decimals. We keep this list to handle these edge cases
+export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
+  "0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c",
+  "0x48759f220ed983db51fa7a8c0d2aab8f3ce4166a",
+  "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+  "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+  // FANTOM
+  "0x04c762a5df2fa02fe868f25359e0c259fb811cfe",
+  "0x328a7b4d538a2b3942653a9983fda3c12c571141",
+  "0x70fac71debfd67394d1278d98a29dea79dc6e57a"
+]
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'
