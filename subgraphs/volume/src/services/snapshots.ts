@@ -30,6 +30,7 @@ import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import {
   CurvePoolCoin128
 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
+import { ERC20 } from '../../generated/AddressProvider/ERC20'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -254,6 +255,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         }
         reserves.push(balance)
         const currentCoin = bytesToAddress(pool.coins[j])
+        // need to handle the fact that balances doesn't actually return token balance
+        // for cTokens
+        if (CTOKENS.includes(currentCoin.toHexString())) {
+          const tokenContract = ERC20.bind(currentCoin)
+          const balanceResult = tokenContract.try_balanceOf(Address.fromString(pool.id))
+          balance = balanceResult.reverted ? balance : balanceResult.value
+        }
         const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(currentCoin, timestamp, pool) : CTOKENS.includes(currentCoin.toHexString()) ? getTokenSnapshot(currentCoin, timestamp, false) : getTokenSnapshotByAssetType(pool, timestamp)
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
