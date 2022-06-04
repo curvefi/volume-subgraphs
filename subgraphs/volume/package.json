@@ -28,7 +28,7 @@
     "stage:optimism": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-optimism-staging"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.30.0-alpha.1",
-    "@graphprotocol/graph-ts": "0.27.0-alpha.1"
+    "@graphprotocol/graph-cli": "0.30.3",
+    "@graphprotocol/graph-ts": "0.27.0"
   }
 }
