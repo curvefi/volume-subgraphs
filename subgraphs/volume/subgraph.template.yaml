@@ -11,7 +11,7 @@ dataSources:
       abi: AddressProvider
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -59,7 +59,7 @@ templates:
       abi: MainRegistry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Registry
@@ -98,7 +98,7 @@ templates:
       abi: StableFactory
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Platform
@@ -139,7 +139,7 @@ templates:
       abi: CryptoRegistry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Platform
@@ -175,7 +175,7 @@ templates:
       abi: CurvePool
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -234,7 +234,7 @@ templates:
       abi: CryptoFactory
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -285,7 +285,7 @@ templates:
       abi: CurvePoolV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool

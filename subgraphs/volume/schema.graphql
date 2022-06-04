@@ -12,7 +12,6 @@ type Platform @entity {
   pools: [Pool!]! @derivedFrom(field: "platform")
   poolAddresses: [Bytes!]!
   latestPoolSnapshot: BigInt!
-  catchup: Boolean!
 }
 
 type Registry @entity {
@@ -65,6 +64,7 @@ type BasePool @entity {
 
 type TokenSnapshot @entity {
   id: ID!
+  token: Bytes!
   price: BigDecimal!
   timestamp: BigInt!
 }

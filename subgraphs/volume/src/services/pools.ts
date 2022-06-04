@@ -5,8 +5,12 @@ import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/Cu
 import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
 import {
   ADDRESS_ZERO,
+  BIG_DECIMAL_ZERO,
   BIG_INT_ONE,
-  CRYPTO_FACTORY, METAPOOL_FACTORY, METAPOOL_FACTORY_ADDRESS,
+  BIG_INT_ZERO,
+  CRYPTO_FACTORY,
+  METAPOOL_FACTORY,
+  METAPOOL_FACTORY_ADDRESS,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
@@ -37,6 +41,9 @@ export function createNewPool(
   platform.poolAddresses = pools
   platform.save()
   const pool = new Pool(poolAddress.toHexString())
+  pool.coins = new Array<Bytes>()
+  pool.coinDecimals = new Array<BigInt>()
+  pool.coinNames = new Array<string>()
   const poolContract = CurvePool.bind(poolAddress)
   pool.name = name
   pool.platform = platform.id
@@ -51,6 +58,10 @@ export function createNewPool(
   pool.poolType = poolType
   pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol)
   pool.basePool = basePool
+  pool.cumulativeVolume = BIG_DECIMAL_ZERO
+  pool.cumulativeVolumeUSD = BIG_DECIMAL_ZERO
+  pool.virtualPrice = BIG_DECIMAL_ZERO
+  pool.baseApr = BIG_DECIMAL_ZERO
 
   const coins = pool.coins
   const coinDecimals = pool.coinDecimals
@@ -228,6 +239,9 @@ export function getBasePool(pool: Address): BasePool {
   if (!basePool) {
     log.info('Adding new base pool : {}', [pool.toHexString()])
     basePool = new BasePool(pool.toHexString())
+
+    basePool.coins = new Array<Bytes>()
+    basePool.coinDecimals = new Array<BigInt>()
     const poolContract = CurvePool.bind(pool)
     const coins = basePool.coins
     const coinDecimals = basePool.coinDecimals
@@ -261,6 +275,9 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
   if (!basePool) {
     log.info('Adding new virtual base lending pool : {}', [pool.toHexString()])
     basePool = new BasePool(pool.toHexString())
+
+    basePool.coins = new Array<Bytes>()
+    basePool.coinDecimals = new Array<BigInt>()
     const poolContract = CurveLendingPool.bind(pool)
     const coins = basePool.coins
     const coinDecimals = basePool.coinDecimals

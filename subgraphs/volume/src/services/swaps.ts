@@ -8,7 +8,14 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE, LENDING, STABLE_FACTORY } from '../../../../packages/constants'
+import {
+  ADDRESS_ZERO,
+  BIG_DECIMAL_TWO,
+  BIG_INT_ONE,
+  BIG_INT_ZERO,
+  LENDING,
+  STABLE_FACTORY,
+} from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -78,6 +85,11 @@ export function handleExchange(
     tokenSoldDecimals = pool.coinDecimals[soldId]
   }
 
+  if (tokenSold == ADDRESS_ZERO) {
+    log.error('Undefined SOLD token for pool {} at tx {}', [pool.id, txhash.toHexString()])
+    return
+  }
+
   if (exchangeUnderlying && pool.poolType == LENDING) {
     const basePool = getVirtualBaseLendingPool(bytesToAddress(pool.basePool))
     if (boughtId > basePool.coins.length - 1) {
@@ -111,6 +123,11 @@ export function handleExchange(
     tokenBoughtDecimals = pool.coinDecimals[boughtId]
   }
 
+  if (tokenBought == ADDRESS_ZERO) {
+    log.error('Undefined BOUGHT token for pool {} at tx {}', [pool.id, txhash.toHexString()])
+    return
+  }
+
   const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
   log.debug('Getting token snaphsot for {}', [pool.id])
@@ -132,7 +149,7 @@ export function handleExchange(
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
   swapEvent.gasLimit = gasLimit
-  swapEvent.gasUsed = gasUsed
+  swapEvent.gasUsed = gasUsed ? gasUsed : BIG_INT_ZERO
   swapEvent.tokenBought = tokenBought
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought
@@ -179,11 +196,12 @@ export function handleExchange(
   dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
   weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
+  hourlySnapshot.save()
+  dailySnapshot.save()
+  weeklySnapshot.save()
+
   pool.cumulativeVolume = pool.cumulativeVolume.plus(volume)
   pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(volumeUSD)
 
   pool.save()
-  hourlySnapshot.save()
-  dailySnapshot.save()
-  weeklySnapshot.save()
 }
