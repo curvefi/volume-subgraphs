@@ -124,6 +124,8 @@ type SwapEvent @entity {
   id: ID!
   pool: Pool!
   block: BigInt!
+  gasLimit: BigInt!
+  gasUsed: BigInt!
   buyer: Bytes!
   tokenSold: Bytes!
   tokenBought: Bytes!

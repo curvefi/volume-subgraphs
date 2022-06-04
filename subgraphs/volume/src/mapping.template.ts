@@ -177,6 +177,8 @@ export function handleMainRegistryPoolAdded(event: PoolAdded): void {
 export function handleTokenExchange(event: TokenExchange): void {
   log.info('Plain swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
+  const receipt = event.receipt
+  const gasUsed = receipt ? receipt.gasUsed : BIG_INT_ZERO
   handleExchange(
     trade.buyer,
     trade.sold_id,
@@ -187,6 +189,8 @@ export function handleTokenExchange(event: TokenExchange): void {
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.transaction.gasLimit,
+    gasUsed,
     false
   )
 }
@@ -194,6 +198,8 @@ export function handleTokenExchange(event: TokenExchange): void {
 export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): void {
   log.info('Underlying swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
+  const receipt = event.receipt
+  const gasUsed = receipt ? receipt.gasUsed : BIG_INT_ZERO
   handleExchange(
     trade.buyer,
     trade.sold_id,
@@ -204,6 +210,8 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.transaction.gasLimit,
+    gasUsed,
     true
   )
 }

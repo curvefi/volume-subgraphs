@@ -8,12 +8,7 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import {
-  BIG_DECIMAL_TWO,
-  BIG_INT_ONE,
-  LENDING,
-  STABLE_FACTORY
-} from '../../../../packages/constants'
+import { BIG_DECIMAL_TWO, BIG_INT_ONE, LENDING, STABLE_FACTORY } from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -29,6 +24,8 @@ export function handleExchange(
   blockNumber: BigInt,
   address: Address,
   txhash: Bytes,
+  gasLimit: BigInt,
+  gasUsed: BigInt,
   exchangeUnderlying: boolean
 ): void {
   const pool = Pool.load(address.toHexString())
@@ -65,7 +62,7 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    if (((pool.assetType == 2 || pool.assetType == 0) && pool.poolType == STABLE_FACTORY) && (boughtId == 0)) {
+    if ((pool.assetType == 2 || pool.assetType == 0) && pool.poolType == STABLE_FACTORY && boughtId == 0) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
       tokenSoldDecimals = BigInt.fromI32(18)
@@ -134,6 +131,8 @@ export function handleExchange(
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
+  swapEvent.gasLimit = gasLimit
+  swapEvent.gasUsed = gasUsed
   swapEvent.tokenBought = tokenBought
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought

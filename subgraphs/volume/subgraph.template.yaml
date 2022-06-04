@@ -222,8 +222,10 @@ templates:
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
+          receipt: true
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
+          receipt: true
       file: ./src/mapping.ts
   - name: CryptoFactoryTemplate
     kind: ethereum/contract
@@ -326,4 +328,5 @@ templates:
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2
+          receipt: true
       file: ./src/mappingV2.ts
