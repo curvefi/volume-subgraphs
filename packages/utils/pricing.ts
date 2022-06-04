@@ -2,9 +2,11 @@ import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_ONE, BIG_DECIMAL_TWO,
+  BIG_DECIMAL_ONE,
+  BIG_DECIMAL_TWO,
   BIG_DECIMAL_ZERO,
-  BIG_INT_ZERO, CTOKENS,
+  BIG_INT_ZERO,
+  CTOKENS,
   SIDECHAIN_SUBSTITUTES,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
@@ -13,15 +15,15 @@ import {
   UNI_V3_QUOTER_ADDRESS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
-  WETH_ADDRESS
+  WETH_ADDRESS,
 } from 'const'
-import { Factory } from 'volume/generated/templates/CurvePoolTemplateV2/Factory'
-import { Pair } from 'volume/generated/templates/CurvePoolTemplateV2/Pair'
+import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
+import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
-import { FactoryV3 } from 'volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
-import { Quoter } from 'volume/generated/templates/CurvePoolTemplateV2/Quoter'
-import { ERC20 } from 'volume/generated/templates/CurvePoolTemplateV2/ERC20'
-import { CToken } from 'volume/generated/templates/CurvePoolTemplateV2/CToken'
+import { FactoryV3 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
+import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Quoter'
+import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
+import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
