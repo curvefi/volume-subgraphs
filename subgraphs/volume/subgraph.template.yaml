@@ -226,6 +226,12 @@ templates:
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
           receipt: true
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+          receipt: true
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+          receipt: true
       file: ./src/mapping.ts
   - name: CryptoFactoryTemplate
     kind: ethereum/contract

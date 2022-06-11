@@ -6,7 +6,7 @@ import {
   EARLY_V2_POOLS,
   LENDING,
   METAPOOL_FACTORY,
-  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, STABLE_FACTORY
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, STABLE_FACTORY, TRANSFER_TOPIC
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
@@ -17,7 +17,7 @@ import {
   RegistryTemplate,
   StableFactoryTemplate,
 } from '../generated/templates'
-import { Address, Bytes, log } from '@graphprotocol/graph-ts'
+import { Address, Bytes, ByteArray, log } from '@graphprotocol/graph-ts'
 import { MainRegistry, PoolAdded } from '../generated/AddressProvider/MainRegistry'
 import { createNewFactoryPool, createNewPool } from './services/pools'
 import { createNewRegistryPool } from './services/pools'
@@ -30,6 +30,8 @@ import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvide
 import { getFactory } from './services/factory'
 import { getPlatform } from './services/platform'
 import { catchUp } from './services/catchup'
+import { RemoveLiquidityOne } from '../generated/AddressProvider/CurvePool'
+import { processLiquidityRemoval } from './services/liquidity'
 {{{ importExistingMetaPools }}}
 
 
@@ -163,6 +165,40 @@ export function addRegistryPool(pool: Address,
       block,
       hash
     )
+  }
+}
+
+export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
+  // the event log doesn't give us the token or its index so we have to figure
+  // it out from the tx receipt
+  const receipt = event.receipt
+  if (receipt) {
+    for (let i=0; i<receipt.logs.length; i++) {
+      const entry = receipt.logs[i]
+      if (entry.topics.length == 3) {
+          if ((entry.topics[0].toHexString() == TRANSFER_TOPIC.toHexString()) &&
+            (entry.topics[1].toHexString().slice(26) == event.address.toHexString().slice(2)) &&
+            (entry.topics[2].toHexString().slice(26) == event.params.provider.toHexString().slice(2)) &&
+            (BigInt.fromUnsignedBytes(changetype<ByteArray>(entry.data.reverse())) == event.params.coin_amount)) {
+            log.info("Found remove coin {} at tx {}", [entry.address.toHexString(), event.transaction.hash.toHexString()])
+          }
+          const coin = entry.address
+          const pool = Pool.load(event.address.toHexString())
+          const tokenAmounts = new Array<BigInt>()
+          if (!pool) {
+            return
+          }
+          for (let j=0; j<pool.coins.length;j++) {
+            tokenAmounts.push(pool.coins[j] == coin ? event.params.token_amount : BIG_INT_ZERO)
+          }
+          processLiquidityRemoval(pool,
+            event.params.provider,
+            tokenAmounts,
+            event.block.timestamp,
+            event.block.number,
+            event.transaction.hash)
+      }
+    }
   }
 }
 

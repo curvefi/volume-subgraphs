@@ -54,6 +54,10 @@ type Pool @entity {
   dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
 
+  hourlyLiquidityVolumeSnapshots: [HourlyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklyLiquidityVolumeSnapshots: [WeeklyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+
 }
 
 type BasePool @entity {
@@ -136,6 +140,49 @@ type SwapEvent @entity {
   timestamp: BigInt!
 }
 
+type HourlyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type DailyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type WeeklyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type LiquidityEvent @entity {
+  id: ID!
+  liquidityProvider: Bytes!
+  timestamp: BigInt!
+  block: BigInt!
+  poolAddress: Bytes!
+  tokenAmount: [BigInt!]!
+  volumeUSD: BigDecimal!
+  removal: Boolean!
+}
 
 type Candle @entity {
   id: ID! # time + period + srcToken + dstToken
