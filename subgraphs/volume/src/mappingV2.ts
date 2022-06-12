@@ -8,6 +8,9 @@ import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
 import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate/CryptoFactory'
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
+import { Pool } from '../generated/schema'
+import { processAddLiquidity, processLiquidityRemoval } from './services/liquidity'
 
 export function addCryptoRegistryPool(
   pool: Address,
@@ -90,5 +93,59 @@ export function handleTokenExchangeV2(event: TokenExchange): void {
     event.transaction.gasLimit,
     gasUsed,
     false
+  )
+}
+
+export function handleRemoveLiquidity(event: RemoveLiquidity): void {
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  processLiquidityRemoval(
+    pool,
+    event.params.provider,
+    event.params.token_amounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
+}
+
+export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  const tokenAmounts = new Array<BigInt>()
+  for (let i = 0; i < pool.coins.length; i++) {
+    if (i == event.params.coin_index.toI32()) {
+      tokenAmounts.push(event.params.token_amount)
+    }
+  }
+  log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  processLiquidityRemoval(
+    pool,
+    event.params.provider,
+    tokenAmounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
+}
+
+export function handleAddLiquidity(event: AddLiquidity): void {
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  log.info('Added liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  processAddLiquidity(
+    pool,
+    event.params.provider,
+    event.params.token_amounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
   )
 }

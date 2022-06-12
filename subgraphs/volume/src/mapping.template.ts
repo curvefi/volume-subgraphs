@@ -30,8 +30,16 @@ import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvide
 import { getFactory } from './services/factory'
 import { getPlatform } from './services/platform'
 import { catchUp } from './services/catchup'
-import { RemoveLiquidityOne } from '../generated/AddressProvider/CurvePool'
-import { processLiquidityRemoval } from './services/liquidity'
+import {
+  AddLiquidity,
+  RemoveLiquidity,
+  RemoveLiquidityImbalance,
+  RemoveLiquidityOne
+} from '../generated/AddressProvider/CurvePool'
+import {
+  processAddLiquidity,
+  processLiquidityRemoval
+} from './services/liquidity'
 {{{ importExistingMetaPools }}}
 
 
@@ -200,6 +208,50 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
       }
     }
   }
+}
+
+
+export function handleRemoveLiquidityImbalance(event: RemoveLiquidityImbalance): void {
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  processLiquidityRemoval(pool,
+    event.params.provider,
+    event.params.token_amounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash)
+
+}
+
+export function handleRemoveLiquidity(event: RemoveLiquidity): void {
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  processLiquidityRemoval(pool,
+    event.params.provider,
+    event.params.token_amounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash)
+}
+
+export function handleAddLiquidity(event: AddLiquidity): void {
+  log.debug('Added liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
+  const pool = Pool.load(event.address.toHexString())
+  if (!pool) {
+    return
+  }
+  processAddLiquidity(pool,
+    event.params.provider,
+    event.params.token_amounts,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash)
 }
 
 export function handleMainRegistryPoolAdded(event: PoolAdded): void {
