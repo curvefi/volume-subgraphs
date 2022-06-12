@@ -178,7 +178,7 @@ type LiquidityEvent @entity {
   liquidityProvider: Bytes!
   timestamp: BigInt!
   block: BigInt!
-  poolAddress: Bytes!
+  pool: Pool!
   tokenAmounts: [BigInt!]!
   volumeUSD: BigDecimal!
   removal: Boolean!

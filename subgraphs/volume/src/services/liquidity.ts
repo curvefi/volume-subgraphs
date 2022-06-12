@@ -133,7 +133,7 @@ export function processLiquidityRemoval(
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp
   liquidityEvent.block = block
-  liquidityEvent.poolAddress = pool.address
+  liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
   liquidityEvent.volumeUSD = volumeUSD
   liquidityEvent.removal = true
@@ -197,7 +197,7 @@ export function processAddLiquidity(
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp
   liquidityEvent.block = block
-  liquidityEvent.poolAddress = pool.address
+  liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
   liquidityEvent.volumeUSD = volumeUSD
   liquidityEvent.removal = false
