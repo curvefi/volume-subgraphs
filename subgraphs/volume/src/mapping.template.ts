@@ -197,7 +197,7 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
             return
           }
           for (let j=0; j<pool.coins.length;j++) {
-            tokenAmounts.push(pool.coins[j] == coin ? event.params.token_amount : BIG_INT_ZERO)
+            tokenAmounts.push(pool.coins[j] == coin ? event.params.coin_amount : BIG_INT_ZERO)
           }
           processLiquidityRemoval(pool,
             event.params.provider,

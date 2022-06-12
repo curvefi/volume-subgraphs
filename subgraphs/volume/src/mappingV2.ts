@@ -119,7 +119,7 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
   }
   const tokenAmounts = new Array<BigInt>()
   for (let i = 0; i < pool.coins.length; i++) {
-    tokenAmounts.push(i == event.params.coin_index.toI32() ? event.params.token_amount : BIG_INT_ZERO)
+    tokenAmounts.push(i == event.params.coin_index.toI32() ? event.params.coin_amount : BIG_INT_ZERO)
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   processLiquidityRemoval(
