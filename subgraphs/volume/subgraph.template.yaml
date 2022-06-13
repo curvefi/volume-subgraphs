@@ -11,7 +11,7 @@ dataSources:
       abi: AddressProvider
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -59,7 +59,7 @@ templates:
       abi: MainRegistry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Registry
@@ -98,7 +98,7 @@ templates:
       abi: StableFactory
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Platform
@@ -139,7 +139,7 @@ templates:
       abi: CryptoRegistry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Platform
@@ -175,7 +175,7 @@ templates:
       abi: CurvePool
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -222,8 +222,22 @@ templates:
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
+          receipt: true
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
+          receipt: true
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+          receipt: true
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+          receipt: true
+        - event: RemoveLiquidity(indexed address,uint256[2],uint256[2],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityImbalance(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleRemoveLiquidityImbalance
+        - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleAddLiquidity
       file: ./src/mapping.ts
   - name: CryptoFactoryTemplate
     kind: ethereum/contract
@@ -232,7 +246,7 @@ templates:
       abi: CryptoFactory
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -283,7 +297,7 @@ templates:
       abi: CurvePoolV2
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -326,4 +340,11 @@ templates:
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2
+          receipt: true
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+        - event: RemoveLiquidity(indexed address,uint256[2],uint256)
+          handler: handleRemoveLiquidity
+        - event: AddLiquidity(indexed address,uint256[2],uint256,uint256)
+          handler: handleAddLiquidity
       file: ./src/mappingV2.ts

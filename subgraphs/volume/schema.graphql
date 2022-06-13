@@ -12,7 +12,6 @@ type Platform @entity {
   pools: [Pool!]! @derivedFrom(field: "platform")
   poolAddresses: [Bytes!]!
   latestPoolSnapshot: BigInt!
-  catchup: Boolean!
 }
 
 type Registry @entity {
@@ -51,9 +50,18 @@ type Pool @entity {
 
   dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
 
+  candles: [Candle!] @derivedFrom(field: "pool")
+  swapEvents: [SwapEvent!] @derivedFrom(field: "pool")
+
   hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+
+  liquidityEvents: [LiquidityEvent!] @derivedFrom(field: "pool")
+
+  hourlyLiquidityVolumeSnapshots: [HourlyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklyLiquidityVolumeSnapshots: [WeeklyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
 }
 
@@ -65,6 +73,7 @@ type BasePool @entity {
 
 type TokenSnapshot @entity {
   id: ID!
+  token: Bytes!
   price: BigDecimal!
   timestamp: BigInt!
 }
@@ -124,6 +133,8 @@ type SwapEvent @entity {
   id: ID!
   pool: Pool!
   block: BigInt!
+  gasLimit: BigInt!
+  gasUsed: BigInt!
   buyer: Bytes!
   tokenSold: Bytes!
   tokenBought: Bytes!
@@ -134,6 +145,49 @@ type SwapEvent @entity {
   timestamp: BigInt!
 }
 
+type HourlyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type DailyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type WeeklyLiquidityVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
+  addCount: BigInt!
+  removeCount: BigInt!
+  volumeUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
+type LiquidityEvent @entity {
+  id: ID!
+  liquidityProvider: Bytes!
+  timestamp: BigInt!
+  block: BigInt!
+  pool: Pool!
+  tokenAmounts: [BigInt!]!
+  volumeUSD: BigDecimal!
+  removal: Boolean!
+}
 
 type Candle @entity {
   id: ID! # time + period + srcToken + dstToken

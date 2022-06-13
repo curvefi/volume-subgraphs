@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, Bytes, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
 export const CURVE_PLATFORM_ID = 'Curve'
 
@@ -64,6 +64,8 @@ SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADD
 export const SYNTH_TOKENS = new Map<string, Address>()
 SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
 
+
+export const TRANSFER_TOPIC = Bytes.fromHexString("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
 
 // Metapools from the 1st metapool factory don't implement the `base_pool`
 // method, so the graph has no way of knowing that they're metapools

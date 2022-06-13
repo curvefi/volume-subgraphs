@@ -20,16 +20,17 @@ import {
   WBTC_ADDRESS,
   SYNTH_TOKENS,
   WETH_ADDRESS,
-  BIG_DECIMAL_TWO, BIG_INT_ZERO, CTOKENS
+  BIG_DECIMAL_TWO,
+  BIG_INT_ZERO,
+  CTOKENS,
+  ADDRESS_ZERO,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import {
-  CurvePoolCoin128
-} from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
+import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 
 export function getForexUsdRate(token: string): BigDecimal {
@@ -58,6 +59,8 @@ export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boole
     } else {
       snapshot.price = getUsdRate(token)
     }
+    snapshot.token = token
+    snapshot.timestamp = timestamp
     snapshot.save()
   }
   return snapshot
@@ -73,12 +76,15 @@ export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): Tok
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
     let price = BIG_DECIMAL_ZERO
+    let token = ADDRESS_ZERO
     for (let i = 0; i < pool.coins.length; ++i) {
       price = getUsdRate(bytesToAddress(pool.coins[i]))
       if (price != BIG_DECIMAL_ZERO) {
+        token = Address.fromBytes(pool.coins[i])
         break
       }
     }
+    snapshot.token = token
     snapshot.timestamp = hour
     snapshot.price = price
     snapshot.save()
@@ -105,12 +111,12 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: 
         log.warning('Price oracle reverted {}', [asset.toHexString()])
       }
     }
+    snapshot.token = asset
     snapshot.price = price
     snapshot.save()
   }
   return snapshot
 }
-
 
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
   if (FOREX_ORACLES.has(pool.id)) {
@@ -134,6 +140,13 @@ export function getHourlySwapSnapshot(pool: Pool, timestamp: BigInt): HourlySwap
     snapshot = new HourlySwapVolumeSnapshot(snapshotId)
     snapshot.pool = pool.id
     snapshot.timestamp = hour
+    snapshot.amountSold = BIG_DECIMAL_ZERO
+    snapshot.amountBought = BIG_DECIMAL_ZERO
+    snapshot.amountSoldUSD = BIG_DECIMAL_ZERO
+    snapshot.amountBoughtUSD = BIG_DECIMAL_ZERO
+    snapshot.volume = BIG_DECIMAL_ZERO
+    snapshot.volumeUSD = BIG_DECIMAL_ZERO
+    snapshot.count = BIG_INT_ZERO
     snapshot.save()
   }
   return snapshot
@@ -147,6 +160,13 @@ export function getDailySwapSnapshot(pool: Pool, timestamp: BigInt): DailySwapVo
     snapshot = new DailySwapVolumeSnapshot(snapshotId)
     snapshot.pool = pool.id
     snapshot.timestamp = day
+    snapshot.amountSold = BIG_DECIMAL_ZERO
+    snapshot.amountBought = BIG_DECIMAL_ZERO
+    snapshot.amountSoldUSD = BIG_DECIMAL_ZERO
+    snapshot.amountBoughtUSD = BIG_DECIMAL_ZERO
+    snapshot.volume = BIG_DECIMAL_ZERO
+    snapshot.volumeUSD = BIG_DECIMAL_ZERO
+    snapshot.count = BIG_INT_ZERO
     snapshot.save()
   }
   return snapshot
@@ -160,6 +180,13 @@ export function getWeeklySwapSnapshot(pool: Pool, timestamp: BigInt): WeeklySwap
     snapshot = new WeeklySwapVolumeSnapshot(snapshotId)
     snapshot.pool = pool.id
     snapshot.timestamp = week
+    snapshot.amountSold = BIG_DECIMAL_ZERO
+    snapshot.amountBought = BIG_DECIMAL_ZERO
+    snapshot.amountSoldUSD = BIG_DECIMAL_ZERO
+    snapshot.amountBoughtUSD = BIG_DECIMAL_ZERO
+    snapshot.volume = BIG_DECIMAL_ZERO
+    snapshot.volumeUSD = BIG_DECIMAL_ZERO
+    snapshot.count = BIG_INT_ZERO
     snapshot.save()
   }
   return snapshot
@@ -216,6 +243,10 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     const snapId = pool.id + '-' + time.toString()
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = new DailyPoolSnapshot(snapId)
+      dailySnapshot.reserves = new Array<BigInt>()
+      dailySnapshot.reservesUsd = new Array<BigDecimal>()
+      dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
+      dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
       dailySnapshot.pool = pool.id
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
@@ -243,14 +274,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         let balance = BIG_INT_ZERO
         let balanceResult = poolContract.try_balances(BigInt.fromI32(j))
         if (balanceResult.reverted) {
-          log.warning("Unable to fetch balances for {}, trying with int128 ABI", [pool.id])
+          log.warning('Unable to fetch balances for {}, trying with int128 ABI', [pool.id])
           const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
           balanceResult = poolContract128.try_balances(BigInt.fromI32(j))
           if (!balanceResult.reverted) {
             balance = balanceResult.value
           }
-        }
-        else {
+        } else {
           balance = balanceResult.value
         }
         reserves.push(balance)
@@ -262,7 +292,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           const balanceResult = tokenContract.try_balanceOf(Address.fromString(pool.id))
           balance = balanceResult.reverted ? balance : balanceResult.value
         }
-        const priceSnapshot = pool.isV2 ? getCryptoTokenSnapshot(currentCoin, timestamp, pool) : CTOKENS.includes(currentCoin.toHexString()) ? getTokenSnapshot(currentCoin, timestamp, false) : getTokenSnapshotByAssetType(pool, timestamp)
+        const priceSnapshot = pool.isV2
+          ? getCryptoTokenSnapshot(currentCoin, timestamp, pool)
+          : CTOKENS.includes(currentCoin.toHexString())
+          ? getTokenSnapshot(currentCoin, timestamp, false)
+          : getTokenSnapshotByAssetType(pool, timestamp)
         const price = priceSnapshot.price
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
       }

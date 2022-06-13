@@ -34,8 +34,8 @@
     "deploy:all": "yarn workspaces run prepare:mainnet && yarn workspaces run deploy:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run deploy:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run deploy:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run deploy:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run deploy:matic && yarn workspaces run prepare:xdai && yarn workspaces run deploy:xdai && yarn workspaces run prepare:optimism && yarn workspaces run deploy:optimism"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "0.22.1",
-    "@graphprotocol/graph-ts": "0.22.1",
+    "@graphprotocol/graph-cli": "0.30.3",
+    "@graphprotocol/graph-ts": "0.27.0",
     "@protofire/subgraph-toolkit": "^0.1.2",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
