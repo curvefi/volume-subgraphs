@@ -50,9 +50,14 @@ type Pool @entity {
 
   dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
 
+  candles: [Candle!] @derivedFrom(field: "pool")
+  swapEvents: [SwapEvent!] @derivedFrom(field: "pool")
+
   hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+
+  liquidityEvents: [LiquidityEvent!] @derivedFrom(field: "pool")
 
   hourlyLiquidityVolumeSnapshots: [HourlyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
   dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
