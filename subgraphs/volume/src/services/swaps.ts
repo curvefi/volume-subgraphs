@@ -4,6 +4,7 @@ import {
   getCryptoTokenSnapshot,
   getDailySwapSnapshot,
   getHourlySwapSnapshot,
+  getTokenSnapshot,
   getTokenSnapshotByAssetType,
   getWeeklySwapSnapshot,
   takePoolSnapshots,
@@ -13,6 +14,7 @@ import {
   BIG_DECIMAL_TWO,
   BIG_INT_ONE,
   BIG_INT_ZERO,
+  CTOKENS,
   LENDING,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
@@ -133,10 +135,15 @@ export function handleExchange(
   log.debug('Getting token snaphsot for {}', [pool.id])
   let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
   if (!pool.isV2) {
-    const latestSnapshot = getTokenSnapshotByAssetType(pool, timestamp)
-    const latestPrice = latestSnapshot.price
-    amountBoughtUSD = amountBought.times(latestPrice)
-    amountSoldUSD = amountSold.times(latestPrice)
+    const latestBoughtSnapshot = CTOKENS.includes(pool.coins[boughtId].toHexString())
+      ? getTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, false)
+      : getTokenSnapshotByAssetType(pool, timestamp)
+    const latestSoldSnapshot = CTOKENS.includes(pool.coins[soldId].toHexString())
+      ? getTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, false)
+      : getTokenSnapshotByAssetType(pool, timestamp)
+
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
+    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
   } else {
     const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, pool)
     const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, pool)
