@@ -16,6 +16,7 @@ import {
   BIG_INT_ZERO,
   CTOKENS,
   LENDING,
+  REBASING_FACTORY_METAPOOLS,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
@@ -71,7 +72,12 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    if ((pool.assetType == 2 || pool.assetType == 0) && pool.poolType == STABLE_FACTORY && boughtId == 0) {
+    if (
+      (pool.assetType == 2 || pool.assetType == 0) &&
+      pool.poolType == STABLE_FACTORY &&
+      boughtId == 0 &&
+      !REBASING_FACTORY_METAPOOLS.includes(pool.id)
+    ) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
       tokenSoldDecimals = BigInt.fromI32(18)
