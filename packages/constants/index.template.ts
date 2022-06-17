@@ -295,6 +295,14 @@ export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
   "0x70fac71debfd67394d1278d98a29dea79dc6e57a"
 ]
 
+// Factory metapools that use the implementation for positive-rebasing and
+// and fee-on-transfer tokens do not log decimals the same way as regular
+// factory metapools. There's no public method to get the pool's implementation
+// and the implementation contract is not logged by the MetaPoolDeployed event
+// so we need to keep a manual mapping.
+export const REBASING_FACTORY_METAPOOLS = ["0xbcb91e689114b9cc865ad7871845c95241df4105"]
+
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'

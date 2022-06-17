@@ -53,6 +53,11 @@ typings/
 # Optional eslint cache
 .eslintcache
 
+# file generated from templates
+subgraphs/price/subgraph.yaml
+subgraphs/price/src/mapping.ts
+packages/constants/index.ts
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
