@@ -1,11 +1,10 @@
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
-  getCryptoTokenSnapshot,
+  getCryptoSwapTokenPriceFromSnapshot,
   getDailySwapSnapshot,
   getHourlySwapSnapshot,
-  getTokenSnapshot,
-  getTokenSnapshotByAssetType,
+  getStableSwapTokenPriceFromSnapshot,
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
@@ -141,20 +140,15 @@ export function handleExchange(
   log.debug('Getting token snaphsot for {}', [pool.id])
   let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
   if (!pool.isV2) {
-    const latestBoughtSnapshot = CTOKENS.includes(tokenBought.toHexString())
-      ? getTokenSnapshot(bytesToAddress(tokenBought), timestamp, false)
-      : getTokenSnapshotByAssetType(pool, timestamp)
-    const latestSoldSnapshot = CTOKENS.includes(tokenSold.toHexString())
-      ? getTokenSnapshot(bytesToAddress(tokenSold), timestamp, false)
-      : getTokenSnapshotByAssetType(pool, timestamp)
-
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
-    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
+    const latestBoughtSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
+    const latestSoldSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
+    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
   } else {
-    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(tokenBought), timestamp, pool)
-    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(tokenSold), timestamp, pool)
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
-    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
+    const latestBoughtSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
+    const latestSoldSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
+    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
   }
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())

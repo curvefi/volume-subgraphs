@@ -24,6 +24,8 @@ import {
   BIG_INT_ZERO,
   CTOKENS,
   ADDRESS_ZERO,
+  META_TOKENS,
+  METATOKEN_TO_METAPOOL_MAPPING,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -226,6 +228,31 @@ export function getV2PoolBaseApr(
   const rate =
     previousProfit == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : currentProfit.minus(previousProfit).div(previousProfit)
   return rate
+}
+
+export function getCryptoSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
+  const snapshot = getCryptoTokenSnapshot(token, timestamp, pool)
+  return snapshot.price
+}
+
+export function getStableSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
+  const isCToken = CTOKENS.includes(token.toHexString())
+  const snapshot = isCToken
+    ? getTokenSnapshot(bytesToAddress(token), timestamp, false)
+    : getTokenSnapshotByAssetType(pool, timestamp)
+  let price = snapshot.price
+  if (isCToken) {
+    return price
+  }
+  // multiply by virtual price for metatoken
+  if (METATOKEN_TO_METAPOOL_MAPPING.has(token.toHexString())) {
+    const metapool = Pool.load(METATOKEN_TO_METAPOOL_MAPPING[token.toHexString()].toHexString())
+    if (metapool) {
+      price = price.times(metapool.virtualPrice).div(BIG_DECIMAL_1E18)
+    }
+  }
+  // now account for depegs by querying price entities
+  return price
 }
 
 export function takePoolSnapshots(timestamp: BigInt): void {

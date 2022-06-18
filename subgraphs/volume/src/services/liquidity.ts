@@ -7,7 +7,11 @@ import {
 } from '../../generated/schema'
 import { Address, BigDecimal, Bytes } from '@graphprotocol/graph-ts'
 import { BigInt } from '@graphprotocol/graph-ts/index'
-import { getCryptoTokenSnapshot, getTokenSnapshot, getTokenSnapshotByAssetType, takePoolSnapshots } from './snapshots'
+import {
+  getCryptoSwapTokenPriceFromSnapshot,
+  getStableSwapTokenPriceFromSnapshot,
+  takePoolSnapshots,
+} from './snapshots'
 import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO, CTOKENS } from '../../../../packages/constants'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -107,12 +111,9 @@ export function processLiquidityRemoval(
     dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
     weeklyAmountRemoved[i] = weeklyAmountRemoved[i].plus(coinAmountRemoved)
     if (tokenAmounts[i].gt(BIG_INT_ZERO)) {
-      const latestSnapshot = pool.isV2
-        ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, pool)
-        : CTOKENS.includes(pool.coins[i].toHexString())
-        ? getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
-        : getTokenSnapshotByAssetType(pool, timestamp)
-      const latestPrice = latestSnapshot.price
+      const latestPrice = pool.isV2
+        ? getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
+        : getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
       volumeUSD = volumeUSD.plus(coinAmountRemoved.times(latestPrice))
     }
   }
@@ -172,12 +173,9 @@ export function processAddLiquidity(
     dailyAmountAdded[i] = dailyAmountAdded[i].plus(coinAmountAdded)
     weeklyAmountAdded[i] = weeklyAmountAdded[i].plus(coinAmountAdded)
     if (tokenAmounts[i].gt(BIG_INT_ZERO)) {
-      const latestSnapshot = pool.isV2
-        ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, pool)
-        : CTOKENS.includes(pool.coins[i].toHexString())
-        ? getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
-        : getTokenSnapshotByAssetType(pool, timestamp)
-      const latestPrice = latestSnapshot.price
+      const latestPrice = pool.isV2
+        ? getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
+        : getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
       volumeUSD = volumeUSD.plus(coinAmountAdded.times(latestPrice))
     }
   }

@@ -35,6 +35,12 @@ export const THREE_BTC_POOL_ADDRESS = Address.fromString(THREE_BTC_POOL)
 export const TWO_BTC_POOL = '{{ two_btc_pool }}'
 export const TWO_BTC_POOL_ADDRESS = Address.fromString(TWO_BTC_POOL)
 
+export const METATOKEN_TO_METAPOOL_MAPPING = new Map<string, Address>()
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_BTC_TOKEN, THREE_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_CRV_TOKEN, THREE_CRV_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_BTC_TOKEN, TWO_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_CRV_TOKEN, TWO_CRV_POOL_ADDRESS)
+
 export const WETH_TOKEN = '{{ weth_token }}'
 export const WBTC_TOKEN = '{{ wbtc_token }}'
 export const USDT_TOKEN = '{{ usdt_token }}'
