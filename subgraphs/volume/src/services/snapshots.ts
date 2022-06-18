@@ -5,8 +5,9 @@ import {
   HourlySwapVolumeSnapshot,
   WeeklySwapVolumeSnapshot,
   DailyPoolSnapshot,
+  PriceFeed,
 } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
@@ -26,6 +27,7 @@ import {
   ADDRESS_ZERO,
   META_TOKENS,
   METATOKEN_TO_METAPOOL_MAPPING,
+  BENCHMARK_STABLE_ASSETS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -34,6 +36,7 @@ import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoo
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
+import { getBasePool } from './pools'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -244,15 +247,49 @@ export function getStableSwapTokenPriceFromSnapshot(pool: Pool, token: Address, 
   if (isCToken) {
     return price
   }
-  // multiply by virtual price for metatoken
+  // multiply by virtual price for metatokens
   if (METATOKEN_TO_METAPOOL_MAPPING.has(token.toHexString())) {
     const metapool = Pool.load(METATOKEN_TO_METAPOOL_MAPPING[token.toHexString()].toHexString())
     if (metapool) {
       price = price.times(metapool.virtualPrice).div(BIG_DECIMAL_1E18)
     }
+    return price
   }
-  // now account for depegs by querying price entities
+  // return if it's an asset we assume won't seriously depeg
+  if (BENCHMARK_STABLE_ASSETS.includes(token.toHexString())) {
+    return price
+  }
+  // now account for depegs by querying price feed entities
+  // we're using USDT as standard now, consider USDC/DAI
+  // we only consider the token price vs ONE other asset in the pool
+  // which may not account for multiple depegs in case of 3+ asset plain pools
+  let relativePrice = estimateDepegFromPair(pool.coins, token, pool.id)
+  if (relativePrice) {
+    return price.times(relativePrice)
+  }
+  // if no price feed we query underlying coins
+  if (pool.metapool) {
+    const basePool = getBasePool(bytesToAddress(pool.basePool))
+    relativePrice = estimateDepegFromPair(basePool.coins, token, pool.id)
+    if (relativePrice) {
+      return price.times(relativePrice)
+    }
+  }
   return price
+}
+
+function estimateDepegFromPair(coins: Array<Bytes>, token: Address, poolId: string): BigDecimal | null {
+  for (let i = 0; i < coins.length; i++) {
+    const currentCoin = coins[i].toHexString()
+    const tokenString = token.toHexString()
+    if (currentCoin != tokenString) {
+      const pricefeed = PriceFeed.load(poolId + '-' + tokenString + '-' + currentCoin)
+      if (pricefeed) {
+        return pricefeed.price
+      }
+    }
+  }
+  return null
 }
 
 export function takePoolSnapshots(timestamp: BigInt): void {
