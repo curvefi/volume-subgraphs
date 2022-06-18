@@ -19,15 +19,21 @@ export const ADDRESS_ZERO = Address.fromString('0x000000000000000000000000000000
 
 export const THREE_CRV_TOKEN = '{{ three_crv_token }}'
 export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
-
 export const TWO_CRV_TOKEN = '{{ two_crv_token }}'
 export const TWO_CRV_ADDRESS = Address.fromString(TWO_CRV_TOKEN)
-
 export const THREE_BTC_TOKEN = '{{ three_btc_token }}'
 export const THREE_BTC_ADDRESS = Address.fromString(THREE_BTC_TOKEN)
-
 export const TWO_BTC_TOKEN = '{{ two_btc_token }}'
 export const TWO_BTC_ADDRESS = Address.fromString(TWO_BTC_TOKEN)
+
+export const THREE_CRV_POOL = '{{ three_crv_pool }}'
+export const THREE_CRV_POOL_ADDRESS = Address.fromString(THREE_CRV_POOL)
+export const TWO_CRV_POOL = '{{ two_crv_pool }}'
+export const TWO_CRV_POOL_ADDRESS = Address.fromString(TWO_CRV_POOL)
+export const THREE_BTC_POOL = '{{ three_btc_pool }}'
+export const THREE_BTC_POOL_ADDRESS = Address.fromString(THREE_BTC_POOL)
+export const TWO_BTC_POOL = '{{ two_btc_pool }}'
+export const TWO_BTC_POOL_ADDRESS = Address.fromString(TWO_BTC_POOL)
 
 export const WETH_TOKEN = '{{ weth_token }}'
 export const WBTC_TOKEN = '{{ wbtc_token }}'

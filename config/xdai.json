@@ -6,7 +6,7 @@
   "usdt_token": "0x4ecaba5870353805a9f068101a40e0f32ed605c6",
   "wbtc_token": "0x8e5bbbb09ed1ebde8674cda39a0c169401db4252",
   "three_crv_token": "0x1337bedc9d22ecbe766df105c9623922a27963ec",
-  "two_crv_token": "0x27e611fd27b276acbd5ffd632e5eaebec9761e40",
+  "two_crv_token": "[ADDRESS_ZERO]",
   "three_btc_token": "[ADDRESS_ZERO]",
   "two_btc_token": "[ADDRESS_ZERO]",
   "native_token": "0xe91d153e0b41518a2ce8dd3d7944fa863463a97d",
