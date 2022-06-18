@@ -54,8 +54,8 @@ typings/
 .eslintcache
 
 # file generated from templates
-subgraphs/price/subgraph.yaml
-subgraphs/price/src/mapping.ts
+subgraphs/volume/subgraph.yaml
+subgraphs/volume/src/mapping.ts
 packages/constants/index.ts
 
 # Microbundle cache
