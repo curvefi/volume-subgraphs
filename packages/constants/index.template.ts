@@ -20,6 +20,15 @@ export const ADDRESS_ZERO = Address.fromString('0x000000000000000000000000000000
 export const THREE_CRV_TOKEN = '{{ three_crv_token }}'
 export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
 
+export const TWO_CRV_TOKEN = '{{ two_crv_token }}'
+export const TWO_CRV_ADDRESS = Address.fromString(TWO_CRV_TOKEN)
+
+export const THREE_BTC_TOKEN = '{{ three_btc_token }}'
+export const THREE_BTC_ADDRESS = Address.fromString(THREE_BTC_TOKEN)
+
+export const TWO_BTC_TOKEN = '{{ two_btc_token }}'
+export const TWO_BTC_ADDRESS = Address.fromString(TWO_BTC_TOKEN)
+
 export const WETH_TOKEN = '{{ weth_token }}'
 export const WBTC_TOKEN = '{{ wbtc_token }}'
 export const USDT_TOKEN = '{{ usdt_token }}'
@@ -302,6 +311,20 @@ export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
 // so we need to keep a manual mapping.
 export const REBASING_FACTORY_METAPOOLS = ["0xbcb91e689114b9cc865ad7871845c95241df4105"]
 
+export const META_TOKENS = [THREE_CRV_TOKEN,
+                            TWO_CRV_TOKEN,
+                            TWO_BTC_TOKEN,
+                            THREE_BTC_TOKEN,
+                            ]
+export const BENCHMARK_STABLE_ASSETS = [WBTC_TOKEN,
+                                        THREE_CRV_TOKEN,
+                                        TWO_CRV_TOKEN,
+                                        TWO_BTC_TOKEN,
+                                        THREE_BTC_TOKEN,
+                                        WETH_TOKEN,
+                                        NATIVE_TOKEN,
+                                        USDT_TOKEN
+]
 
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
