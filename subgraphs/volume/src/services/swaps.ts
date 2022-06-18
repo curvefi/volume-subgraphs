@@ -141,18 +141,18 @@ export function handleExchange(
   log.debug('Getting token snaphsot for {}', [pool.id])
   let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
   if (!pool.isV2) {
-    const latestBoughtSnapshot = CTOKENS.includes(pool.coins[boughtId].toHexString())
-      ? getTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, false)
+    const latestBoughtSnapshot = CTOKENS.includes(tokenBought.toHexString())
+      ? getTokenSnapshot(bytesToAddress(tokenBought), timestamp, false)
       : getTokenSnapshotByAssetType(pool, timestamp)
-    const latestSoldSnapshot = CTOKENS.includes(pool.coins[soldId].toHexString())
-      ? getTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, false)
+    const latestSoldSnapshot = CTOKENS.includes(tokenSold.toHexString())
+      ? getTokenSnapshot(bytesToAddress(tokenSold), timestamp, false)
       : getTokenSnapshotByAssetType(pool, timestamp)
 
     amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
     amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
   } else {
-    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, pool)
-    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, pool)
+    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(tokenBought), timestamp, pool)
+    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(tokenSold), timestamp, pool)
     amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
     amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
   }
