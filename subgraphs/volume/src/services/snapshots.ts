@@ -298,8 +298,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = new DailyPoolSnapshot(snapId)
       dailySnapshot.reserves = new Array<BigInt>()
-      dailySnapshot.reservesUsd = new Array<BigDecimal>()
-      dailySnapshot.lpPriceUsd = BIG_DECIMAL_ZERO
+      dailySnapshot.reservesUSD = new Array<BigDecimal>()
+      dailySnapshot.fee = BIG_INT_ZERO
+      dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
+      dailySnapshot.dailyFees = BIG_DECIMAL_ZERO
+      dailySnapshot.tvl = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
       dailySnapshot.pool = pool.id
@@ -324,7 +327,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.timestamp = time
 
       const reserves = dailySnapshot.reserves
-      const reservesUsd = dailySnapshot.reservesUsd
+      const reservesUsd = dailySnapshot.reservesUSD
       let tvl = BIG_DECIMAL_ZERO
       for (let j = 0; j < pool.coins.length; j++) {
         let balance = BIG_INT_ZERO
@@ -357,11 +360,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.tvl = tvl
       dailySnapshot.reserves = reserves
-      dailySnapshot.reservesUsd = reservesUsd
+      dailySnapshot.reservesUSD = reservesUsd
 
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
-      dailySnapshot.lpPriceUsd = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : tvl.div(supply)
+      dailySnapshot.lpPriceUSD = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : tvl.div(supply)
 
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr

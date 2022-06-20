@@ -60,6 +60,7 @@ export function createNewPool(
   pool.basePool = basePool
   pool.cumulativeVolume = BIG_DECIMAL_ZERO
   pool.cumulativeVolumeUSD = BIG_DECIMAL_ZERO
+  pool.cumulativeFeesUSD = BIG_DECIMAL_ZERO
   pool.virtualPrice = BIG_DECIMAL_ZERO
   pool.baseApr = BIG_DECIMAL_ZERO
 

@@ -41,6 +41,8 @@ type Pool @entity {
   cumulativeVolume: BigDecimal!
   cumulativeVolumeUSD: BigDecimal!
 
+  cumulativeFeesUSD: BigDecimal!
+
   virtualPrice: BigDecimal!
   baseApr: BigDecimal!
 
@@ -79,10 +81,12 @@ type DailyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!
-  lpPriceUsd: BigDecimal!
+  lpPriceUSD: BigDecimal!
   tvl: BigDecimal!
+  fee: BigInt! # only used for v1 pools
+  dailyFees: BigDecimal!
   reserves: [BigInt!]!
-  reservesUsd: [BigDecimal!]!
+  reservesUSD: [BigDecimal!]!
   xcpProfit: BigDecimal!
   xcpProfitA: BigDecimal!
   baseApr: BigDecimal!
