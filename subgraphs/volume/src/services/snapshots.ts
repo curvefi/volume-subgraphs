@@ -7,7 +7,7 @@ import {
   LiquidityVolumeSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
   BIG_DECIMAL_1E18,
@@ -24,9 +24,9 @@ import {
   BIG_INT_ZERO,
   CTOKENS,
   ADDRESS_ZERO,
-  META_TOKENS,
   METATOKEN_TO_METAPOOL_MAPPING,
   BENCHMARK_STABLE_ASSETS,
+  FEE_PRECISION,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -282,6 +282,11 @@ function getPoolLpTokenTotalSupply(pool: Pool): BigDecimal {
   return supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
+function getLatestDailyVolumeValue(pool: Pool, timestamp: BigInt): BigDecimal {
+  const snapshot = getSwapSnapshot(pool, timestamp.minus(DAY), DAY)
+  return snapshot ? snapshot.volumeUSD : BIG_DECIMAL_ZERO
+}
+
 export function takePoolSnapshots(timestamp: BigInt): void {
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -299,9 +304,9 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const dailySnapshot = new DailyPoolSnapshot(snapId)
       dailySnapshot.reserves = new Array<BigInt>()
       dailySnapshot.reservesUSD = new Array<BigDecimal>()
-      dailySnapshot.fee = BIG_INT_ZERO
+      dailySnapshot.fee = BIG_DECIMAL_ZERO
       dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.dailyFees = BIG_DECIMAL_ZERO
+      dailySnapshot.dailyFeesUSD = BIG_DECIMAL_ZERO
       dailySnapshot.tvl = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
@@ -365,7 +370,12 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
       dailySnapshot.lpPriceUSD = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : tvl.div(supply)
-
+      if (!pool.isV2) {
+        const feeResult = poolContract.try_fee()
+        const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
+        dailySnapshot.fee = fee
+        dailySnapshot.dailyFeesUSD = getLatestDailyVolumeValue(pool, timestamp).times(fee)
+      }
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr
 

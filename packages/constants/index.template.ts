@@ -11,6 +11,8 @@ export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
+export const FEE_PRECISION = BigDecimal.fromString('1e10')
+
 export const NATIVE_PLACEHOLDER_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const NATIVE_PLACEHOLDER = Address.fromString(NATIVE_PLACEHOLDER_ADDRESS)
 export const NATIVE_TOKEN = '{{ native_token }}'

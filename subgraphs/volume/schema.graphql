@@ -83,8 +83,8 @@ type DailyPoolSnapshot @entity {
   virtualPrice: BigDecimal!
   lpPriceUSD: BigDecimal!
   tvl: BigDecimal!
-  fee: BigInt! # only used for v1 pools
-  dailyFees: BigDecimal!
+  fee: BigDecimal! # only used for v1 pools
+  dailyFeesUSD: BigDecimal!
   reserves: [BigInt!]!
   reservesUSD: [BigDecimal!]!
   xcpProfit: BigDecimal!
