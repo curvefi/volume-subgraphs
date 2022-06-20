@@ -1,12 +1,4 @@
-import {
-  Pool,
-  TokenSnapshot,
-  DailySwapVolumeSnapshot,
-  HourlySwapVolumeSnapshot,
-  WeeklySwapVolumeSnapshot,
-  DailyPoolSnapshot,
-  PriceFeed,
-} from '../../generated/schema'
+import { Pool, TokenSnapshot, DailyPoolSnapshot, PriceFeed, SwapVolumeSnapshot } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
@@ -137,54 +129,15 @@ export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): Toke
   }
 }
 
-export function getHourlySwapSnapshot(pool: Pool, timestamp: BigInt): HourlySwapVolumeSnapshot {
-  const hour = getIntervalFromTimestamp(timestamp, HOUR)
-  const snapshotId = pool.id + '-' + hour.toString()
-  let snapshot = HourlySwapVolumeSnapshot.load(snapshotId)
+export function getSwapSnapshot(pool: Pool, timestamp: BigInt, period: BigInt): SwapVolumeSnapshot {
+  const interval = getIntervalFromTimestamp(timestamp, period)
+  const snapshotId = pool.id + '-' + period.toString() + '-' + interval.toString()
+  let snapshot = SwapVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
-    snapshot = new HourlySwapVolumeSnapshot(snapshotId)
+    snapshot = new SwapVolumeSnapshot(snapshotId)
     snapshot.pool = pool.id
-    snapshot.timestamp = hour
-    snapshot.amountSold = BIG_DECIMAL_ZERO
-    snapshot.amountBought = BIG_DECIMAL_ZERO
-    snapshot.amountSoldUSD = BIG_DECIMAL_ZERO
-    snapshot.amountBoughtUSD = BIG_DECIMAL_ZERO
-    snapshot.volume = BIG_DECIMAL_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
-    snapshot.count = BIG_INT_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getDailySwapSnapshot(pool: Pool, timestamp: BigInt): DailySwapVolumeSnapshot {
-  const day = getIntervalFromTimestamp(timestamp, DAY)
-  const snapshotId = pool.id + '-' + day.toString()
-  let snapshot = DailySwapVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new DailySwapVolumeSnapshot(snapshotId)
-    snapshot.pool = pool.id
-    snapshot.timestamp = day
-    snapshot.amountSold = BIG_DECIMAL_ZERO
-    snapshot.amountBought = BIG_DECIMAL_ZERO
-    snapshot.amountSoldUSD = BIG_DECIMAL_ZERO
-    snapshot.amountBoughtUSD = BIG_DECIMAL_ZERO
-    snapshot.volume = BIG_DECIMAL_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
-    snapshot.count = BIG_INT_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getWeeklySwapSnapshot(pool: Pool, timestamp: BigInt): WeeklySwapVolumeSnapshot {
-  const week = getIntervalFromTimestamp(timestamp, WEEK)
-  const snapshotId = pool.id + '-' + week.toString()
-  let snapshot = WeeklySwapVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new WeeklySwapVolumeSnapshot(snapshotId)
-    snapshot.pool = pool.id
-    snapshot.timestamp = week
+    snapshot.period = period
+    snapshot.timestamp = interval
     snapshot.amountSold = BIG_DECIMAL_ZERO
     snapshot.amountBought = BIG_DECIMAL_ZERO
     snapshot.amountSoldUSD = BIG_DECIMAL_ZERO

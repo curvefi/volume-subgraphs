@@ -54,15 +54,11 @@ type Pool @entity {
   prices: [PriceFeed!] @derivedFrom(field: "pool")
   swapEvents: [SwapEvent!] @derivedFrom(field: "pool")
 
-  hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
-  dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
-  weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+  swapVolumeSnapshots: [SwapVolumeSnapshot!] @derivedFrom(field: "pool")
 
   liquidityEvents: [LiquidityEvent!] @derivedFrom(field: "pool")
 
-  hourlyLiquidityVolumeSnapshots: [HourlyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
-  dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
-  weeklyLiquidityVolumeSnapshots: [WeeklyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  liquidityVolumeSnapshots: [LiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
 }
 
@@ -91,35 +87,10 @@ type DailyPoolSnapshot @entity {
   timestamp: BigInt!
 }
 
-type HourlySwapVolumeSnapshot @entity {
+type SwapVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountSold: BigDecimal!
-  amountBought: BigDecimal!
-  amountSoldUSD: BigDecimal!
-  amountBoughtUSD: BigDecimal!
-  count: BigInt!
-  volume: BigDecimal!
-  volumeUSD: BigDecimal!
-  timestamp: BigInt!
-}
-
-type DailySwapVolumeSnapshot @entity {
-  id: ID!
-  pool: Pool!
-  amountSold: BigDecimal!
-  amountBought: BigDecimal!
-  amountSoldUSD: BigDecimal!
-  amountBoughtUSD: BigDecimal!
-  count: BigInt!
-  volume: BigDecimal!
-  volumeUSD: BigDecimal!
-  timestamp: BigInt!
-}
-
-type WeeklySwapVolumeSnapshot @entity {
-  id: ID!
-  pool: Pool!
+  period: BigInt!
   amountSold: BigDecimal!
   amountBought: BigDecimal!
   amountSoldUSD: BigDecimal!
@@ -146,31 +117,10 @@ type SwapEvent @entity {
   timestamp: BigInt!
 }
 
-type HourlyLiquidityVolumeSnapshot @entity {
+type LiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountAdded: [BigDecimal!]!
-  amountRemoved: [BigDecimal!]!
-  addCount: BigInt!
-  removeCount: BigInt!
-  volumeUSD: BigDecimal!
-  timestamp: BigInt!
-}
-
-type DailyLiquidityVolumeSnapshot @entity {
-  id: ID!
-  pool: Pool!
-  amountAdded: [BigDecimal!]!
-  amountRemoved: [BigDecimal!]!
-  addCount: BigInt!
-  removeCount: BigInt!
-  volumeUSD: BigDecimal!
-  timestamp: BigInt!
-}
-
-type WeeklyLiquidityVolumeSnapshot @entity {
-  id: ID!
-  pool: Pool!
+  period: BigInt!
   amountAdded: [BigDecimal!]!
   amountRemoved: [BigDecimal!]!
   addCount: BigInt!

@@ -2,10 +2,8 @@ import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
   getCryptoSwapTokenPriceFromSnapshot,
-  getDailySwapSnapshot,
-  getHourlySwapSnapshot,
   getStableSwapTokenPriceFromSnapshot,
-  getWeeklySwapSnapshot,
+  getSwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
 import {
@@ -13,11 +11,11 @@ import {
   BIG_DECIMAL_TWO,
   BIG_INT_ONE,
   BIG_INT_ZERO,
-  CTOKENS,
   LENDING,
   REBASING_FACTORY_METAPOOLS,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
+import { PERIODS } from '../../../../packages/utils/time'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -185,41 +183,18 @@ export function handleExchange(
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
 
-  const hourlySnapshot = getHourlySwapSnapshot(pool, timestamp)
-  const dailySnapshot = getDailySwapSnapshot(pool, timestamp)
-  const weeklySnapshot = getWeeklySwapSnapshot(pool, timestamp)
-
-  hourlySnapshot.count = hourlySnapshot.count.plus(BIG_INT_ONE)
-  dailySnapshot.count = dailySnapshot.count.plus(BIG_INT_ONE)
-  weeklySnapshot.count = weeklySnapshot.count.plus(BIG_INT_ONE)
-
-  hourlySnapshot.amountSold = hourlySnapshot.amountSold.plus(amountSold)
-  dailySnapshot.amountSold = dailySnapshot.amountSold.plus(amountSold)
-  weeklySnapshot.amountSold = weeklySnapshot.amountSold.plus(amountSold)
-
-  hourlySnapshot.amountBought = hourlySnapshot.amountBought.plus(amountBought)
-  dailySnapshot.amountBought = dailySnapshot.amountBought.plus(amountBought)
-  weeklySnapshot.amountBought = weeklySnapshot.amountBought.plus(amountBought)
-
-  hourlySnapshot.amountSoldUSD = hourlySnapshot.amountSoldUSD.plus(amountSoldUSD)
-  dailySnapshot.amountSoldUSD = dailySnapshot.amountSoldUSD.plus(amountSoldUSD)
-  weeklySnapshot.amountSoldUSD = weeklySnapshot.amountSoldUSD.plus(amountSoldUSD)
-
-  hourlySnapshot.amountBoughtUSD = hourlySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-  dailySnapshot.amountBoughtUSD = dailySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-  weeklySnapshot.amountBoughtUSD = weeklySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-
-  hourlySnapshot.volume = hourlySnapshot.volume.plus(volume)
-  dailySnapshot.volume = dailySnapshot.volume.plus(volume)
-  weeklySnapshot.volume = weeklySnapshot.volume.plus(volume)
-
-  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
-  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
-  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
-
-  hourlySnapshot.save()
-  dailySnapshot.save()
-  weeklySnapshot.save()
+  // create hourly, daily & weekly snapshots
+  for (let i = 0; i < PERIODS.length; i++) {
+    const snapshot = getSwapSnapshot(pool, timestamp, PERIODS[i])
+    snapshot.count = snapshot.count.plus(BIG_INT_ONE)
+    snapshot.amountSold = snapshot.amountSold.plus(amountSold)
+    snapshot.amountBought = snapshot.amountBought.plus(amountBought)
+    snapshot.amountSoldUSD = snapshot.amountSoldUSD.plus(amountSoldUSD)
+    snapshot.amountBoughtUSD = snapshot.amountBoughtUSD.plus(amountBoughtUSD)
+    snapshot.volume = snapshot.volume.plus(volume)
+    snapshot.volumeUSD = snapshot.volumeUSD.plus(volumeUSD)
+    snapshot.save()
+  }
 
   pool.cumulativeVolume = pool.cumulativeVolume.plus(volume)
   pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(volumeUSD)
