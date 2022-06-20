@@ -79,6 +79,8 @@ type DailyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!
+  lpPriceUsd: BigDecimal!
+  tvl: BigDecimal!
   reserves: [BigInt!]!
   reservesUsd: [BigDecimal!]!
   xcpProfit: BigDecimal!

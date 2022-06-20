@@ -275,6 +275,13 @@ function estimateDepegFromPair(coins: Array<Bytes>, token: Address, poolId: stri
   return null
 }
 
+function getPoolLpTokenTotalSupply(pool: Pool): BigDecimal {
+  const lpToken = bytesToAddress(pool.lpToken)
+  const tokenContract = ERC20.bind(lpToken)
+  const supplyResult = tokenContract.try_totalSupply()
+  return supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+}
+
 export function takePoolSnapshots(timestamp: BigInt): void {
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -292,6 +299,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const dailySnapshot = new DailyPoolSnapshot(snapId)
       dailySnapshot.reserves = new Array<BigInt>()
       dailySnapshot.reservesUsd = new Array<BigDecimal>()
+      dailySnapshot.lpPriceUsd = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
       dailySnapshot.pool = pool.id
@@ -317,6 +325,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
       const reserves = dailySnapshot.reserves
       const reservesUsd = dailySnapshot.reservesUsd
+      let tvl = BIG_DECIMAL_ZERO
       for (let j = 0; j < pool.coins.length; j++) {
         let balance = BIG_INT_ZERO
         let balanceResult = poolContract.try_balances(BigInt.fromI32(j))
@@ -339,16 +348,20 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           const balanceResult = tokenContract.try_balanceOf(Address.fromString(pool.id))
           balance = balanceResult.reverted ? balance : balanceResult.value
         }
-        const priceSnapshot = pool.isV2
-          ? getCryptoTokenSnapshot(currentCoin, timestamp, pool)
-          : CTOKENS.includes(currentCoin.toHexString())
-          ? getTokenSnapshot(currentCoin, timestamp, false)
-          : getTokenSnapshotByAssetType(pool, timestamp)
-        const price = priceSnapshot.price
-        reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
+        const price = pool.isV2
+          ? getCryptoSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
+          : getStableSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
+        const reserveUsdValue = balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price)
+        reservesUsd.push(reserveUsdValue)
+        tvl = tvl.plus(reserveUsdValue)
       }
+      dailySnapshot.tvl = tvl
       dailySnapshot.reserves = reserves
       dailySnapshot.reservesUsd = reservesUsd
+
+      // compute lpUsdPrice from reserves & lp supply
+      const supply = getPoolLpTokenTotalSupply(pool)
+      dailySnapshot.lpPriceUsd = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : tvl.div(supply)
 
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr
