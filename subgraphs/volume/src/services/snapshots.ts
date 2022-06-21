@@ -305,8 +305,12 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.reserves = new Array<BigInt>()
       dailySnapshot.reservesUSD = new Array<BigDecimal>()
       dailySnapshot.fee = BIG_DECIMAL_ZERO
+      dailySnapshot.adminFee = BIG_DECIMAL_ZERO
+      dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
+      dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
+      dailySnapshot.eventFeesUSD = BIG_DECIMAL_ZERO
       dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.dailyFeesUSD = BIG_DECIMAL_ZERO
+      dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
       dailySnapshot.tvl = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
       dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
@@ -374,7 +378,27 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         const feeResult = poolContract.try_fee()
         const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
         dailySnapshot.fee = fee
-        dailySnapshot.dailyFeesUSD = getLatestDailyVolumeValue(pool, timestamp).times(fee)
+        const dailyFees = getLatestDailyVolumeValue(pool, timestamp).times(fee)
+        dailySnapshot.totalDailyFeesUSD = dailyFees
+
+        const adminFeeResult = poolContract.try_admin_fee()
+        const adminFee = adminFeeResult.reverted
+          ? BIG_DECIMAL_ZERO
+          : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+
+        dailySnapshot.adminFee = adminFee
+        dailySnapshot.adminFeesUSD = dailyFees.times(adminFee)
+        dailySnapshot.lpFeesUSD = dailyFees.minus(dailySnapshot.adminFeesUSD)
+        pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailyFees)
+      } else {
+        const adminFeeResult = poolContract.try_admin_fee()
+        const adminFee = adminFeeResult.reverted
+          ? BIG_DECIMAL_ZERO
+          : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+        dailySnapshot.adminFeesUSD = dailySnapshot.baseApr.times(tvl)
+        dailySnapshot.lpFeesUSD = dailySnapshot.baseApr.times(tvl)
+        dailySnapshot.totalDailyFeesUSD = dailySnapshot.baseApr.times(tvl).times(BIG_DECIMAL_TWO)
+        pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
       }
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr

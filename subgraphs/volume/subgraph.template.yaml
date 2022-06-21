@@ -347,4 +347,6 @@ templates:
           handler: handleRemoveLiquidity
         - event: AddLiquidity(indexed address,uint256[2],uint256,uint256)
           handler: handleAddLiquidity
+        - event: ClaimAdminFee(indexed address,uint256)
+          handler: handleClaimAdminFee
       file: ./src/mappingV2.ts

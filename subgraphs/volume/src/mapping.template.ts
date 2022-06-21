@@ -5,9 +5,7 @@ import {
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
   LENDING,
-  METAPOOL_FACTORY,
-  REGISTRY_V2,
-  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, STABLE_FACTORY, TRANSFER_TOPIC
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, TRANSFER_TOPIC
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
