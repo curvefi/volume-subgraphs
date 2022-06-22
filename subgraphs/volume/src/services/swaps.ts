@@ -12,6 +12,7 @@ import {
   BIG_INT_ONE,
   BIG_INT_ZERO,
   LENDING,
+  METAPOOL_FACTORY,
   REBASING_FACTORY_METAPOOLS,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
@@ -71,8 +72,8 @@ export function handleExchange(
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
     if (
-      (pool.assetType == 2 || pool.assetType == 0) &&
-      pool.poolType == STABLE_FACTORY &&
+      ((pool.assetType == 2 && pool.poolType == METAPOOL_FACTORY) ||
+        (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
       boughtId == 0 &&
       !REBASING_FACTORY_METAPOOLS.includes(pool.id)
     ) {
