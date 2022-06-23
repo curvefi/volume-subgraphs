@@ -199,8 +199,11 @@ export function getV2PoolBaseApr(
 ): BigDecimal {
   const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
   const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
-  const previousSnapshotXcpProfit = previousSnapshot ? previousSnapshot.xcpProfit : BIG_DECIMAL_ZERO
-  const previousSnapshotXcpProfitA = previousSnapshot ? previousSnapshot.xcpProfitA : BIG_DECIMAL_ZERO
+  if (!previousSnapshot) {
+    return BIG_DECIMAL_ZERO
+  }
+  const previousSnapshotXcpProfit = previousSnapshot.xcpProfit
+  const previousSnapshotXcpProfitA = previousSnapshot.xcpProfitA
   const currentProfit = currentXcpProfit
     .div(BIG_DECIMAL_TWO)
     .plus(currentXcpProfitA.div(BIG_DECIMAL_TWO))
