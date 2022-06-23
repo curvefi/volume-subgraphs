@@ -396,6 +396,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         const adminFee = adminFeeResult.reverted
           ? BIG_DECIMAL_ZERO
           : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+        dailySnapshot.adminFee = adminFee
         dailySnapshot.adminFeesUSD = dailySnapshot.baseApr.times(tvl)
         dailySnapshot.lpFeesUSD = dailySnapshot.baseApr.times(tvl)
         dailySnapshot.totalDailyFeesUSD = dailySnapshot.baseApr.times(tvl).times(BIG_DECIMAL_TWO)
