@@ -26,8 +26,9 @@ export function processFeesFromAddLiquidity(pool: Pool, fees: Array<BigInt>, tim
   const snapId = pool.id + '-' + time.toString()
   const snapshot = DailyPoolSnapshot.load(snapId)
   if (snapshot) {
-    snapshot.adminFeesUSD = snapshot.adminFeesUSD.plus(totalFeesUsd.times(snapshot.adminFee))
-    snapshot.lpFeesUSD = snapshot.lpFeesUSD.plus(totalFeesUsd.minus(snapshot.adminFeesUSD))
+    const adminFees = totalFeesUsd.times(snapshot.adminFee)
+    snapshot.adminFeesUSD = snapshot.adminFeesUSD.plus(adminFees)
+    snapshot.lpFeesUSD = snapshot.lpFeesUSD.plus(totalFeesUsd.minus(adminFees))
     snapshot.totalDailyFeesUSD = snapshot.totalDailyFeesUSD.plus(totalFeesUsd)
     snapshot.save()
   }
