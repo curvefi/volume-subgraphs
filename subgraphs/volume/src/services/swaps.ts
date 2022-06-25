@@ -72,7 +72,7 @@ export function handleExchange(
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
     if (
-      ((pool.assetType == 2 && pool.poolType == METAPOOL_FACTORY) ||
+      ((pool.assetType == 2 && (pool.poolType == METAPOOL_FACTORY || pool.poolType == STABLE_FACTORY)) ||
         (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
       boughtId == 0 &&
       !REBASING_FACTORY_METAPOOLS.includes(pool.id)
