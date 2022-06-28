@@ -38,6 +38,7 @@ type Pool @entity {
   assetType: Int!
   poolType: PoolType!
   isV2: Boolean!
+  isRebasing: Boolean!
   cumulativeVolume: BigDecimal!
   cumulativeVolumeUSD: BigDecimal!
 

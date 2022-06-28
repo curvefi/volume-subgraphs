@@ -320,10 +320,9 @@ export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
 
 // Factory metapools that use the implementation for positive-rebasing and
 // and fee-on-transfer tokens do not log decimals the same way as regular
-// factory metapools. There's no public method to get the pool's implementation
-// and the implementation contract is not logged by the MetaPoolDeployed event
-// so we need to keep a manual mapping.
-export const REBASING_FACTORY_METAPOOLS = ["0xbcb91e689114b9cc865ad7871845c95241df4105"]
+// factory metapools.
+export const REBASING_POOL_IMPLEMENTATION = "0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9"
+export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_POOL_IMPLEMENTATION)
 
 export const META_TOKENS = [THREE_CRV_TOKEN,
                             TWO_CRV_TOKEN,
