@@ -136,7 +136,7 @@ export function createNewFactoryPool(
     factoryPool = factory.pool_list(poolCount)
     const implementationResult = factory.try_get_implementation_address(factoryPool)
     if (!implementationResult.reverted) {
-      isRebasing = implementationResult.value == REBASING_POOL_IMPLEMENTATION_ADDRESS ? true : false
+      isRebasing = implementationResult.value == REBASING_POOL_IMPLEMENTATION_ADDRESS
     }
     log.info('New factory pool (metapool: {}, base pool: {}) added {} with id {}', [
       metapool.toString(),
