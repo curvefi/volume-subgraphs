@@ -37,7 +37,7 @@ import {
   RemoveLiquidityOne
 } from '../generated/AddressProvider/CurvePool'
 import {
-  processAddLiquidity, processFeesFromAddLiquidity,
+  processAddLiquidity,
   processLiquidityRemoval
 } from './services/liquidity'
 {{{ importExistingMetaPools }}}
@@ -254,9 +254,6 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     event.block.timestamp,
     event.block.number,
     event.transaction.hash)
-  processFeesFromAddLiquidity(pool,
-    event.params.fees,
-    event.block.timestamp)
 }
 
 export function handleMainRegistryPoolAdded(event: PoolAdded): void {

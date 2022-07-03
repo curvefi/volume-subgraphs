@@ -12,30 +12,6 @@ import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { bytesToAddress } from '../../../../packages/utils'
 
-export function processFeesFromAddLiquidity(pool: Pool, fees: Array<BigInt>, timestamp: BigInt): void {
-  let totalFeesUsd = BIG_DECIMAL_ZERO
-  const time = getIntervalFromTimestamp(timestamp, DAY)
-  for (let i = 0; i < pool.coins.length; i++) {
-    const latestPrice = pool.isV2
-      ? getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
-      : getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
-    totalFeesUsd = totalFeesUsd.plus(
-      fees[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i])).times(latestPrice)
-    )
-  }
-  const snapId = pool.id + '-' + time.toString()
-  const snapshot = DailyPoolSnapshot.load(snapId)
-  if (snapshot) {
-    const adminFees = totalFeesUsd.times(snapshot.adminFee)
-    snapshot.adminFeesUSD = snapshot.adminFeesUSD.plus(adminFees)
-    snapshot.lpFeesUSD = snapshot.lpFeesUSD.plus(totalFeesUsd.minus(adminFees))
-    snapshot.totalDailyFeesUSD = snapshot.totalDailyFeesUSD.plus(totalFeesUsd)
-    snapshot.save()
-  }
-  pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(totalFeesUsd)
-  pool.save()
-}
-
 export function processLiquidityRemoval(
   pool: Pool,
   provider: Address,
