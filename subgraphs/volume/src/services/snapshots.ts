@@ -7,7 +7,7 @@ import {
   LiquidityVolumeSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
   BIG_DECIMAL_1E18,
@@ -203,6 +203,10 @@ export function getV2PoolBaseApr(
     return BIG_DECIMAL_ZERO
   }
   const previousSnapshotXcpProfit = previousSnapshot.xcpProfit
+  // avoid creating an artificial apr jump if pool was just created
+  if (previousSnapshotXcpProfit == BIG_DECIMAL_ZERO) {
+    return BIG_DECIMAL_ZERO
+  }
   const previousSnapshotXcpProfitA = previousSnapshot.xcpProfitA
   const currentProfit = currentXcpProfit
     .div(BIG_DECIMAL_TWO)
@@ -381,30 +385,18 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         const feeResult = poolContract.try_fee()
         const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
         dailySnapshot.fee = fee
-        const dailyFees = getLatestDailyVolumeValue(pool, timestamp).times(fee)
-        dailySnapshot.totalDailyFeesUSD = dailyFees
-
-        const adminFeeResult = poolContract.try_admin_fee()
-        const adminFee = adminFeeResult.reverted
-          ? BIG_DECIMAL_ZERO
-          : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
-
-        dailySnapshot.adminFee = adminFee
-        const dailyAdminFees = dailyFees.times(adminFee)
-        dailySnapshot.adminFeesUSD = dailyAdminFees
-        dailySnapshot.lpFeesUSD = dailyFees.minus(dailySnapshot.adminFeesUSD)
-        pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailyFees)
-      } else {
-        const adminFeeResult = poolContract.try_admin_fee()
-        const adminFee = adminFeeResult.reverted
-          ? BIG_DECIMAL_ZERO
-          : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
-        dailySnapshot.adminFee = adminFee
-        dailySnapshot.adminFeesUSD = dailySnapshot.baseApr.times(tvl)
-        dailySnapshot.lpFeesUSD = dailySnapshot.baseApr.times(tvl)
-        dailySnapshot.totalDailyFeesUSD = dailySnapshot.baseApr.times(tvl).times(BIG_DECIMAL_TWO)
-        pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
       }
+      const adminFeeResult = poolContract.try_admin_fee()
+      const adminFee = adminFeeResult.reverted
+        ? BIG_DECIMAL_ZERO
+        : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+
+      const totalFees = dailySnapshot.baseApr.times(tvl)
+      dailySnapshot.adminFeesUSD = totalFees.times(adminFee)
+      dailySnapshot.lpFeesUSD = totalFees.minus(dailySnapshot.adminFeesUSD)
+      dailySnapshot.totalDailyFeesUSD = pool.isV2 ? totalFees.times(BIG_DECIMAL_TWO) : totalFees
+      pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
+
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr
 
