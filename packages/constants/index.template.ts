@@ -327,6 +327,8 @@ export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_
 // Addresses and variables needed to compute the APR of rebasing tokens
 export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
 export const LIDO_POOL_ADDRESS = Address.fromString("0xDC24316b9AE028F1497c275EB9192a3Ea0f67022")
+export const AAVE_POOL_ADDRESS = Address.fromString("0xDeBF20617708857ebe4F679508E7b7863a8A8EeE")
+
 
 export const META_TOKENS = [THREE_CRV_TOKEN,
                             TWO_CRV_TOKEN,

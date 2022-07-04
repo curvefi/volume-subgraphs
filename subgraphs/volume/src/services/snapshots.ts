@@ -7,7 +7,7 @@ import {
   LiquidityVolumeSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
   BIG_DECIMAL_1E18,
@@ -27,7 +27,6 @@ import {
   METATOKEN_TO_METAPOOL_MAPPING,
   BENCHMARK_STABLE_ASSETS,
   FEE_PRECISION,
-  LIDO_POOL_ADDRESS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -37,7 +36,7 @@ import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
-import { getDeductibleApr, getLidoApr } from './rebase'
+import { getDeductibleApr } from './rebase/rebase'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -381,7 +380,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.baseApr = baseApr
       // handle rebasing pools
-      const deductibleApr = getDeductibleApr(pool, reserves)
+      const deductibleApr = getDeductibleApr(pool, reservesUsd, timestamp)
       if (deductibleApr.gt(BIG_DECIMAL_ZERO)) {
         log.info('Deductible APR for pool {}: {} (from base APR {})', [
           pool.id,

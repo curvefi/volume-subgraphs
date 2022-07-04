@@ -205,6 +205,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: AToken
+          file: ./abis/AToken.json
         - name: LidoOracle
           file: ./abis/LidoOracle.json
         - name: Factory
@@ -327,6 +329,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: AToken
+          file: ./abis/AToken.json
         - name: LidoOracle
           file: ./abis/LidoOracle.json
         - name: Factory
