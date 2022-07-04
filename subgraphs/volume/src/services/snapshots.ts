@@ -27,6 +27,7 @@ import {
   METATOKEN_TO_METAPOOL_MAPPING,
   BENCHMARK_STABLE_ASSETS,
   FEE_PRECISION,
+  LIDO_POOL_ADDRESS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -36,6 +37,7 @@ import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
+import { getDeductibleApr, getLidoApr } from './rebase'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -331,16 +333,6 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }
       dailySnapshot.virtualPrice = vPrice
-      if (pool.isV2) {
-        const xcpProfitResult = poolContract.try_xcp_profit()
-        const xcpProfitAResult = poolContract.try_xcp_profit_a()
-        dailySnapshot.xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
-        dailySnapshot.xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
-        dailySnapshot.baseApr = getV2PoolBaseApr(pool, dailySnapshot.xcpProfit, dailySnapshot.xcpProfitA, timestamp)
-      } else {
-        dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
-      }
-      dailySnapshot.timestamp = time
 
       const reserves = dailySnapshot.reserves
       const reservesUsd = dailySnapshot.reservesUSD
@@ -377,6 +369,29 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.tvl = tvl
       dailySnapshot.reserves = reserves
       dailySnapshot.reservesUSD = reservesUsd
+      let baseApr = BIG_DECIMAL_ZERO
+      if (pool.isV2) {
+        const xcpProfitResult = poolContract.try_xcp_profit()
+        const xcpProfitAResult = poolContract.try_xcp_profit_a()
+        dailySnapshot.xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
+        dailySnapshot.xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
+        baseApr = getV2PoolBaseApr(pool, dailySnapshot.xcpProfit, dailySnapshot.xcpProfitA, timestamp)
+      } else {
+        baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+      }
+      dailySnapshot.baseApr = baseApr
+      // handle rebasing pools
+      const deductibleApr = getDeductibleApr(pool, reserves)
+      if (deductibleApr.gt(BIG_DECIMAL_ZERO)) {
+        log.info('Deductible APR for pool {}: {} (from base APR {})', [
+          pool.id,
+          deductibleApr.toString(),
+          baseApr.toString(),
+        ])
+      }
+      baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
+
+      dailySnapshot.timestamp = time
 
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
@@ -391,7 +406,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         ? BIG_DECIMAL_ZERO
         : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
 
-      const totalFees = dailySnapshot.baseApr.times(tvl)
+      const totalFees = baseApr.times(tvl)
       dailySnapshot.adminFeesUSD = totalFees.times(adminFee)
       dailySnapshot.lpFeesUSD = totalFees.minus(dailySnapshot.adminFeesUSD)
       dailySnapshot.totalDailyFeesUSD = pool.isV2 ? totalFees.times(BIG_DECIMAL_TWO) : totalFees

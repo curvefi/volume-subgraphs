@@ -117,6 +117,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: MetaPool
           file: ./abis/MetaPool.json
         - name: CurvePoolCoin128
@@ -203,6 +205,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -323,6 +327,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
