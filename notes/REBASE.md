@@ -13,3 +13,7 @@ For the LIDO stETH pools, the APR is calculated based on the growth rate of tota
 ### aTokens
 
 For the aToken pools, we get each token's APR by computing the growth rate of the ratio `totalSupply / scaledTotalSupply` based on the values obtained from the tokens' contracts.
+
+### cTokens
+
+For cTokens pools, we get the daily growth rate of the cToken's exchange rate (available in the token's snapshots as they are used for volume accounting) and deduct in proportion of each token's ratio in the pool.
