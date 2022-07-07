@@ -327,9 +327,15 @@ export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_
 // Addresses and variables needed to compute the APR of rebasing tokens
 export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
 export const LIDO_POOL_ADDRESS = Address.fromString("0xDC24316b9AE028F1497c275EB9192a3Ea0f67022")
-export const AAVE_POOL_ADDRESS = Address.fromString("0xDeBF20617708857ebe4F679508E7b7863a8A8EeE")
-export const Y_POOL_ADDRESS = Address.fromString("0xDeBF20617708857ebe4F679508E7b7863a8A8EeE")
-export const CTOKEN_POOLS = [Y_POOL_ADDRESS.toHexString()]
+export const ATOKEN_POOLS = ["0xeb16ae0052ed37f479f7fe63849198df1765a733",
+                             "0xdebf20617708857ebe4f679508e7b7863a8a8eee"]
+
+export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
+                             "0x8925d9d9b4569d737a48499def3f67baa5a144b9",
+                             "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+                             "0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c",
+                             "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+                             "0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf"]
 
 export const META_TOKENS = [THREE_CRV_TOKEN,
                             TWO_CRV_TOKEN,

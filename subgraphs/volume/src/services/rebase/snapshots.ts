@@ -7,8 +7,8 @@ import { BIG_DECIMAL_ZERO, BIG_INT_ZERO } from '../../../../../packages/constant
 // Used to calculate rebase APR of aTokens
 // We store the total supply / total supply scaled ratio as price
 export function getATokenSnapshotPrice(token: Address, timestamp: BigInt): BigDecimal {
-  const hour = getIntervalFromTimestamp(timestamp, DAY)
-  const snapshotId = token.toHexString() + '-' + hour.toString() + '-rebase'
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const snapshotId = token.toHexString() + '-' + day.toString() + '-rebase'
   let snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
@@ -28,6 +28,17 @@ export function getATokenSnapshotPrice(token: Address, timestamp: BigInt): BigDe
     snapshot.token = token
     snapshot.timestamp = timestamp
     snapshot.save()
+  }
+  return snapshot.price
+}
+
+// Used to calculate rebase APR of USDN
+export function getUsdnSnapshotPrice(token: Address, timestamp: BigInt): BigDecimal {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const snapshotId = token.toHexString() + '-' + day.toString() + '-rebase'
+  const snapshot = TokenSnapshot.load(snapshotId)
+  if (!snapshot) {
+    return BIG_DECIMAL_ZERO
   }
   return snapshot.price
 }
