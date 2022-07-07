@@ -2,7 +2,7 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { TokenSnapshot } from '../../../generated/schema'
 import { DAY, getIntervalFromTimestamp } from '../../../../../packages/utils/time'
 import { AToken } from '../../../generated/templates/CurvePoolTemplate/AToken'
-import { BIG_DECIMAL_ZERO, BIG_INT_ZERO } from '../../../../../packages/constants'
+import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_POOL, USDN_TOKEN } from '../../../../../packages/constants'
 
 // Used to calculate rebase APR of aTokens
 // We store the total supply / total supply scaled ratio as price
@@ -33,9 +33,9 @@ export function getATokenSnapshotPrice(token: Address, timestamp: BigInt): BigDe
 }
 
 // Used to calculate rebase APR of USDN
-export function getUsdnSnapshotPrice(token: Address, timestamp: BigInt): BigDecimal {
+export function getUsdnSnapshotPrice(timestamp: BigInt): BigDecimal {
   const day = getIntervalFromTimestamp(timestamp, DAY)
-  const snapshotId = token.toHexString() + '-' + day.toString() + '-rebase'
+  const snapshotId = USDN_TOKEN + '-' + day.toString() + '-rebase'
   const snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     return BIG_DECIMAL_ZERO

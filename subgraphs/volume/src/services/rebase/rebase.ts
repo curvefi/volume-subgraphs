@@ -1,22 +1,23 @@
-import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
 import {
-  AAVE_POOL_ADDRESS,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   CTOKENS,
   CTOKEN_POOLS,
   LIDO_ORACLE_ADDRESS,
   LIDO_POOL_ADDRESS,
+  ATOKEN_POOLS,
+  USDN_POOL,
 } from '../../../../../packages/constants'
 import { Pool } from '../../../generated/schema'
-import { getATokenSnapshotPrice } from './snapshots'
+import { getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
 import { DAY } from '../../../../../packages/utils/time'
 import { bytesToAddress } from '../../../../../packages/utils'
 import { growthRate } from '../../../../../packages/utils/maths'
 import { getTokenSnapshot } from '../snapshots'
 
-export function getLidoApr(): BigDecimal {
+function getLidoApr(): BigDecimal {
   const lidoOracleContract = LidoOracle.bind(LIDO_ORACLE_ADDRESS)
   const reportResult = lidoOracleContract.try_getLastCompletedReportDelta()
   if (reportResult.reverted) {
@@ -33,7 +34,7 @@ export function getLidoApr(): BigDecimal {
   return userApr
 }
 
-export function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt): BigDecimal {
+function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   const tvl = reserves.reduce((a: BigDecimal, b: BigDecimal) => a.plus(b), BIG_DECIMAL_ZERO)
   let totalApr = BIG_DECIMAL_ZERO
   for (let i = 0; i < pool.coins.length; i++) {
@@ -51,8 +52,7 @@ export function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestam
   return totalApr
 }
 
-export function getCompPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt): BigDecimal {
-  const tvl = reserves.reduce((a: BigDecimal, b: BigDecimal) => a.plus(b), BIG_DECIMAL_ZERO)
+function getCompPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   let totalApr = BIG_DECIMAL_ZERO
   for (let i = 0; i < pool.coins.length; i++) {
     if (!CTOKENS.includes(pool.coins[i].toHexString())) {
@@ -72,20 +72,33 @@ export function getCompPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestam
   return totalApr
 }
 
+function getUsdnPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
+  // we take the previous day's snapshot as reward distribution may not have happened yet
+  const growthRate = getUsdnSnapshotPrice(timestamp.minus(DAY))
+  const usdnRatio = reserves[0].div(tvl)
+  log.info('Deductible APR for USDN: {} APR, {} Ratio', [growthRate.toString(), usdnRatio.toString()])
+  return growthRate.times(usdnRatio)
+}
+
 export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt): BigDecimal {
   if (reserves.length != pool.coins.length) {
     return BIG_DECIMAL_ZERO
   }
-
+  const tvl = reserves.reduce((a: BigDecimal, b: BigDecimal) => a.plus(b), BIG_DECIMAL_ZERO)
+  if (tvl.le(BIG_DECIMAL_ZERO)) {
+    return BIG_DECIMAL_ZERO
+  }
   if (pool.id == LIDO_POOL_ADDRESS.toHexString()) {
     const lidoApr = getLidoApr()
     // rebase only applies to steth part of the pool
-    const stEthRatio = reserves[0].plus(reserves[1]).div(reserves[1])
+    const stEthRatio = reserves[1].div(tvl)
     return lidoApr.times(stEthRatio)
-  } else if (pool.id == AAVE_POOL_ADDRESS.toHexString()) {
-    return getAavePoolApr(pool, reserves, timestamp)
+  } else if (ATOKEN_POOLS.includes(pool.id)) {
+    return getAavePoolApr(pool, reserves, timestamp, tvl)
   } else if (CTOKEN_POOLS.includes(pool.id)) {
-    return getCompPoolApr(pool, reserves, timestamp)
+    return getCompPoolApr(pool, reserves, timestamp, tvl)
+  } else if (pool.id == USDN_POOL) {
+    return getUsdnPoolApr(pool, reserves, timestamp, tvl)
   }
   return BIG_DECIMAL_ZERO
 }

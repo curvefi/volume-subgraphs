@@ -337,6 +337,9 @@ export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
                              "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
                              "0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf"]
 
+export const USDN_POOL = "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1"
+export const USDN_TOKEN = "0x674c6ad92fd080e4004b2312b45f796a192d27a0"
+
 export const META_TOKENS = [THREE_CRV_TOKEN,
                             TWO_CRV_TOKEN,
                             TWO_BTC_TOKEN,

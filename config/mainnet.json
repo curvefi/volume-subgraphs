@@ -27,5 +27,6 @@
   "importExistingMetaPools": "import { Add_existing_metapoolsCall } from '../generated/templates/CryptoFactoryTemplate/StableFactory'",
   "transactionHash": "call.transaction.hash.toHexString()",
   "factoryAddress": "call.to.toHexString()",
-  "unknownMetapoolType": "METAPOOL_FACTORY"
+  "unknownMetapoolType": "METAPOOL_FACTORY",
+  "usdnMapping": "  - kind: ethereum/contract\n    name: USDN\n    network: mainnet\n    source:\n      address: \"0x674C6Ad92Fd080e4004b2312b45f796a192D27a0\"\n      startBlock: 10970706\n      abi: USDN\n    mapping:\n      kind: ethereum/events\n      apiVersion: 0.0.7\n      language: wasm/assemblyscript\n      entities:\n        - TokenSnapshot\n      abis:\n        - name: USDN\n          file: ./abis/USDN.json\n      eventHandlers:\n        - event: Reward(uint256,uint256)\n          handler: handleUsdnRewards\n      file: ./src/services/rebase/mappingUsdn.ts"
 }
