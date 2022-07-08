@@ -36,6 +36,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
         - name: CurvePool
@@ -72,6 +74,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: CurvePoolV2
@@ -118,6 +122,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: LidoOracle
           file: ./abis/LidoOracle.json
         - name: MetaPool
@@ -167,6 +173,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
       eventHandlers:
         - event: PoolAdded(indexed address)
           handler: handleCryptoPoolAdded
@@ -206,6 +214,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: AToken
           file: ./abis/AToken.json
         - name: LidoOracle
@@ -279,6 +289,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -330,6 +342,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: AToken
           file: ./abis/AToken.json
         - name: LidoOracle

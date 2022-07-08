@@ -27,6 +27,7 @@ import {
   METATOKEN_TO_METAPOOL_MAPPING,
   BENCHMARK_STABLE_ASSETS,
   FEE_PRECISION,
+  LENDING_TOKENS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -230,12 +231,12 @@ export function getCryptoSwapTokenPriceFromSnapshot(pool: Pool, token: Address, 
 }
 
 export function getStableSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
-  const isCToken = CTOKENS.includes(token.toHexString())
-  const snapshot = isCToken
+  const isLendingToken = LENDING_TOKENS.includes(token.toHexString())
+  const snapshot = isLendingToken
     ? getTokenSnapshot(bytesToAddress(token), timestamp, false)
     : getTokenSnapshotByAssetType(pool, timestamp)
   let price = snapshot.price
-  if (isCToken) {
+  if (isLendingToken) {
     return price
   }
   // multiply by virtual price for metatokens
