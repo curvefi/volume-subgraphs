@@ -53,6 +53,7 @@ dataSources:
           handler: handleAddressModified
       file: ./src/mapping.ts
 {{{usdnMapping}}}
+{{{aethMapping}}}
 
 templates:
   - name: RegistryTemplate

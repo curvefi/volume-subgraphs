@@ -28,5 +28,6 @@
   "transactionHash": "LENDING",
   "factoryAddress": "'0x0000000000000000000000000000000000000001'",
   "unknownMetapoolType": "METAPOOL_FACTORY",
-  "usdnMapping": ""
+  "usdnMapping": "",
+  "aethMapping": ""
 }

@@ -357,6 +357,9 @@ export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
 export const USDN_POOL = "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1"
 export const USDN_TOKEN = "0x674c6ad92fd080e4004b2312b45f796a192d27a0"
 
+export const AETH_POOL = "0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2"
+export const AETH_TOKEN = "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb"
+
 export const META_TOKENS = [THREE_CRV_TOKEN,
                             TWO_CRV_TOKEN,
                             TWO_BTC_TOKEN,

@@ -9,9 +9,10 @@ import {
   USDN_POOL,
   Y_AND_C_POOLS,
   YC_LENDING_TOKENS,
+  AETH_POOL,
 } from '../../../../../packages/constants'
 import { Pool } from '../../../generated/schema'
-import { getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
+import { getAethSnapshotPrice, getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
 import { DAY } from '../../../../../packages/utils/time'
 import { bytesToAddress } from '../../../../../packages/utils'
 import { growthRate } from '../../../../../packages/utils/maths'
@@ -83,6 +84,16 @@ function getUsdnPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
   return growthRate.times(usdnRatio)
 }
 
+function getAethPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
+  // we take the two previous day's snapshot as reward distribution may not have happened yet
+  const lastRatio = getAethSnapshotPrice(timestamp.minus(DAY))
+  const prevRatio = getAethSnapshotPrice(timestamp.minus(DAY))
+  const growthRate = lastRatio == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : prevRatio.minus(lastRatio).div(lastRatio)
+  const aethRatio = reserves[0].div(tvl)
+  log.info('Deductible APR for AETH: {} APR, {} Ratio', [growthRate.toString(), usdnRatio.toString()])
+  return growthRate.times(aethRatio)
+}
+
 export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt): BigDecimal {
   if (reserves.length != pool.coins.length) {
     return BIG_DECIMAL_ZERO
@@ -99,6 +110,8 @@ export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timest
     return getCompOrYPoolApr(pool, reserves, timestamp, tvl)
   } else if (pool.id == USDN_POOL) {
     return getUsdnPoolApr(pool, reserves, timestamp, tvl)
+  } else if (pool.id == AETH_POOL) {
+    return getAethPoolApr(pool, reserves, timestamp, tvl)
   }
   return BIG_DECIMAL_ZERO
 }
