@@ -28,6 +28,7 @@ import {
   BENCHMARK_STABLE_ASSETS,
   FEE_PRECISION,
   YC_LENDING_TOKENS,
+  USDN_POOL,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -406,10 +407,20 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         ? BIG_DECIMAL_ZERO
         : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
 
-      const totalFees = baseApr.times(tvl)
-      dailySnapshot.adminFeesUSD = totalFees.times(adminFee)
-      dailySnapshot.lpFeesUSD = totalFees.minus(dailySnapshot.adminFeesUSD)
-      dailySnapshot.totalDailyFeesUSD = pool.isV2 ? totalFees.times(BIG_DECIMAL_TWO) : totalFees
+      let lpFees = BIG_DECIMAL_ZERO
+      let adminFees = BIG_DECIMAL_ZERO
+      // handle edge cases
+      // USDN fees are not split by the pool but by the burner with a 50/50 ratio
+      if (pool.id == USDN_POOL) {
+        lpFees = baseApr.times(tvl)
+        adminFees = lpFees
+      } else {
+        lpFees = baseApr.times(tvl)
+        adminFees = adminFee == BIG_DECIMAL_ONE ? BIG_DECIMAL_ZERO : lpFees.div(BIG_DECIMAL_ONE.minus(adminFee))
+      }
+      dailySnapshot.adminFeesUSD = adminFees
+      dailySnapshot.lpFeesUSD = lpFees
+      dailySnapshot.totalDailyFeesUSD = pool.isV2 ? lpFees.times(BIG_DECIMAL_TWO) : lpFees
       pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
 
       pool.virtualPrice = vPrice
