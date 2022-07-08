@@ -26,6 +26,8 @@ For yTokens pools, the logic is the same as for cTokens (growth rate of exchange
 
 For the USDN pool, we track the token's contract and the events for reward updates. We then use the daily growth rate of rewards as deductible APR.
 
+Note: we also need to handle the fact that all rewards for the USDN pool are claimed by the burner contract before being redistributed 50/50 to LPs and DAO.
+
 ### AETH
 
 For the Ankr ETH pool, we track the token's contract and the events that broadcast updates to the redeemability ratio. We use the inverse growth rate of the ratio as deductible APR.
