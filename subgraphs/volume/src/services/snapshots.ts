@@ -412,7 +412,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       // handle edge cases
       // USDN fees are not split by the pool but by the burner with a 50/50 ratio
       if (pool.id == USDN_POOL) {
-        lpFees = baseApr.times(tvl)
+        lpFees = baseApr.times(tvl).div(BIG_DECIMAL_TWO)
         adminFees = lpFees
       } else {
         lpFees = baseApr.times(tvl)
