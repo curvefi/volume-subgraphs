@@ -17,3 +17,15 @@ For the aToken pools, we get each token's APR by computing the growth rate of th
 ### cTokens
 
 For cTokens pools, we get the daily growth rate of the cToken's exchange rate (available in the token's snapshots as they are used for volume accounting) and deduct in proportion of each token's ratio in the pool.
+
+### yTokens
+
+For yTokens pools, the logic is the same as for cTokens (growth rate of exchange rate)
+
+### USDN
+
+For the USDN pool, we track the token's contract and the events for reward updates. We then use the daily growth rate of rewards as deductible APR.
+
+### AETH
+
+For the Ankr ETH pool, we track the token's contract and the events that broadcast updates to the redeemability ratio. We use the inverse growth rate of the ratio as deductible APR.
