@@ -1,14 +1,14 @@
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
 import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
-  CTOKENS,
-  CTOKEN_POOLS,
   LIDO_ORACLE_ADDRESS,
   LIDO_POOL_ADDRESS,
   ATOKEN_POOLS,
   USDN_POOL,
+  Y_AND_C_POOLS,
+  YC_LENDING_TOKENS,
 } from '../../../../../packages/constants'
 import { Pool } from '../../../generated/schema'
 import { getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
@@ -55,17 +55,17 @@ function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
   return totalApr
 }
 
-function getCompPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
+function getCompOrYPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   let totalApr = BIG_DECIMAL_ZERO
   for (let i = 0; i < pool.coins.length; i++) {
-    if (!CTOKENS.includes(pool.coins[i].toHexString())) {
+    if (!YC_LENDING_TOKENS.includes(pool.coins[i].toHexString())) {
       continue
     }
     const previousSnapshot = getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp.minus(DAY), false)
     const currentSnapshot = getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
     const currentCoinApr = growthRate(currentSnapshot.price, previousSnapshot.price)
     const aprRatio = tvl == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : reserves[i].div(tvl)
-    log.info('Deductible APR for cToken ({}): {} APR, {} Ratio', [
+    log.info('Deductible APR for lending c/y token ({}): {} APR, {} Ratio', [
       pool.coins[i].toHexString(),
       currentCoinApr.toString(),
       aprRatio.toString(),
@@ -95,8 +95,8 @@ export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timest
     return getLidoApr(pool, reserves, timestamp, tvl)
   } else if (ATOKEN_POOLS.includes(pool.id)) {
     return getAavePoolApr(pool, reserves, timestamp, tvl)
-  } else if (CTOKEN_POOLS.includes(pool.id)) {
-    return getCompPoolApr(pool, reserves, timestamp, tvl)
+  } else if (Y_AND_C_POOLS.includes(pool.id)) {
+    return getCompOrYPoolApr(pool, reserves, timestamp, tvl)
   } else if (pool.id == USDN_POOL) {
     return getUsdnPoolApr(pool, reserves, timestamp, tvl)
   }

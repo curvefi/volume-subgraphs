@@ -351,7 +351,8 @@ export const YTOKENS = [ "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
   "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
   "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"]
 
-export const LENDING_TOKENS = CTOKENS.concat(YTOKENS)
+export const YC_LENDING_TOKENS = CTOKENS.concat(YTOKENS)
+export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
 
 export const USDN_POOL = "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1"
 export const USDN_TOKEN = "0x674c6ad92fd080e4004b2312b45f796a192d27a0"

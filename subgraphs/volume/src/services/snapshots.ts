@@ -27,7 +27,7 @@ import {
   METATOKEN_TO_METAPOOL_MAPPING,
   BENCHMARK_STABLE_ASSETS,
   FEE_PRECISION,
-  LENDING_TOKENS,
+  YC_LENDING_TOKENS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -231,7 +231,7 @@ export function getCryptoSwapTokenPriceFromSnapshot(pool: Pool, token: Address, 
 }
 
 export function getStableSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
-  const isLendingToken = LENDING_TOKENS.includes(token.toHexString())
+  const isLendingToken = YC_LENDING_TOKENS.includes(token.toHexString())
   const snapshot = isLendingToken
     ? getTokenSnapshot(bytesToAddress(token), timestamp, false)
     : getTokenSnapshotByAssetType(pool, timestamp)
