@@ -382,6 +382,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.baseApr = baseApr
       // handle rebasing pools
+      // TODO: handle decimals to work with depeg (instead of using USD value)
       const deductibleApr = getDeductibleApr(pool, reservesUsd, timestamp)
       if (deductibleApr.gt(BIG_DECIMAL_ZERO)) {
         log.info('Deductible APR for pool {}: {} (from base APR {})', [
@@ -420,7 +421,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.adminFeesUSD = adminFees
       dailySnapshot.lpFeesUSD = lpFees
-      dailySnapshot.totalDailyFeesUSD = pool.isV2 ? lpFees.times(BIG_DECIMAL_TWO) : lpFees
+      dailySnapshot.totalDailyFeesUSD = lpFees.plus(adminFees)
       pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
 
       pool.virtualPrice = vPrice

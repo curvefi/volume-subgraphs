@@ -334,7 +334,9 @@ export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_
 
 // Addresses and variables needed to compute the APR of rebasing tokens
 export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
-export const LIDO_POOL_ADDRESS = Address.fromString("0xDC24316b9AE028F1497c275EB9192a3Ea0f67022")
+export const CONCENTRATED_LIDO_POOL = "0x828b154032950c8ff7cf8085d841723db2696056"
+export const LIDO_POOL = "0xdc24316b9ae028f1497c275eb9192a3ea0f67022"
+export const STETH_POOLS = [LIDO_POOL, CONCENTRATED_LIDO_POOL]
 export const ATOKEN_POOLS = ["0xeb16ae0052ed37f479f7fe63849198df1765a733",
                              "0xdebf20617708857ebe4f679508e7b7863a8a8eee"]
 

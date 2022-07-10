@@ -4,12 +4,12 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   LIDO_ORACLE_ADDRESS,
-  LIDO_POOL_ADDRESS,
   ATOKEN_POOLS,
   USDN_POOL,
   Y_AND_C_POOLS,
   YC_LENDING_TOKENS,
   AETH_POOL,
+  STETH_POOLS,
 } from '../../../../../packages/constants'
 import { Pool } from '../../../generated/schema'
 import { getAethSnapshotPrice, getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
@@ -90,7 +90,7 @@ function getAethPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
   const prevRatio = getAethSnapshotPrice(timestamp.minus(DAY))
   const growthRate = lastRatio == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : prevRatio.minus(lastRatio).div(lastRatio)
   const aethRatio = reserves[0].div(tvl)
-  log.info('Deductible APR for AETH: {} APR, {} Ratio', [growthRate.toString(), usdnRatio.toString()])
+  log.info('Deductible APR for AETH: {} APR, {} Ratio', [growthRate.toString(), aethRatio.toString()])
   return growthRate.times(aethRatio)
 }
 
@@ -102,7 +102,7 @@ export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timest
   if (tvl.le(BIG_DECIMAL_ZERO)) {
     return BIG_DECIMAL_ZERO
   }
-  if (pool.id == LIDO_POOL_ADDRESS.toHexString()) {
+  if (STETH_POOLS.includes(pool.id)) {
     return getLidoApr(pool, reserves, timestamp, tvl)
   } else if (ATOKEN_POOLS.includes(pool.id)) {
     return getAavePoolApr(pool, reserves, timestamp, tvl)
