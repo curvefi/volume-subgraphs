@@ -9,7 +9,7 @@ The subgraph is based on the address provider contract which is located at `0x00
 The subgraph listens to the events on the address provider to track all added Stable Registry, Stable Factory, Crypto Registry and Crypto Factory contracts.
 The registries and factories are then in turn tracked to track all new deployed or added pools.
 
-The subgraphs are only as comprehensive as the  address indexer and associated registries. If the
+The subgraphs are only as comprehensive as the address indexer and associated registries. If the
 address indexer is not up to date, neither will the subgraph. If a non-factory pool is not added to a
 registry, or if the registry itself is not added to the address provider, the pool will not be tracked by the
 subgraph. Note that if the address of a registry or a factory is updated on the address provider contract the
@@ -120,7 +120,7 @@ Sample query:
 #### Pool Base APR
 
 The pools' LP token virtual price as well as base APR (from fees) can be queried.
-The base apr is calculated as `((virtual_price_t - virtual_price_t-1) / virtual_price_t-1)`. 
+The base apr is calculated as `((virtual_price_t - virtual_price_t-1) / virtual_price_t-1)`.
 The APR is not annualized, to do so, calculate `((1 + APR) ** 365 - 1) * 100`
 
 Sample query:
@@ -179,3 +179,11 @@ For instance with tricrypto, for the ETH/BTC pair:
   }
 }
 ```
+
+### Tests
+
+Only basic sanity checks are currently available. Unit tests are still a WIP.
+
+To run sanity checks:
+
+`node subgraphs/volume/tests/sanity/checks.js`

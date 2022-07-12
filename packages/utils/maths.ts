@@ -1,5 +1,5 @@
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
-import { BIG_INT_ONE, BIG_INT_ZERO } from 'const'
+import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO } from 'const'
 
 export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   let bd = BigDecimal.fromString('1')
@@ -15,4 +15,8 @@ export function exponentToBigInt(decimals: BigInt): BigInt {
     bd = bd.times(BigInt.fromString('10'))
   }
   return bd
+}
+
+export function growthRate(final: BigDecimal, start: BigDecimal): BigDecimal {
+  return start == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : final.minus(start).div(start)
 }

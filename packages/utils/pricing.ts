@@ -16,6 +16,7 @@ import {
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
+  YTOKENS,
 } from 'const'
 import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
 import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
@@ -24,6 +25,7 @@ import { FactoryV3 } from '../../subgraphs/volume/generated/templates/CurvePoolT
 import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Quoter'
 import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
 import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
+import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
@@ -141,15 +143,27 @@ export function getCTokenExchangeRate(token: Address): BigDecimal {
   return exchangeRate.toBigDecimal().div(rateScale)
 }
 
+export function getYTokenExchangeRate(token: Address): BigDecimal {
+  const yToken = YToken.bind(token)
+  const pricePerShareResult = yToken.try_getPricePerFullShare()
+  if (pricePerShareResult.reverted) {
+    // if fail we use 1
+    log.error('Failed to get underlying or rate for yToken {}', [token.toHexString()])
+    return BIG_DECIMAL_ONE
+  }
+  const exchangeRate = pricePerShareResult.value
+  return exchangeRate.toBigDecimal().div(BIG_DECIMAL_1E18)
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
     token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
-  }
-  if (CTOKENS.includes(token.toHexString())) {
+  } else if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
-  }
-  if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+  } else if (YTOKENS.includes(token.toHexString())) {
+    return getYTokenExchangeRate(token)
+  } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     return getTokenAValueInTokenB(token, USDT_ADDRESS)
   }
   return usdt

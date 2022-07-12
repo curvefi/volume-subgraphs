@@ -11,6 +11,8 @@ export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
+export const FEE_PRECISION = BigDecimal.fromString('1e10')
+
 export const NATIVE_PLACEHOLDER_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const NATIVE_PLACEHOLDER = Address.fromString(NATIVE_PLACEHOLDER_ADDRESS)
 export const NATIVE_TOKEN = '{{ native_token }}'
@@ -19,6 +21,27 @@ export const ADDRESS_ZERO = Address.fromString('0x000000000000000000000000000000
 
 export const THREE_CRV_TOKEN = '{{ three_crv_token }}'
 export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
+export const TWO_CRV_TOKEN = '{{ two_crv_token }}'
+export const TWO_CRV_ADDRESS = Address.fromString(TWO_CRV_TOKEN)
+export const THREE_BTC_TOKEN = '{{ three_btc_token }}'
+export const THREE_BTC_ADDRESS = Address.fromString(THREE_BTC_TOKEN)
+export const TWO_BTC_TOKEN = '{{ two_btc_token }}'
+export const TWO_BTC_ADDRESS = Address.fromString(TWO_BTC_TOKEN)
+
+export const THREE_CRV_POOL = '{{ three_crv_pool }}'
+export const THREE_CRV_POOL_ADDRESS = Address.fromString(THREE_CRV_POOL)
+export const TWO_CRV_POOL = '{{ two_crv_pool }}'
+export const TWO_CRV_POOL_ADDRESS = Address.fromString(TWO_CRV_POOL)
+export const THREE_BTC_POOL = '{{ three_btc_pool }}'
+export const THREE_BTC_POOL_ADDRESS = Address.fromString(THREE_BTC_POOL)
+export const TWO_BTC_POOL = '{{ two_btc_pool }}'
+export const TWO_BTC_POOL_ADDRESS = Address.fromString(TWO_BTC_POOL)
+
+export const METATOKEN_TO_METAPOOL_MAPPING = new Map<string, Address>()
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_BTC_TOKEN, THREE_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_CRV_TOKEN, THREE_CRV_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_BTC_TOKEN, TWO_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_CRV_TOKEN, TWO_CRV_POOL_ADDRESS)
 
 export const WETH_TOKEN = '{{ weth_token }}'
 export const WBTC_TOKEN = '{{ wbtc_token }}'
@@ -293,6 +316,65 @@ export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
   "0x04c762a5df2fa02fe868f25359e0c259fb811cfe",
   "0x328a7b4d538a2b3942653a9983fda3c12c571141",
   "0x70fac71debfd67394d1278d98a29dea79dc6e57a"
+]
+
+export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
+  "0x8925d9d9b4569d737a48499def3f67baa5a144b9",
+  "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+  "0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c",
+  "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+  "0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf"]
+
+
+// Factory metapools that use the implementation for positive-rebasing and
+// and fee-on-transfer tokens do not log decimals the same way as regular
+// factory metapools.
+export const REBASING_POOL_IMPLEMENTATION = "0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9"
+export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_POOL_IMPLEMENTATION)
+
+// Addresses and variables needed to compute the APR of rebasing tokens
+export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
+export const CONCENTRATED_LIDO_POOL = "0x828b154032950c8ff7cf8085d841723db2696056"
+export const LIDO_POOL = "0xdc24316b9ae028f1497c275eb9192a3ea0f67022"
+export const STETH_POOLS = [LIDO_POOL, CONCENTRATED_LIDO_POOL]
+export const ATOKEN_POOLS = ["0xeb16ae0052ed37f479f7fe63849198df1765a733",
+                             "0xdebf20617708857ebe4f679508e7b7863a8a8eee"]
+
+export const YTOKEN_POOLS = ["0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+"0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+]
+
+export const YTOKENS = [ "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
+  "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
+  "0x83f798e925bcd4017eb265844fddabb448f1707d",
+  "0x73a052500105205d34daf004eab301916da8190f",
+  "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
+  "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
+  "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
+  "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"]
+
+export const YC_LENDING_TOKENS = CTOKENS.concat(YTOKENS)
+export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
+
+export const USDN_POOL = "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1"
+export const USDN_TOKEN = "0x674c6ad92fd080e4004b2312b45f796a192d27a0"
+
+export const AETH_POOL = "0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2"
+export const AETH_TOKEN = "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb"
+
+export const META_TOKENS = [THREE_CRV_TOKEN,
+                            TWO_CRV_TOKEN,
+                            TWO_BTC_TOKEN,
+                            THREE_BTC_TOKEN,
+                            ]
+export const BENCHMARK_STABLE_ASSETS = [WBTC_TOKEN,
+                                        THREE_CRV_TOKEN,
+                                        TWO_CRV_TOKEN,
+                                        TWO_BTC_TOKEN,
+                                        THREE_BTC_TOKEN,
+                                        WETH_TOKEN,
+                                        NATIVE_TOKEN,
+                                        USDT_TOKEN
 ]
 
 // some v2 pools can have Forex : Crypto pairs for which we need
