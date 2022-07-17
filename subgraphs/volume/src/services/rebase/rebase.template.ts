@@ -5,6 +5,7 @@ import {
 import { Pool } from '../../../generated/schema'
 import { getATokenSnapshotPrice } from './snapshots'
 import { growthRate } from '../../../../../packages/utils/maths'
+import { DAY } from '../../../../../packages/utils/time'
 {{{ importChainRebaseAprModule }}}
 
 export function getATokenDailyApr(token: Address, timestamp: BigInt): BigDecimal {

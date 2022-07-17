@@ -32,5 +32,7 @@ export function getAvalanchePoolApr(
   timestamp: BigInt,
   tvl: BigDecimal
 ): BigDecimal {
-  // many avax pools use aTokens
+  // many avax pools use aTokens or a mix of aTokens and regular assets
+  // we consider this to be the general case - edge cases can be added later
+  return getGeneralAvalanchePoolApr(pool, reserves, timestamp, tvl)
 }
