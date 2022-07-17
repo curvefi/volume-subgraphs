@@ -353,6 +353,13 @@ export const YTOKENS = [ "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
   "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
   "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"]
 
+export const AVALANCHE_ATOKENS = ["0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d", //avWBTC
+  "0x47afa96cdc9fab46904a55a6ad4bf6660b53c38a", //avDAI
+  "0x46a51127c3ce23fb7ab1de06226147f446e4a857", //avUSDC
+  "0x532e6537fea298397212f09a61e03311686f548e", //avUSDT
+  "0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21" //avWETH
+]
+
 export const YC_LENDING_TOKENS = CTOKENS.concat(YTOKENS)
 export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
 

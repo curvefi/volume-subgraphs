@@ -56,6 +56,7 @@ typings/
 # file generated from templates
 subgraphs/volume/subgraph.yaml
 subgraphs/volume/src/mapping.ts
+subgraphs/volume/src/services/rebase/rebase.ts
 packages/constants/index.ts
 
 # Microbundle cache

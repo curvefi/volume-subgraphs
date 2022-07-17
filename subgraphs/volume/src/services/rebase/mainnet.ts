@@ -1,22 +1,23 @@
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Pool } from '../../../generated/schema'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
+import { getAethSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
+import { getTokenSnapshot } from '../snapshots'
 import {
+  AETH_POOL,
+  ATOKEN_POOLS,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   LIDO_ORACLE_ADDRESS,
-  ATOKEN_POOLS,
+  STETH_POOLS,
   USDN_POOL,
   Y_AND_C_POOLS,
   YC_LENDING_TOKENS,
-  AETH_POOL,
-  STETH_POOLS,
 } from '../../../../../packages/constants'
-import { Pool } from '../../../generated/schema'
-import { getAethSnapshotPrice, getATokenSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
-import { DAY } from '../../../../../packages/utils/time'
-import { bytesToAddress } from '../../../../../packages/utils'
 import { growthRate } from '../../../../../packages/utils/maths'
-import { getTokenSnapshot } from '../snapshots'
+import { bytesToAddress } from '../../../../../packages/utils'
+import { DAY } from '../../../../../packages/utils/time'
+import { getATokenDailyApr } from './rebase'
 
 function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   const lidoOracleContract = LidoOracle.bind(LIDO_ORACLE_ADDRESS)
@@ -37,12 +38,6 @@ function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, 
   const stEthRatio = reserves[1].div(tvl)
   log.info('Deductible APR for LIDO: {} APR, {} Ratio', [userApr.toString(), stEthRatio.toString()])
   return userApr.times(stEthRatio)
-}
-
-function getATokenDailyApr(token: Address, timestamp: BigInt): BigDecimal {
-  const previousScale = getATokenSnapshotPrice(token, timestamp.minus(DAY))
-  const currentScale = getATokenSnapshotPrice(token, timestamp)
-  return growthRate(currentScale, previousScale)
 }
 
 function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
@@ -98,14 +93,12 @@ function getAethPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
   return growthRate.times(aethRatio)
 }
 
-export function getDeductibleApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt): BigDecimal {
-  if (reserves.length != pool.coins.length) {
-    return BIG_DECIMAL_ZERO
-  }
-  const tvl = reserves.reduce((a: BigDecimal, b: BigDecimal) => a.plus(b), BIG_DECIMAL_ZERO)
-  if (tvl.le(BIG_DECIMAL_ZERO)) {
-    return BIG_DECIMAL_ZERO
-  }
+export function getMainnetPoolApr(
+  pool: Pool,
+  reserves: Array<BigDecimal>,
+  timestamp: BigInt,
+  tvl: BigDecimal
+): BigDecimal {
   if (STETH_POOLS.includes(pool.id)) {
     return getLidoApr(pool, reserves, timestamp, tvl)
   } else if (ATOKEN_POOLS.includes(pool.id)) {
