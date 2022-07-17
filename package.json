@@ -30,8 +30,16 @@
     "stage:matic": "yarn workspaces run stage:matic",
     "stage:xdai": "yarn workspaces run stage:xdai",
     "stage:optimism": "yarn workspaces run stage:optimism",
+    "test:mainnet": "yarn workspaces run test:mainnet",
+    "test:avalanche": "yarn workspaces run test:avalanche",
+    "test:fantom": "yarn workspaces run test:fantom",
+    "test:arbitrum": "yarn workspaces run test:arbitrum",
+    "test:matic": "yarn workspaces run test:matic",
+    "test:xdai": "yarn workspaces run test:xdai",
+    "test:optimism": "yarn workspaces run test:optimism",
     "stage:all": "yarn workspaces run prepare:mainnet && yarn workspaces run stage:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run stage:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run stage:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run stage:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run stage:matic && yarn workspaces run prepare:xdai && yarn workspaces run stage:xdai && yarn workspaces run prepare:optimism && yarn workspaces run stage:optimism",
-    "deploy:all": "yarn workspaces run prepare:mainnet && yarn workspaces run deploy:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run deploy:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run deploy:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run deploy:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run deploy:matic && yarn workspaces run prepare:xdai && yarn workspaces run deploy:xdai && yarn workspaces run prepare:optimism && yarn workspaces run deploy:optimism"
+    "deploy:all": "yarn workspaces run prepare:mainnet && yarn workspaces run deploy:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run deploy:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run deploy:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run deploy:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run deploy:matic && yarn workspaces run prepare:xdai && yarn workspaces run deploy:xdai && yarn workspaces run prepare:optimism && yarn workspaces run deploy:optimism",
+    "test:all": "yarn workspaces run prepare:mainnet && yarn workspaces run test:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run test:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run test:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run test:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run test:matic && yarn workspaces run prepare:xdai && yarn workspaces run test:xdai && yarn workspaces run prepare:optimism && yarn workspaces run test:optimism"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.30.3",

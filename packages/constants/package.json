@@ -28,6 +28,13 @@
     "stage:arbitrum": "true",
     "stage:matic": "true",
     "stage:xdai": "true",
-    "stage:optimism": "true"
+    "stage:optimism": "true",
+    "test:mainnet": "true",
+    "test:avalanche": "true",
+    "test:fantom": "true",
+    "test:arbitrum": "true",
+    "test:matic": "true",
+    "test:xdai": "true",
+    "test:optimism": "true"
   }
 }
