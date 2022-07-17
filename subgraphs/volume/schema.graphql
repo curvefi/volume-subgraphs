@@ -95,6 +95,7 @@ type DailyPoolSnapshot @entity {
   xcpProfit: BigDecimal!
   xcpProfitA: BigDecimal!
   baseApr: BigDecimal!
+  rebaseApr: BigDecimal!
   timestamp: BigInt!
 }
 
