@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
 import {
   BIG_DECIMAL_ONE,
@@ -39,12 +39,16 @@ function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, 
   return userApr.times(stEthRatio)
 }
 
+function getATokenDailyApr(token: Address, timestamp: BigInt): BigDecimal {
+  const previousScale = getATokenSnapshotPrice(token, timestamp.minus(DAY))
+  const currentScale = getATokenSnapshotPrice(token, timestamp)
+  return growthRate(currentScale, previousScale)
+}
+
 function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   let totalApr = BIG_DECIMAL_ZERO
   for (let i = 0; i < pool.coins.length; i++) {
-    const previousScale = getATokenSnapshotPrice(bytesToAddress(pool.coins[i]), timestamp.minus(DAY))
-    const currentScale = getATokenSnapshotPrice(bytesToAddress(pool.coins[i]), timestamp)
-    const currentCoinApr = growthRate(currentScale, previousScale)
+    const currentCoinApr = getATokenDailyApr(bytesToAddress(pool.coins[i]), timestamp)
     const aprRatio = tvl == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : reserves[i].div(tvl)
     log.info('Deductible APR for aToken ({}): {} APR, {} Ratio', [
       pool.coins[i].toHexString(),
