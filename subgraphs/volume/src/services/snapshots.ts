@@ -297,6 +297,15 @@ function getLatestDailyVolumeValue(pool: Pool, timestamp: BigInt): BigDecimal {
   return snapshot ? snapshot.volumeUSD : BIG_DECIMAL_ZERO
 }
 
+function getPreviousDayTvl(pool: Pool, timestamp: BigInt): BigDecimal {
+  const snapId = pool.id + '-' + getIntervalFromTimestamp(timestamp.minus(DAY), DAY).toString()
+  const previousDaySnapshot = DailyPoolSnapshot.load(snapId)
+  if (!previousDaySnapshot) {
+    return BIG_DECIMAL_ZERO
+  }
+  return previousDaySnapshot.tvl
+}
+
 export function takePoolSnapshots(timestamp: BigInt): void {
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -411,14 +420,16 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       let lpFees = BIG_DECIMAL_ZERO
       let adminFees = BIG_DECIMAL_ZERO
       let totalFees = BIG_DECIMAL_ZERO
+      // we use the previous day's tvl because this is what the apr applies to
+      const previousDayTvl = getPreviousDayTvl(pool, timestamp)
       // handle edge cases
       // USDN fees are not split by the pool but by the burner with a 50/50 ratio
       if (pool.id == USDN_POOL) {
-        totalFees = baseApr.times(tvl)
+        totalFees = baseApr.times(previousDayTvl)
         lpFees = totalFees.div(BIG_DECIMAL_TWO)
         adminFees = lpFees
       } else {
-        lpFees = baseApr.times(tvl)
+        lpFees = baseApr.times(previousDayTvl)
         totalFees = adminFee == BIG_DECIMAL_ONE ? BIG_DECIMAL_ZERO : lpFees.div(BIG_DECIMAL_ONE.minus(adminFee))
         adminFees = totalFees.minus(lpFees)
       }
