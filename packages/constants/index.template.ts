@@ -360,6 +360,16 @@ export const AVALANCHE_ATOKENS = ["0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d", 
   "0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21" //avWETH
 ]
 
+export const FANTOM_GTOKENS = ["0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d", //avWBTC
+  "0x07e6332dd090d287d3489245038daf987955dcfb", //gDAI
+  "0x0fa949783947bf6c1b171db13aeacbb488845b3f", //gUSDC
+  "0x0fa949783947bf6c1b171db13aeacbb488845b3f", //gfUSDT
+  "0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21" //avWETH
+]
+
+export const GEIST_POOL_FTM = "0x0fa949783947bf6c1b171db13aeacbb488845b3f"
+export const IB_POOL_FTM = "0x4fc8d635c3cb1d0aa123859e2b2587d0ff2707b1"
+
 export const YC_LENDING_TOKENS = CTOKENS.concat(YTOKENS)
 export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
 

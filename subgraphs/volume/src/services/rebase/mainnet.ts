@@ -2,7 +2,6 @@ import { Pool } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
 import { getAethSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
-import { getTokenSnapshot } from '../snapshots'
 import {
   AETH_POOL,
   ATOKEN_POOLS,
@@ -12,12 +11,10 @@ import {
   STETH_POOLS,
   USDN_POOL,
   Y_AND_C_POOLS,
-  YC_LENDING_TOKENS,
 } from '../../../../../packages/constants'
-import { growthRate } from '../../../../../packages/utils/maths'
 import { bytesToAddress } from '../../../../../packages/utils'
 import { DAY } from '../../../../../packages/utils/time'
-import { getATokenDailyApr } from './rebase'
+import { getATokenDailyApr, getCompOrYPoolApr } from './rebase'
 
 function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
   const lidoOracleContract = LidoOracle.bind(LIDO_ORACLE_ADDRESS)
@@ -46,26 +43,6 @@ function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
     const currentCoinApr = getATokenDailyApr(bytesToAddress(pool.coins[i]), timestamp)
     const aprRatio = tvl == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : reserves[i].div(tvl)
     log.info('Deductible APR for aToken ({}): {} APR, {} Ratio', [
-      pool.coins[i].toHexString(),
-      currentCoinApr.toString(),
-      aprRatio.toString(),
-    ])
-    totalApr = totalApr.plus(currentCoinApr.times(aprRatio))
-  }
-  return totalApr
-}
-
-function getCompOrYPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
-  let totalApr = BIG_DECIMAL_ZERO
-  for (let i = 0; i < pool.coins.length; i++) {
-    if (!YC_LENDING_TOKENS.includes(pool.coins[i].toHexString())) {
-      continue
-    }
-    const previousSnapshot = getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp.minus(DAY), false)
-    const currentSnapshot = getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
-    const currentCoinApr = growthRate(currentSnapshot.price, previousSnapshot.price)
-    const aprRatio = tvl == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : reserves[i].div(tvl)
-    log.info('Deductible APR for lending c/y token ({}): {} APR, {} Ratio', [
       pool.coins[i].toHexString(),
       currentCoinApr.toString(),
       aprRatio.toString(),
