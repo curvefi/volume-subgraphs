@@ -401,14 +401,24 @@ export const BENCHMARK_STABLE_ASSETS = [WBTC_TOKEN,
                                         USDT_TOKEN
 ]
 
+// Some pools (especially on matic) use ridiculous decimals that are different
+// from what they advertise, or fake exchange rates, or use unpegged assets with
+// v1 pools. we filter them to avoid messing up the stats
+export const SCAM_POOLS = ["0x0950ea36770ed3b95a428c83a532b1ffa46088bc",
+"0xb5be5a8126244da7e388a88f16ee8be54d22117c",
+"0xdaedd59fa2c5c63d46a3bae5ed115247df9eb6ec",
+"0x5e0458211702142aa0833a4a60a4535cd891dcc7"]
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'
+export const POLYGON_AGEUR_TOKEN = '0xe0b52e49357fd4daf2c15e02058dce6bc0057db4'
 export const POLYGON_JJPY_TOKEN = '0x8343091F2499FD4b6174A46D067A920a3b851FF9'.toLowerCase()
 export const POLYGON_JPYC_TOKEN = '0x6AE7Dfc73E0dDE2aa99ac063DcF7e8A63265108c'.toLowerCase()
 export const ARBI_EURS_TOKEN = '0xD22a58f79e9481D1a88e00c343885A588b34b68B'.toLowerCase()
 export const ARBI_FXEUR_TOKEN = '0x116172B2482c5dC3E6f445C16Ac13367aC3FCd35'.toLowerCase()
 export const FOREX_TOKENS = [
+  POLYGON_AGEUR_TOKEN,
   POLYGON_EURT_TOKEN,
   POLYGON_JJPY_TOKEN,
   POLYGON_JPYC_TOKEN,
@@ -434,6 +444,7 @@ FOREX_ORACLES.set(GBP_LP_TOKEN, Address.fromString('0x5c0Ab2d9b5a7ed9f470386e82B
 FOREX_ORACLES.set(AUD_LP_TOKEN, Address.fromString('0x77F9710E7d0A19669A13c055F62cd80d313dF022'))
 FOREX_ORACLES.set(CHF_LP_TOKEN, Address.fromString('0x449d117117838fFA61263B61dA6301AA2a88B13A'))
 FOREX_ORACLES.set(POLYGON_EURT_TOKEN, Address.fromString('0x73366Fe0AA0Ded304479862808e02506FE556a98'))
+FOREX_ORACLES.set(POLYGON_AGEUR_TOKEN, Address.fromString('0x73366Fe0AA0Ded304479862808e02506FE556a98'))
 FOREX_ORACLES.set(POLYGON_JPYC_TOKEN, Address.fromString('0xD647a6fC9BC6402301583C91decC5989d8Bc382D'))
 FOREX_ORACLES.set(POLYGON_JJPY_TOKEN, Address.fromString('0xD647a6fC9BC6402301583C91decC5989d8Bc382D'))
 FOREX_ORACLES.set(ARBI_EURS_TOKEN, Address.fromString('0xA14d53bC1F1c0F31B4aA3BD109344E5009051a84'))

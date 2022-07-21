@@ -29,6 +29,7 @@ import {
   FEE_PRECISION,
   YC_LENDING_TOKENS,
   USDN_POOL,
+  SCAM_POOLS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -227,11 +228,17 @@ export function getV2PoolBaseApr(
 }
 
 export function getCryptoSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
+  if (SCAM_POOLS.includes(pool.id)) {
+    return BIG_DECIMAL_ZERO
+  }
   const snapshot = getCryptoTokenSnapshot(token, timestamp, pool)
   return snapshot.price
 }
 
 export function getStableSwapTokenPriceFromSnapshot(pool: Pool, token: Address, timestamp: BigInt): BigDecimal {
+  if (SCAM_POOLS.includes(pool.id)) {
+    return BIG_DECIMAL_ZERO
+  }
   const isLendingToken = YC_LENDING_TOKENS.includes(token.toHexString())
   const snapshot = isLendingToken
     ? getTokenSnapshot(bytesToAddress(token), timestamp, false)
