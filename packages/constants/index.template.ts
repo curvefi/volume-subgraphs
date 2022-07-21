@@ -409,6 +409,12 @@ export const SCAM_POOLS = ["0x0950ea36770ed3b95a428c83a532b1ffa46088bc",
 "0xdaedd59fa2c5c63d46a3bae5ed115247df9eb6ec",
 "0x5e0458211702142aa0833a4a60a4535cd891dcc7"]
 
+// We use this as a way to deal with potential aberations that are not handled
+// (particularly necessary for matic) and avoid issues when calculating fees
+// if TVL exceeds this number, we consider it to be a mistake
+
+export const TVL_THRESHOLD = BigDecimal.fromString("{{ tvlThreshold }}")
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'

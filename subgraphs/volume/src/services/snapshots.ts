@@ -30,6 +30,7 @@ import {
   YC_LENDING_TOKENS,
   USDN_POOL,
   SCAM_POOLS,
+  TVL_THRESHOLD,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -383,6 +384,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         reservesUsd.push(reserveUsdValue)
         tvl = tvl.plus(reserveUsdValue)
       }
+
+      // sanity check
+      if (tvl.gt(TVL_THRESHOLD)) {
+        log.warning('TVL for pool {} exceeds threshold {}', [pool.id, TVL_THRESHOLD.toString()])
+        tvl = BIG_DECIMAL_ZERO
+      }
+
       dailySnapshot.tvl = tvl
       dailySnapshot.reserves = reserves
       dailySnapshot.reservesUSD = reservesUsd
