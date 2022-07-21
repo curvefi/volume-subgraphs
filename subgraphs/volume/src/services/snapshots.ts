@@ -415,6 +415,12 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           baseApr.toString(),
         ])
       }
+      // if someone puts in a very high imbalance at low tvl
+      // the virtual price will be dramatically skewed - and the base APR
+      // as well. we discard such instances
+      if (tvl.lt(BigDecimal.fromString('1000000')) && baseApr.gt(BigDecimal.fromString('2'))) {
+        baseApr = BIG_DECIMAL_ZERO
+      }
       baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
       dailySnapshot.timestamp = time
