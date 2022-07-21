@@ -366,7 +366,7 @@ export const FANTOM_GTOKENS = [
   "0x0fa949783947bf6c1b171db13aeacbb488845b3f", //gfUSDT
 ]
 
-export const POLYGON_ATOKENS = [
+export const MATIC_ATOKENS = [
 "0x5c2ed810328349100a66b82b78a1791b101c9d61", //amWBTC
   "0x28424507fefb6f7f8E9D3860F56504E4e5f5f390", //amWETH
   "0x27f8d03b3a2196956ed754badc28d73be8830a6e", //amDAI
