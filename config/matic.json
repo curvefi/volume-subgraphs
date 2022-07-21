@@ -31,5 +31,6 @@
   "usdnMapping": "",
   "aethMapping": "",
   "importChainRebaseAprModule": "",
-  "returnChainRebaseApr": "return BIG_DECIMAL_ZERO"
+  "returnChainRebaseApr": "return BIG_DECIMAL_ZERO",
+  "rebasingPoolImplementation": "0xc7c46488566b9ef9b981b87e328939caa5ca152f"
 }

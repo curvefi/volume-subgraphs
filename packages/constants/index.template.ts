@@ -329,7 +329,7 @@ export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
 // Factory metapools that use the implementation for positive-rebasing and
 // and fee-on-transfer tokens do not log decimals the same way as regular
 // factory metapools.
-export const REBASING_POOL_IMPLEMENTATION = "0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9"
+export const REBASING_POOL_IMPLEMENTATION = '{{ rebasingPoolImplementation }}'
 export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_POOL_IMPLEMENTATION)
 
 // Addresses and variables needed to compute the APR of rebasing tokens
