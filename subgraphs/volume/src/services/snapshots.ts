@@ -185,9 +185,13 @@ export function getLiquiditySnapshot(pool: Pool, timestamp: BigInt, period: BigI
   return snapshot
 }
 
-export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
+function getPreviousDaySnapshot(pool: Pool, timestamp: BigInt): DailyPoolSnapshot | null {
   const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
-  const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+  return DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+}
+
+export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
+  const previousSnapshot = getPreviousDaySnapshot(pool, timestamp)
   const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.virtualPrice : BIG_DECIMAL_ZERO
   const rate =
     previousSnapshotVPrice == BIG_DECIMAL_ZERO
@@ -415,11 +419,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
           baseApr.toString(),
         ])
       }
-      // if someone puts in a very high imbalance at low tvl
-      // the virtual price will be dramatically skewed - and the base APR
-      // as well. we discard such instances
-      if (tvl.lt(BigDecimal.fromString('1000000')) && baseApr.gt(BigDecimal.fromString('2'))) {
-        baseApr = BIG_DECIMAL_ZERO
+      // Discard spikes in base APR as outliers
+      // We replace outlier value with previous day value
+      if (baseApr.gt(BigDecimal.fromString('0.001'))) {
+        const prevSnapshot = getPreviousDaySnapshot(pool, timestamp)
+        baseApr = prevSnapshot ? prevSnapshot.baseApr : BIG_DECIMAL_ZERO
       }
       baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
