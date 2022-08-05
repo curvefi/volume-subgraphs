@@ -408,7 +408,6 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       } else {
         baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
       }
-      dailySnapshot.baseApr = baseApr
       // handle rebasing pools
       // TODO: handle decimals to work with depeg (instead of using USD value)
       const deductibleApr = getDeductibleApr(pool, reservesUsd, timestamp)
@@ -421,10 +420,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       // Discard spikes in base APR as outliers
       // We replace outlier value with previous day value
-      if (baseApr.gt(BigDecimal.fromString('0.001'))) {
+      if (baseApr.gt(BigDecimal.fromString('0.0005'))) {
         const prevSnapshot = getPreviousDaySnapshot(pool, timestamp)
         baseApr = prevSnapshot ? prevSnapshot.baseApr : BIG_DECIMAL_ZERO
       }
+      dailySnapshot.baseApr = baseApr
       baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
       dailySnapshot.timestamp = time
