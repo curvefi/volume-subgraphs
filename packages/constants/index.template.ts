@@ -83,9 +83,23 @@ SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADD
 SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100a66b82b78a1791b101c9d61', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADDRESS)
 
-// handle wrapped tokens and synths in v2 pools
-export const SYNTH_TOKENS = new Map<string, Address>()
-SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
+
+// handle tokens that only trade on Curve
+// maps to other token on curve pool that can be priced elswhere
+// and token indice to know whether to invert price oracle or not
+// TODO: Use the registries - at least for v2 - to get price without mapping
+class OracleInfo {
+  pricingToken: Address
+  tokenIndex: i32
+  constructor(pricingToken: Address, tokenIndex: i32) {
+    this.pricingToken = pricingToken
+    this.tokenIndex = tokenIndex
+  }
+}
+export const T_TOKEN = '0xcdf7028ceab81fa0c6971208e83fa7872994bee5'
+export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
+CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
+CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 
 
 export const TRANSFER_TOPIC = Bytes.fromHexString("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")

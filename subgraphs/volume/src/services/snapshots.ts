@@ -18,7 +18,6 @@ import {
   FOREX_TOKENS,
   USDT_ADDRESS,
   WBTC_ADDRESS,
-  SYNTH_TOKENS,
   WETH_ADDRESS,
   BIG_DECIMAL_TWO,
   BIG_INT_ZERO,
@@ -31,6 +30,7 @@ import {
   USDN_POOL,
   SCAM_POOLS,
   TVL_THRESHOLD,
+  CURVE_ONLY_TOKENS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
@@ -109,16 +109,20 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: 
     snapshot = new TokenSnapshot(snapshotId)
     snapshot.timestamp = hour
     let price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
-    if (price == BIG_DECIMAL_ZERO && SYNTH_TOKENS.has(asset.toHexString())) {
+    // for synths and tokens that only trade on curve we use a mapping
+    // get the price of the original asset and multiply that by the pool's price oracle
+    if (price == BIG_DECIMAL_ZERO && CURVE_ONLY_TOKENS.has(asset.toHexString())) {
       log.warning('Invalid price found for {}', [asset.toHexString()])
-      price = getUsdRate(SYNTH_TOKENS[asset.toHexString()])
+      const oracleInfo = CURVE_ONLY_TOKENS[asset.toHexString()]
+      price = getUsdRate(oracleInfo.pricingToken)
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const priceOracleResult = poolContract.try_price_oracle()
-      if (!priceOracleResult.reverted) {
-        price = price.times(priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18))
-      } else {
-        log.warning('Price oracle reverted {}', [asset.toHexString()])
-      }
+      let priceOracle = priceOracleResult.reverted
+        ? BIG_DECIMAL_ONE
+        : priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+      priceOracle =
+        oracleInfo.tokenIndex == 1 && priceOracle != BIG_DECIMAL_ZERO ? priceOracle : BIG_DECIMAL_ONE.div(priceOracle)
+      price = price.times(priceOracle)
     }
     snapshot.token = asset
     snapshot.price = price
