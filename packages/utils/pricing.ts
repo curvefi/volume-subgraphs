@@ -121,6 +121,7 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
       tokenB.toHexString(),
       ethRateB.toString(),
     ])
+    return BIG_DECIMAL_ZERO
   }
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
