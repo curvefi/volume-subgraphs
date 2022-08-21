@@ -27,43 +27,45 @@ import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTempl
 import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
 import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
 
+export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
+  const factory = Factory.bind(factoryContract)
+  const address = factory.getPair(token, numeraire)
+  if (address == ADDRESS_ZERO) {
+    log.debug('No pair found for {} on {}', [token.toHexString(), factoryContract.toHexString()])
+    return BIG_DECIMAL_ZERO
+  }
+  const pair = Pair.bind(address)
+  const reserves = pair.getReserves()
+  // if reserves are below a certain threshold we consider them invalid
+  // ideally we'd account for different decimals, but this would increase
+  // number of calls. so we only filter for a common lower denom for dust.
+  if (reserves.value1.lt(BigInt.fromI32(100000000)) || reserves.value0.lt(BigInt.fromI32(100000000))) {
+    log.debug('Low reserves found for {} on {}', [token.toHexString(), factoryContract.toHexString()])
+    return BIG_DECIMAL_ZERO
+  }
+  const price =
+    pair.token0() == numeraire
+      ? reserves.value0.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value1.toBigDecimal())
+      : reserves.value1.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value0.toBigDecimal())
+
+  return price.div(BIG_DECIMAL_1E18)
+}
+
 export function getNumeraireRate(token: Address, numeraire: Address): BigDecimal {
-  let eth = BIG_DECIMAL_ONE
 
   if (token != numeraire) {
-    let factory = Factory.bind(SUSHI_FACTORY_ADDRESS)
-    let address = factory.getPair(token, numeraire)
-
-    if (address == ADDRESS_ZERO) {
-      // if no pair on sushi, we try uni v2
-      log.debug('No sushi pair found for {}', [token.toHexString()])
-      factory = Factory.bind(UNI_FACTORY_ADDRESS)
-      address = factory.getPair(token, numeraire)
-
-      // if no pair on v2 either we try uni v3
-      if (address == ADDRESS_ZERO) {
-        log.debug('No Uni v2 pair found for {}', [token.toHexString()])
-        return getRateUniV3(token, numeraire)
-      }
+    const sushiPrice = getRateFromUniFork(token, numeraire, SUSHI_FACTORY_ADDRESS)
+    if (sushiPrice != BIG_DECIMAL_ZERO) {
+      return sushiPrice
     }
-
-    const pair = Pair.bind(address)
-
-    const reserves = pair.getReserves()
-
-    if (reserves.value1 == BIG_INT_ZERO || reserves.value0 == BIG_INT_ZERO) {
-      return eth
+    const uniV2Price = getRateFromUniFork(token, numeraire, UNI_FACTORY_ADDRESS)
+    if (uniV2Price != BIG_DECIMAL_ZERO) {
+      return uniV2Price
     }
-
-    eth =
-      pair.token0() == numeraire
-        ? reserves.value0.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value1.toBigDecimal())
-        : reserves.value1.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value0.toBigDecimal())
-
-    return eth.div(BIG_DECIMAL_1E18)
+    log.debug('No Uni v2 pair found for {}', [token.toHexString()])
+    return getRateUniV3(token, numeraire)
   }
-
-  return eth
+  return BIG_DECIMAL_ONE
 }
 
 export function getEthRate(token: Address): BigDecimal {
