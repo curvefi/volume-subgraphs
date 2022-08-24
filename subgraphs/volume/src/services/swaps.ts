@@ -154,6 +154,7 @@ export function handleExchange(
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
+  swapEvent.tx = txhash
   swapEvent.gasLimit = gasLimit
   swapEvent.gasUsed = gasUsed ? gasUsed : BIG_INT_ZERO
   swapEvent.tokenBought = tokenBought
