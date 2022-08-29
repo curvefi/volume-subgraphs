@@ -5,6 +5,7 @@ import {
   PriceFeed,
   SwapVolumeSnapshot,
   LiquidityVolumeSnapshot,
+  DailyPlatformSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
@@ -328,6 +329,12 @@ export function takePoolSnapshots(timestamp: BigInt): void {
   if (platform.latestPoolSnapshot == time) {
     return
   }
+
+  const protocolSnapshot = new DailyPlatformSnapshot(time.toString())
+  protocolSnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
+  protocolSnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
+  protocolSnapshot.timestamp = timestamp
+
   for (let i = 0; i < platform.poolAddresses.length; ++i) {
     const poolAddress = platform.poolAddresses[i]
     const pool = Pool.load(poolAddress.toHexString())
@@ -467,6 +474,10 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.totalDailyFeesUSD = totalFees
       pool.cumulativeFeesUSD = pool.cumulativeFeesUSD.plus(dailySnapshot.totalDailyFeesUSD)
 
+      protocolSnapshot.adminFeesUSD = protocolSnapshot.adminFeesUSD.plus(adminFees)
+      protocolSnapshot.lpFeesUSD = protocolSnapshot.lpFeesUSD.plus(lpFees)
+      protocolSnapshot.totalDailyFeesUSD = protocolSnapshot.totalDailyFeesUSD.plus(totalFees)
+
       pool.virtualPrice = vPrice
       pool.baseApr = dailySnapshot.baseApr
 
@@ -474,4 +485,6 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.save()
     }
   }
+
+  protocolSnapshot.save()
 }

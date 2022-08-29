@@ -78,6 +78,14 @@ type TokenSnapshot @entity {
   timestamp: BigInt!
 }
 
+type DailyPlatformSnapshot @entity {
+  id: ID!
+  adminFeesUSD: BigDecimal!
+  lpFeesUSD: BigDecimal!
+  totalDailyFeesUSD: BigDecimal!
+  timestamp: BigInt!
+}
+
 type DailyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
