@@ -1,4 +1,4 @@
-import { DailyPoolSnapshot, LiquidityEvent, Pool } from '../../generated/schema'
+import { LiquidityEvent, Pool } from '../../generated/schema'
 import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import {
