@@ -332,6 +332,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
   const protocolSnapshot = new DailyPlatformSnapshot(time.toString())
   protocolSnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
+  protocolSnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
   protocolSnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
   protocolSnapshot.timestamp = timestamp
 
