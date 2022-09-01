@@ -36,6 +36,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
         - name: CurvePool
@@ -50,6 +52,8 @@ dataSources:
         - event: AddressModified(indexed uint256,address,uint256)
           handler: handleAddressModified
       file: ./src/mapping.ts
+{{{usdnMapping}}}
+{{{aethMapping}}}
 
 templates:
   - name: RegistryTemplate
@@ -71,6 +75,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: CurvePool
           file: ./abis/CurvePool.json
         - name: CurvePoolV2
@@ -117,6 +123,10 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: MetaPool
           file: ./abis/MetaPool.json
         - name: CurvePoolCoin128
@@ -164,6 +174,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
       eventHandlers:
         - event: PoolAdded(indexed address)
           handler: handleCryptoPoolAdded
@@ -203,6 +215,12 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
+        - name: AToken
+          file: ./abis/AToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -226,18 +244,18 @@ templates:
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
           receipt: true
-        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
-          handler: handleRemoveLiquidityOne
-          receipt: true
-        - event: RemoveLiquidityOne(indexed address,uint256,uint256)
-          handler: handleRemoveLiquidityOne
-          receipt: true
-        - event: RemoveLiquidity(indexed address,uint256[2],uint256[2],uint256)
-          handler: handleRemoveLiquidity
-        - event: RemoveLiquidityImbalance(indexed address,uint256[2],uint256[2],uint256,uint256)
-          handler: handleRemoveLiquidityImbalance
-        - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
-          handler: handleAddLiquidity
+#        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+#          handler: handleRemoveLiquidityOne
+#          receipt: true
+#        - event: RemoveLiquidityOne(indexed address,uint256,uint256)
+#          handler: handleRemoveLiquidityOne
+#          receipt: true
+#        - event: RemoveLiquidity(indexed address,uint256[2],uint256[2],uint256)
+#          handler: handleRemoveLiquidity
+#        - event: RemoveLiquidityImbalance(indexed address,uint256[2],uint256[2],uint256,uint256)
+#          handler: handleRemoveLiquidityImbalance
+#        - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
+#          handler: handleAddLiquidity
       file: ./src/mapping.ts
   - name: CryptoFactoryTemplate
     kind: ethereum/contract
@@ -272,6 +290,8 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -323,6 +343,12 @@ templates:
           file: ./abis/ERC20.json
         - name: CToken
           file: ./abis/CToken.json
+        - name: YToken
+          file: ./abis/YToken.json
+        - name: AToken
+          file: ./abis/AToken.json
+        - name: LidoOracle
+          file: ./abis/LidoOracle.json
         - name: Factory
           file: ./abis/UniswapV2Factory.json
         - name: Pair
@@ -341,10 +367,12 @@ templates:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2
           receipt: true
-        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
-          handler: handleRemoveLiquidityOne
-        - event: RemoveLiquidity(indexed address,uint256[2],uint256)
-          handler: handleRemoveLiquidity
-        - event: AddLiquidity(indexed address,uint256[2],uint256,uint256)
-          handler: handleAddLiquidity
+#        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+#          handler: handleRemoveLiquidityOne
+#        - event: RemoveLiquidity(indexed address,uint256[2],uint256)
+#          handler: handleRemoveLiquidity
+#        - event: AddLiquidity(indexed address,uint256[2],uint256,uint256)
+#          handler: handleAddLiquidity
+        - event: ClaimAdminFee(indexed address,uint256)
+          handler: handleClaimAdminFee
       file: ./src/mappingV2.ts

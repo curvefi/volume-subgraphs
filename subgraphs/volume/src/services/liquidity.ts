@@ -1,83 +1,16 @@
-import {
-  DailyLiquidityVolumeSnapshot,
-  HourlyLiquidityVolumeSnapshot,
-  LiquidityEvent,
-  Pool,
-  WeeklyLiquidityVolumeSnapshot,
-} from '../../generated/schema'
-import { Address, BigDecimal, Bytes } from '@graphprotocol/graph-ts'
+import { LiquidityEvent, Pool } from '../../generated/schema'
+import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { BigInt } from '@graphprotocol/graph-ts/index'
-import { getCryptoTokenSnapshot, getTokenSnapshot, getTokenSnapshotByAssetType, takePoolSnapshots } from './snapshots'
-import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO, CTOKENS } from '../../../../packages/constants'
+import {
+  getCryptoSwapTokenPriceFromSnapshot,
+  getLiquiditySnapshot,
+  getStableSwapTokenPriceFromSnapshot,
+  takePoolSnapshots,
+} from './snapshots'
+import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO } from '../../../../packages/constants'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { bytesToAddress } from '../../../../packages/utils'
-
-export function getHourlyLiquiditySnapshot(pool: Pool, timestamp: BigInt): HourlyLiquidityVolumeSnapshot {
-  const hour = getIntervalFromTimestamp(timestamp, HOUR)
-  const snapshotId = pool.id + '-' + hour.toString()
-  let snapshot = HourlyLiquidityVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new HourlyLiquidityVolumeSnapshot(snapshotId)
-    const coinArray = new Array<BigDecimal>()
-    for (let i = 0; i < pool.coins.length; i++) {
-      coinArray.push(BIG_DECIMAL_ZERO)
-    }
-    snapshot.pool = pool.id
-    snapshot.timestamp = hour
-    snapshot.amountAdded = coinArray
-    snapshot.amountRemoved = coinArray
-    snapshot.addCount = BIG_INT_ZERO
-    snapshot.removeCount = BIG_INT_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getDailyLiquiditySnapshot(pool: Pool, timestamp: BigInt): DailyLiquidityVolumeSnapshot {
-  const day = getIntervalFromTimestamp(timestamp, DAY)
-  const snapshotId = pool.id + '-' + day.toString()
-  let snapshot = DailyLiquidityVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new DailyLiquidityVolumeSnapshot(snapshotId)
-    const coinArray = new Array<BigDecimal>()
-    for (let i = 0; i < pool.coins.length; i++) {
-      coinArray.push(BIG_DECIMAL_ZERO)
-    }
-    snapshot.pool = pool.id
-    snapshot.timestamp = day
-    snapshot.amountAdded = coinArray
-    snapshot.amountRemoved = coinArray
-    snapshot.addCount = BIG_INT_ZERO
-    snapshot.removeCount = BIG_INT_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): WeeklyLiquidityVolumeSnapshot {
-  const week = getIntervalFromTimestamp(timestamp, WEEK)
-  const snapshotId = pool.id + '-' + week.toString()
-  let snapshot = WeeklyLiquidityVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new WeeklyLiquidityVolumeSnapshot(snapshotId)
-    const coinArray = new Array<BigDecimal>()
-    for (let i = 0; i < pool.coins.length; i++) {
-      coinArray.push(BIG_DECIMAL_ZERO)
-    }
-    snapshot.pool = pool.id
-    snapshot.timestamp = week
-    snapshot.amountAdded = coinArray
-    snapshot.amountRemoved = coinArray
-    snapshot.addCount = BIG_INT_ZERO
-    snapshot.removeCount = BIG_INT_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
 
 export function processLiquidityRemoval(
   pool: Pool,
@@ -90,9 +23,10 @@ export function processLiquidityRemoval(
   takePoolSnapshots(timestamp)
 
   // initialise snapshot entities:
-  const hourlySnapshot = getHourlyLiquiditySnapshot(pool, timestamp)
-  const dailySnapshot = getDailyLiquiditySnapshot(pool, timestamp)
-  const weeklySnapshot = getWeeklyLiquiditySnapshot(pool, timestamp)
+  // need 3 different variables due to how array updates are handled by the graph
+  const hourlySnapshot = getLiquiditySnapshot(pool, timestamp, HOUR)
+  const dailySnapshot = getLiquiditySnapshot(pool, timestamp, DAY)
+  const weeklySnapshot = getLiquiditySnapshot(pool, timestamp, WEEK)
   const liquidityEvent = new LiquidityEvent(hash.toHexString())
 
   // get volume of liquidity event:
@@ -107,12 +41,9 @@ export function processLiquidityRemoval(
     dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
     weeklyAmountRemoved[i] = weeklyAmountRemoved[i].plus(coinAmountRemoved)
     if (tokenAmounts[i].gt(BIG_INT_ZERO)) {
-      const latestSnapshot = pool.isV2
-        ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, pool)
-        : CTOKENS.includes(pool.coins[i].toHexString())
-        ? getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
-        : getTokenSnapshotByAssetType(pool, timestamp)
-      const latestPrice = latestSnapshot.price
+      const latestPrice = pool.isV2
+        ? getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
+        : getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
       volumeUSD = volumeUSD.plus(coinAmountRemoved.times(latestPrice))
     }
   }
@@ -155,9 +86,9 @@ export function processAddLiquidity(
   takePoolSnapshots(timestamp)
 
   // initialise snapshot entities:
-  const hourlySnapshot = getHourlyLiquiditySnapshot(pool, timestamp)
-  const dailySnapshot = getDailyLiquiditySnapshot(pool, timestamp)
-  const weeklySnapshot = getWeeklyLiquiditySnapshot(pool, timestamp)
+  const hourlySnapshot = getLiquiditySnapshot(pool, timestamp, HOUR)
+  const dailySnapshot = getLiquiditySnapshot(pool, timestamp, DAY)
+  const weeklySnapshot = getLiquiditySnapshot(pool, timestamp, WEEK)
   const liquidityEvent = new LiquidityEvent(hash.toHexString())
 
   // get volume of liquidity event:
@@ -172,12 +103,9 @@ export function processAddLiquidity(
     dailyAmountAdded[i] = dailyAmountAdded[i].plus(coinAmountAdded)
     weeklyAmountAdded[i] = weeklyAmountAdded[i].plus(coinAmountAdded)
     if (tokenAmounts[i].gt(BIG_INT_ZERO)) {
-      const latestSnapshot = pool.isV2
-        ? getCryptoTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, pool)
-        : CTOKENS.includes(pool.coins[i].toHexString())
-        ? getTokenSnapshot(bytesToAddress(pool.coins[i]), timestamp, false)
-        : getTokenSnapshotByAssetType(pool, timestamp)
-      const latestPrice = latestSnapshot.price
+      const latestPrice = pool.isV2
+        ? getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
+        : getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(pool.coins[i]), timestamp)
       volumeUSD = volumeUSD.plus(coinAmountAdded.times(latestPrice))
     }
   }

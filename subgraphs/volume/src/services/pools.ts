@@ -11,6 +11,7 @@ import {
   CRYPTO_FACTORY,
   METAPOOL_FACTORY,
   METAPOOL_FACTORY_ADDRESS,
+  REBASING_POOL_IMPLEMENTATION_ADDRESS,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
@@ -30,6 +31,7 @@ export function createNewPool(
   poolType: string,
   metapool: boolean,
   isV2: boolean,
+  isRebasing: boolean,
   block: BigInt,
   tx: Bytes,
   timestamp: BigInt,
@@ -51,6 +53,7 @@ export function createNewPool(
   pool.symbol = symbol
   pool.metapool = metapool
   pool.isV2 = isV2
+  pool.isRebasing = isRebasing
   pool.address = poolAddress
   pool.creationBlock = block
   pool.creationTx = tx
@@ -60,6 +63,7 @@ export function createNewPool(
   pool.basePool = basePool
   pool.cumulativeVolume = BIG_DECIMAL_ZERO
   pool.cumulativeVolumeUSD = BIG_DECIMAL_ZERO
+  pool.cumulativeFeesUSD = BIG_DECIMAL_ZERO
   pool.virtualPrice = BIG_DECIMAL_ZERO
   pool.baseApr = BIG_DECIMAL_ZERO
 
@@ -125,10 +129,15 @@ export function createNewFactoryPool(
   let poolType: string
   const factoryEntity = getFactory(factoryContract)
   const poolCount = factoryEntity.poolCount
+  let isRebasing = false
   if (version == 1) {
     const factory = StableFactory.bind(factoryContract)
     poolType = factoryContract == Address.fromString(METAPOOL_FACTORY_ADDRESS) ? METAPOOL_FACTORY : STABLE_FACTORY
     factoryPool = factory.pool_list(poolCount)
+    const implementationResult = factory.try_get_implementation_address(factoryPool)
+    if (!implementationResult.reverted) {
+      isRebasing = implementationResult.value == REBASING_POOL_IMPLEMENTATION_ADDRESS
+    }
     log.info('New factory pool (metapool: {}, base pool: {}) added {} with id {}', [
       metapool.toString(),
       basePool.toHexString(),
@@ -164,6 +173,7 @@ export function createNewFactoryPool(
     poolType,
     metapool,
     version == 2,
+    isRebasing,
     block,
     tx,
     timestamp,
@@ -203,6 +213,7 @@ export function createNewRegistryPool(
       poolType,
       metapool,
       isV2,
+      false,
       block,
       tx,
       timestamp,

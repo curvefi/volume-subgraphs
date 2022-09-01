@@ -1,12 +1,9 @@
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
-  getCryptoTokenSnapshot,
-  getDailySwapSnapshot,
-  getHourlySwapSnapshot,
-  getTokenSnapshot,
-  getTokenSnapshotByAssetType,
-  getWeeklySwapSnapshot,
+  getCryptoSwapTokenPriceFromSnapshot,
+  getStableSwapTokenPriceFromSnapshot,
+  getSwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
 import {
@@ -14,14 +11,16 @@ import {
   BIG_DECIMAL_TWO,
   BIG_INT_ONE,
   BIG_INT_ZERO,
-  CTOKENS,
   LENDING,
+  METAPOOL_FACTORY,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
+import { PERIODS } from '../../../../packages/utils/time'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { updateCandles } from './candles'
+import { updatePriceFeed } from './pricefeeds'
 
 export function handleExchange(
   buyer: Address,
@@ -71,7 +70,12 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    if ((pool.assetType == 2 || pool.assetType == 0) && pool.poolType == STABLE_FACTORY && boughtId == 0) {
+    if (
+      ((pool.assetType == 2 && (pool.poolType == METAPOOL_FACTORY || pool.poolType == STABLE_FACTORY)) ||
+        (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
+      boughtId == 0 &&
+      !pool.isRebasing
+    ) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
       tokenSoldDecimals = BigInt.fromI32(18)
@@ -135,26 +139,22 @@ export function handleExchange(
   log.debug('Getting token snaphsot for {}', [pool.id])
   let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
   if (!pool.isV2) {
-    const latestBoughtSnapshot = CTOKENS.includes(pool.coins[boughtId].toHexString())
-      ? getTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, false)
-      : getTokenSnapshotByAssetType(pool, timestamp)
-    const latestSoldSnapshot = CTOKENS.includes(pool.coins[soldId].toHexString())
-      ? getTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, false)
-      : getTokenSnapshotByAssetType(pool, timestamp)
-
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
-    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
+    const latestBoughtSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
+    const latestSoldSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
+    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
   } else {
-    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp, pool)
-    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp, pool)
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
-    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
+    const latestBoughtSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
+    const latestSoldSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
+    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
   }
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
+  swapEvent.tx = txhash
   swapEvent.gasLimit = gasLimit
   swapEvent.gasUsed = gasUsed ? gasUsed : BIG_INT_ZERO
   swapEvent.tokenBought = tokenBought
@@ -168,44 +168,34 @@ export function handleExchange(
 
   updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, blockNumber)
 
+  updatePriceFeed(
+    pool,
+    tokenSold,
+    tokenBought,
+    amountSold,
+    amountBought,
+    soldId,
+    boughtId,
+    exchangeUnderlying,
+    blockNumber,
+    timestamp
+  )
+
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
 
-  const hourlySnapshot = getHourlySwapSnapshot(pool, timestamp)
-  const dailySnapshot = getDailySwapSnapshot(pool, timestamp)
-  const weeklySnapshot = getWeeklySwapSnapshot(pool, timestamp)
-
-  hourlySnapshot.count = hourlySnapshot.count.plus(BIG_INT_ONE)
-  dailySnapshot.count = dailySnapshot.count.plus(BIG_INT_ONE)
-  weeklySnapshot.count = weeklySnapshot.count.plus(BIG_INT_ONE)
-
-  hourlySnapshot.amountSold = hourlySnapshot.amountSold.plus(amountSold)
-  dailySnapshot.amountSold = dailySnapshot.amountSold.plus(amountSold)
-  weeklySnapshot.amountSold = weeklySnapshot.amountSold.plus(amountSold)
-
-  hourlySnapshot.amountBought = hourlySnapshot.amountBought.plus(amountBought)
-  dailySnapshot.amountBought = dailySnapshot.amountBought.plus(amountBought)
-  weeklySnapshot.amountBought = weeklySnapshot.amountBought.plus(amountBought)
-
-  hourlySnapshot.amountSoldUSD = hourlySnapshot.amountSoldUSD.plus(amountSoldUSD)
-  dailySnapshot.amountSoldUSD = dailySnapshot.amountSoldUSD.plus(amountSoldUSD)
-  weeklySnapshot.amountSoldUSD = weeklySnapshot.amountSoldUSD.plus(amountSoldUSD)
-
-  hourlySnapshot.amountBoughtUSD = hourlySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-  dailySnapshot.amountBoughtUSD = dailySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-  weeklySnapshot.amountBoughtUSD = weeklySnapshot.amountBoughtUSD.plus(amountBoughtUSD)
-
-  hourlySnapshot.volume = hourlySnapshot.volume.plus(volume)
-  dailySnapshot.volume = dailySnapshot.volume.plus(volume)
-  weeklySnapshot.volume = weeklySnapshot.volume.plus(volume)
-
-  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
-  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
-  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
-
-  hourlySnapshot.save()
-  dailySnapshot.save()
-  weeklySnapshot.save()
+  // create hourly, daily & weekly snapshots
+  for (let i = 0; i < PERIODS.length; i++) {
+    const snapshot = getSwapSnapshot(pool, timestamp, PERIODS[i])
+    snapshot.count = snapshot.count.plus(BIG_INT_ONE)
+    snapshot.amountSold = snapshot.amountSold.plus(amountSold)
+    snapshot.amountBought = snapshot.amountBought.plus(amountBought)
+    snapshot.amountSoldUSD = snapshot.amountSoldUSD.plus(amountSoldUSD)
+    snapshot.amountBoughtUSD = snapshot.amountBoughtUSD.plus(amountBoughtUSD)
+    snapshot.volume = snapshot.volume.plus(volume)
+    snapshot.volumeUSD = snapshot.volumeUSD.plus(volumeUSD)
+    snapshot.save()
+  }
 
   pool.cumulativeVolume = pool.cumulativeVolume.plus(volume)
   pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(volumeUSD)

@@ -11,6 +11,8 @@ export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
+export const FEE_PRECISION = BigDecimal.fromString('1e10')
+
 export const NATIVE_PLACEHOLDER_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 export const NATIVE_PLACEHOLDER = Address.fromString(NATIVE_PLACEHOLDER_ADDRESS)
 export const NATIVE_TOKEN = '{{ native_token }}'
@@ -19,6 +21,27 @@ export const ADDRESS_ZERO = Address.fromString('0x000000000000000000000000000000
 
 export const THREE_CRV_TOKEN = '{{ three_crv_token }}'
 export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
+export const TWO_CRV_TOKEN = '{{ two_crv_token }}'
+export const TWO_CRV_ADDRESS = Address.fromString(TWO_CRV_TOKEN)
+export const THREE_BTC_TOKEN = '{{ three_btc_token }}'
+export const THREE_BTC_ADDRESS = Address.fromString(THREE_BTC_TOKEN)
+export const TWO_BTC_TOKEN = '{{ two_btc_token }}'
+export const TWO_BTC_ADDRESS = Address.fromString(TWO_BTC_TOKEN)
+
+export const THREE_CRV_POOL = '{{ three_crv_pool }}'
+export const THREE_CRV_POOL_ADDRESS = Address.fromString(THREE_CRV_POOL)
+export const TWO_CRV_POOL = '{{ two_crv_pool }}'
+export const TWO_CRV_POOL_ADDRESS = Address.fromString(TWO_CRV_POOL)
+export const THREE_BTC_POOL = '{{ three_btc_pool }}'
+export const THREE_BTC_POOL_ADDRESS = Address.fromString(THREE_BTC_POOL)
+export const TWO_BTC_POOL = '{{ two_btc_pool }}'
+export const TWO_BTC_POOL_ADDRESS = Address.fromString(TWO_BTC_POOL)
+
+export const METATOKEN_TO_METAPOOL_MAPPING = new Map<string, Address>()
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_BTC_TOKEN, THREE_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(THREE_CRV_TOKEN, THREE_CRV_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_BTC_TOKEN, TWO_BTC_POOL_ADDRESS)
+METATOKEN_TO_METAPOOL_MAPPING.set(TWO_CRV_TOKEN, TWO_CRV_POOL_ADDRESS)
 
 export const WETH_TOKEN = '{{ weth_token }}'
 export const WBTC_TOKEN = '{{ wbtc_token }}'
@@ -59,10 +82,27 @@ SIDECHAIN_SUBSTITUTES.set('0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21', WETH_ADD
 // polygon
 SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100a66b82b78a1791b101c9d61', WBTC_ADDRESS)
 SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADDRESS)
+// moonbeam
+SIDECHAIN_SUBSTITUTES.set('0x5c2ed810328349100a66b82b78a1791b101c9d61', WBTC_ADDRESS)
+SIDECHAIN_SUBSTITUTES.set('0x28424507fefb6f7f8e9d3860f56504e4e5f5f390', WETH_ADDRESS)
 
-// handle wrapped tokens and synths in v2 pools
-export const SYNTH_TOKENS = new Map<string, Address>()
-SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
+
+// handle tokens that only trade on Curve
+// maps to other token on curve pool that can be priced elswhere
+// and token indice to know whether to invert price oracle or not
+// TODO: Use the registries - at least for v2 - to get price without mapping
+class OracleInfo {
+  pricingToken: Address
+  tokenIndex: i32
+  constructor(pricingToken: Address, tokenIndex: i32) {
+    this.pricingToken = pricingToken
+    this.tokenIndex = tokenIndex
+  }
+}
+export const T_TOKEN = '0xcdf7028ceab81fa0c6971208e83fa7872994bee5'
+export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
+CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
+CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 
 
 export const TRANSFER_TOPIC = Bytes.fromHexString("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
@@ -295,14 +335,113 @@ export const CTOKENS = ["0x8e595470ed749b85c6f7669de83eae304c2ec68f",
   "0x70fac71debfd67394d1278d98a29dea79dc6e57a"
 ]
 
+export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
+  "0x8925d9d9b4569d737a48499def3f67baa5a144b9",
+  "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+  "0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c",
+  "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+  "0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf"]
+
+
+// Factory metapools that use the implementation for positive-rebasing and
+// and fee-on-transfer tokens do not log decimals the same way as regular
+// factory metapools.
+export const REBASING_POOL_IMPLEMENTATION = '{{ rebasingPoolImplementation }}'
+export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_POOL_IMPLEMENTATION)
+
+// Addresses and variables needed to compute the APR of rebasing tokens
+export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
+export const CONCENTRATED_LIDO_POOL = "0x828b154032950c8ff7cf8085d841723db2696056"
+export const LIDO_POOL = "0xdc24316b9ae028f1497c275eb9192a3ea0f67022"
+export const STETH_POOLS = [LIDO_POOL, CONCENTRATED_LIDO_POOL]
+export const ATOKEN_POOLS = ["0xeb16ae0052ed37f479f7fe63849198df1765a733",
+                             "0xdebf20617708857ebe4f679508e7b7863a8a8eee"]
+
+export const YTOKEN_POOLS = ["0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+"0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+]
+
+export const YTOKENS = [ "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
+  "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
+  "0x83f798e925bcd4017eb265844fddabb448f1707d",
+  "0x73a052500105205d34daf004eab301916da8190f",
+  "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
+  "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
+  "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
+  "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"]
+
+export const AVALANCHE_ATOKENS = ["0x686bef2417b6dc32c50a3cbfbcc3bb60e1e9a15d", //avWBTC
+  "0x47afa96cdc9fab46904a55a6ad4bf6660b53c38a", //avDAI
+  "0x46a51127c3ce23fb7ab1de06226147f446e4a857", //avUSDC
+  "0x532e6537fea298397212f09a61e03311686f548e", //avUSDT
+  "0x53f7c5869a859f0aec3d334ee8b4cf01e3492f21" //avWETH
+]
+
+export const FANTOM_GTOKENS = [
+  "0x07e6332dd090d287d3489245038daf987955dcfb", //gDAI
+  "0x0fa949783947bf6c1b171db13aeacbb488845b3f", //gUSDC
+  "0x0fa949783947bf6c1b171db13aeacbb488845b3f", //gfUSDT
+]
+
+export const MATIC_ATOKENS = [
+"0x5c2ed810328349100a66b82b78a1791b101c9d61", //amWBTC
+  "0x28424507fefb6f7f8E9D3860F56504E4e5f5f390", //amWETH
+  "0x27f8d03b3a2196956ed754badc28d73be8830a6e", //amDAI
+  "0x1a13f4ca1d028320a707d99520abfefca3998b7f", //amUSDC
+  "0x60d55f02a771d515e077c9c2403a1ef324885cec" //amUSDT
+]
+
+export const GEIST_POOL_FTM = "0x0fa949783947bf6c1b171db13aeacbb488845b3f"
+export const IB_POOL_FTM = "0x4fc8d635c3cb1d0aa123859e2b2587d0ff2707b1"
+
+export const YC_LENDING_TOKENS = CTOKENS.concat(YTOKENS)
+export const Y_AND_C_POOLS = CTOKEN_POOLS.concat(YTOKEN_POOLS)
+
+export const USDN_POOL = "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1"
+export const USDN_TOKEN = "0x674c6ad92fd080e4004b2312b45f796a192d27a0"
+
+export const AETH_POOL = "0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2"
+export const AETH_TOKEN = "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb"
+
+export const META_TOKENS = [THREE_CRV_TOKEN,
+                            TWO_CRV_TOKEN,
+                            TWO_BTC_TOKEN,
+                            THREE_BTC_TOKEN,
+                            ]
+export const BENCHMARK_STABLE_ASSETS = [WBTC_TOKEN,
+                                        THREE_CRV_TOKEN,
+                                        TWO_CRV_TOKEN,
+                                        TWO_BTC_TOKEN,
+                                        THREE_BTC_TOKEN,
+                                        WETH_TOKEN,
+                                        NATIVE_TOKEN,
+                                        USDT_TOKEN
+]
+
+// Some pools (especially on matic) use ridiculous decimals that are different
+// from what they advertise, or fake exchange rates, or use unpegged assets with
+// v1 pools. we filter them to avoid messing up the stats
+export const SCAM_POOLS = ["0x0950ea36770ed3b95a428c83a532b1ffa46088bc",
+"0xb5be5a8126244da7e388a88f16ee8be54d22117c",
+"0xdaedd59fa2c5c63d46a3bae5ed115247df9eb6ec",
+"0x5e0458211702142aa0833a4a60a4535cd891dcc7"]
+
+// We use this as a way to deal with potential aberations that are not handled
+// (particularly necessary for matic) and avoid issues when calculating fees
+// if TVL exceeds this number, we consider it to be a mistake
+
+export const TVL_THRESHOLD = BigDecimal.fromString("{{ tvlThreshold }}")
+
 // some v2 pools can have Forex : Crypto pairs for which we need
 // a rate. We use oracles when available.
 export const POLYGON_EURT_TOKEN = '0x7bdf330f423ea880ff95fc41a280fd5ecfd3d09f'
+export const POLYGON_AGEUR_TOKEN = '0xe0b52e49357fd4daf2c15e02058dce6bc0057db4'
 export const POLYGON_JJPY_TOKEN = '0x8343091F2499FD4b6174A46D067A920a3b851FF9'.toLowerCase()
 export const POLYGON_JPYC_TOKEN = '0x6AE7Dfc73E0dDE2aa99ac063DcF7e8A63265108c'.toLowerCase()
 export const ARBI_EURS_TOKEN = '0xD22a58f79e9481D1a88e00c343885A588b34b68B'.toLowerCase()
 export const ARBI_FXEUR_TOKEN = '0x116172B2482c5dC3E6f445C16Ac13367aC3FCd35'.toLowerCase()
 export const FOREX_TOKENS = [
+  POLYGON_AGEUR_TOKEN,
   POLYGON_EURT_TOKEN,
   POLYGON_JJPY_TOKEN,
   POLYGON_JPYC_TOKEN,
@@ -328,6 +467,7 @@ FOREX_ORACLES.set(GBP_LP_TOKEN, Address.fromString('0x5c0Ab2d9b5a7ed9f470386e82B
 FOREX_ORACLES.set(AUD_LP_TOKEN, Address.fromString('0x77F9710E7d0A19669A13c055F62cd80d313dF022'))
 FOREX_ORACLES.set(CHF_LP_TOKEN, Address.fromString('0x449d117117838fFA61263B61dA6301AA2a88B13A'))
 FOREX_ORACLES.set(POLYGON_EURT_TOKEN, Address.fromString('0x73366Fe0AA0Ded304479862808e02506FE556a98'))
+FOREX_ORACLES.set(POLYGON_AGEUR_TOKEN, Address.fromString('0x73366Fe0AA0Ded304479862808e02506FE556a98'))
 FOREX_ORACLES.set(POLYGON_JPYC_TOKEN, Address.fromString('0xD647a6fC9BC6402301583C91decC5989d8Bc382D'))
 FOREX_ORACLES.set(POLYGON_JJPY_TOKEN, Address.fromString('0xD647a6fC9BC6402301583C91decC5989d8Bc382D'))
 FOREX_ORACLES.set(ARBI_EURS_TOKEN, Address.fromString('0xA14d53bC1F1c0F31B4aA3BD109344E5009051a84'))

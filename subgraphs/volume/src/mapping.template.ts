@@ -4,9 +4,9 @@ import {
   UNKNOWN_METAPOOLS,
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
-  LENDING,
   METAPOOL_FACTORY,
-  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, STABLE_FACTORY, TRANSFER_TOPIC
+  LENDING,
+  LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, TRANSFER_TOPIC
 } from '../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
@@ -134,6 +134,7 @@ export function addRegistryPool(pool: Address,
       LENDING,
       false,
       false,
+      false,
       block,
       hash,
       timestamp,
@@ -144,6 +145,7 @@ export function addRegistryPool(pool: Address,
   const testMetaPool = MetaPool.bind(pool)
   const testMetaPoolResult = testMetaPool.try_base_pool()
   const unknownMetapool = UNKNOWN_METAPOOLS.has(pool.toHexString())
+
   if (!testMetaPoolResult.reverted || unknownMetapool) {
     log.info('New meta pool {} added from registry at {}', [pool.toHexString(), hash.toHexString()])
     const basePool = unknownMetapool ? UNKNOWN_METAPOOLS[pool.toHexString()] : testMetaPoolResult.value
@@ -155,7 +157,7 @@ export function addRegistryPool(pool: Address,
       EARLY_V2_POOLS.includes(pool) ? true : false,
       // on mainnet the unknown metapools are legacy metapools deployed before the
       // contract was added to the address indexer
-      UNKNOWN_METAPOOLS.has(pool.toHexString()) ? {{ unknownMetapoolType }} : STABLE_FACTORY,
+      unknownMetapool ? {{ unknownMetapoolType }} : REGISTRY_V1,
       timestamp,
       block,
       hash

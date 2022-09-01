@@ -16,6 +16,7 @@ import {
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
+  YTOKENS,
 } from 'const'
 import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
 import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
@@ -24,56 +25,63 @@ import { FactoryV3 } from '../../subgraphs/volume/generated/templates/CurvePoolT
 import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Quoter'
 import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
 import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
+import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
 
-export function getEthRate(token: Address): BigDecimal {
-  let eth = BIG_DECIMAL_ONE
-
-  if (token != WETH_ADDRESS) {
-    let factory = Factory.bind(SUSHI_FACTORY_ADDRESS)
-    let address = factory.getPair(token, WETH_ADDRESS)
-
-    if (address == ADDRESS_ZERO) {
-      // if no pair on sushi, we try uni v2
-      log.debug('No sushi pair found for {}', [token.toHexString()])
-      factory = Factory.bind(UNI_FACTORY_ADDRESS)
-      address = factory.getPair(token, WETH_ADDRESS)
-
-      // if no pair on v2 either we try uni v3
-      if (address == ADDRESS_ZERO) {
-        log.debug('No Uni v2 pair found for {}', [token.toHexString()])
-        return getEthRateUniV3(token)
-      }
-    }
-
-    const pair = Pair.bind(address)
-
-    const reserves = pair.getReserves()
-
-    if (reserves.value1 == BIG_INT_ZERO || reserves.value0 == BIG_INT_ZERO) {
-      return eth
-    }
-
-    eth =
-      pair.token0() == WETH_ADDRESS
-        ? reserves.value0.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value1.toBigDecimal())
-        : reserves.value1.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value0.toBigDecimal())
-
-    return eth.div(BIG_DECIMAL_1E18)
+export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
+  const factory = Factory.bind(factoryContract)
+  const address = factory.getPair(token, numeraire)
+  if (address == ADDRESS_ZERO) {
+    log.debug('No pair found for {} on {}', [token.toHexString(), factoryContract.toHexString()])
+    return BIG_DECIMAL_ZERO
   }
+  const pair = Pair.bind(address)
+  const reserves = pair.getReserves()
+  // if reserves are below a certain threshold we consider them invalid
+  // ideally we'd account for different decimals, but this would increase
+  // number of calls. so we only filter for a common lower denom for dust.
+  if (reserves.value1.lt(BigInt.fromI32(100000000)) || reserves.value0.lt(BigInt.fromI32(100000000))) {
+    log.debug('Low reserves found for {} on {}', [token.toHexString(), factoryContract.toHexString()])
+    return BIG_DECIMAL_ZERO
+  }
+  const price =
+    pair.token0() == numeraire
+      ? reserves.value0.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value1.toBigDecimal())
+      : reserves.value1.toBigDecimal().times(BIG_DECIMAL_1E18).div(reserves.value0.toBigDecimal())
 
-  return eth
+  return price.div(BIG_DECIMAL_1E18)
 }
 
-export function getEthRateUniV3(token: Address): BigDecimal {
+export function getNumeraireRate(token: Address, numeraire: Address): BigDecimal {
+
+  if (token != numeraire) {
+    const sushiPrice = getRateFromUniFork(token, numeraire, SUSHI_FACTORY_ADDRESS)
+    if (sushiPrice != BIG_DECIMAL_ZERO) {
+      return sushiPrice
+    }
+    const uniV2Price = getRateFromUniFork(token, numeraire, UNI_FACTORY_ADDRESS)
+    if (uniV2Price != BIG_DECIMAL_ZERO) {
+      return uniV2Price
+    }
+    log.debug('No Uni v2 pair found for {}', [token.toHexString()])
+    return getRateUniV3(token, numeraire)
+  }
+  return BIG_DECIMAL_ONE
+}
+
+export function getEthRate(token: Address): BigDecimal {
+  return getNumeraireRate(token, WETH_ADDRESS)
+}
+
+export function getRateUniV3(token: Address, numeraire: Address): BigDecimal {
   const factory = FactoryV3.bind(UNI_V3_FACTORY_ADDRESS)
   let fee = 3000
   // first try the 0.3% pool
-  let poolCall = factory.try_getPool(token, WETH_ADDRESS, fee)
+  let poolCall = factory.try_getPool(token, numeraire, fee)
   if (poolCall.reverted || poolCall.value == ADDRESS_ZERO) {
     log.debug('No Uni v3 pair (.3%) found for {}', [token.toHexString()])
     // if it fails, try 1%
     fee = 10000
-    poolCall = factory.try_getPool(token, WETH_ADDRESS, fee)
+    poolCall = factory.try_getPool(token, numeraire, fee)
     if (poolCall.reverted || poolCall.value == ADDRESS_ZERO) {
       log.debug('No Uni v3 pair (1%) found for {}', [token.toHexString()])
       return BIG_DECIMAL_ZERO
@@ -81,7 +89,7 @@ export function getEthRateUniV3(token: Address): BigDecimal {
   }
   const quoter = Quoter.bind(UNI_V3_QUOTER_ADDRESS)
   const decimals = getDecimals(token)
-  const rate = quoter.try_quoteExactInputSingle(token, WETH_ADDRESS, fee, exponentToBigInt(decimals), BIG_INT_ZERO)
+  const rate = quoter.try_quoteExactInputSingle(token, numeraire, fee, exponentToBigInt(decimals), BIG_INT_ZERO)
   if (!rate.reverted) {
     log.debug('Rate for {}: {}', [token.toHexString(), rate.value.toString()])
     return rate.value.toBigDecimal().div(exponentToBigDecimal(decimals))
@@ -119,6 +127,7 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
       tokenB.toHexString(),
       ethRateB.toString(),
     ])
+    return BIG_DECIMAL_ZERO
   }
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
@@ -141,16 +150,34 @@ export function getCTokenExchangeRate(token: Address): BigDecimal {
   return exchangeRate.toBigDecimal().div(rateScale)
 }
 
+export function getYTokenExchangeRate(token: Address): BigDecimal {
+  const yToken = YToken.bind(token)
+  const pricePerShareResult = yToken.try_getPricePerFullShare()
+  if (pricePerShareResult.reverted) {
+    // if fail we use 1
+    log.error('Failed to get underlying or rate for yToken {}', [token.toHexString()])
+    return BIG_DECIMAL_ONE
+  }
+  const exchangeRate = pricePerShareResult.value
+  return exchangeRate.toBigDecimal().div(BIG_DECIMAL_1E18)
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
     token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
-  }
-  if (CTOKENS.includes(token.toHexString())) {
+  } else if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
-  }
-  if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
-    return getTokenAValueInTokenB(token, USDT_ADDRESS)
+  } else if (YTOKENS.includes(token.toHexString())) {
+    return getYTokenExchangeRate(token)
+  } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+    let usdPrice = getTokenAValueInTokenB(token, USDT_ADDRESS)
+    // if it fails we try to go directly via a stable pair
+    if (usdPrice == BIG_DECIMAL_ZERO) {
+      usdPrice = getNumeraireRate(token, USDT_ADDRESS)
+      // TODO: add attempt to price in native token if still fails
+    }
+    return usdPrice
   }
   return usdt
 }

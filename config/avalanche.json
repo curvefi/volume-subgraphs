@@ -6,6 +6,13 @@
   "usdt_token": "0xc7198437980c041c805a1edcba50c1ce5db95118",
   "wbtc_token": "0x50b7545627a5162f82a992c33b87adc75187b218",
   "three_crv_token": "0x1337bedc9d22ecbe766df105c9623922a27963ec",
+  "two_crv_token": "0x0000000000000000000000000000000000000000",
+  "three_btc_token": "0x0000000000000000000000000000000000000000",
+  "two_btc_token": "0xc2b1df84112619d190193e48148000e3990bf627",
+  "three_crv_pool": "0x1337bedc9d22ecbe766df105c9623922a27963ec",
+  "two_crv_pool": "0x0000000000000000000000000000000000000000",
+  "three_btc_pool": "0x0000000000000000000000000000000000000000",
+  "two_btc_pool": "0x16a7da911a4dd1d83f3ff066fe28f3c792c50d90",
   "native_token": "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",
   "unifork_1_factory": "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10",
   "unifork_2_factory": "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
@@ -20,5 +27,11 @@
   "importExistingMetaPools": "",
   "transactionHash": "LENDING",
   "factoryAddress": "'0x0000000000000000000000000000000000000001'",
-  "unknownMetapoolType": "METAPOOL_FACTORY"
+  "unknownMetapoolType": "METAPOOL_FACTORY",
+  "usdnMapping": "",
+  "aethMapping": "",
+  "importChainRebaseAprModule": "import { getAvalanchePoolApr } from './avalanche'",
+  "returnChainRebaseApr": "return getAvalanchePoolApr(pool, reserves, timestamp, tvl)",
+  "rebasingPoolImplementation": "0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9",
+  "tvlThreshold": "1000000000"
 }
