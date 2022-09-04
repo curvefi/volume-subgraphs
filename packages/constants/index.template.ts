@@ -346,8 +346,8 @@ export const CTOKEN_POOLS = ["0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
 // Factory metapools that use the implementation for positive-rebasing and
 // and fee-on-transfer tokens do not log decimals the same way as regular
 // factory metapools.
-export const REBASING_POOL_IMPLEMENTATION = '{{ rebasingPoolImplementation }}'
-export const REBASING_POOL_IMPLEMENTATION_ADDRESS = Address.fromString(REBASING_POOL_IMPLEMENTATION)
+export const REBASING_POOL_IMPLEMENTATIONS: Array<string> = {{{rebasingPoolImplementations}}}
+export const REBASING_POOL_IMPLEMENTATION_ADDRESSES = REBASING_POOL_IMPLEMENTATIONS.map<Address>(function(x: string) { return Address.fromString(x)})
 
 // Addresses and variables needed to compute the APR of rebasing tokens
 export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
