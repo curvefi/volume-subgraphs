@@ -11,7 +11,7 @@ import {
   CRYPTO_FACTORY,
   METAPOOL_FACTORY,
   METAPOOL_FACTORY_ADDRESS,
-  REBASING_POOL_IMPLEMENTATION_ADDRESS,
+  REBASING_POOL_IMPLEMENTATION_ADDRESSES,
   STABLE_FACTORY,
 } from '../../../../packages/constants'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
@@ -136,7 +136,7 @@ export function createNewFactoryPool(
     factoryPool = factory.pool_list(poolCount)
     const implementationResult = factory.try_get_implementation_address(factoryPool)
     if (!implementationResult.reverted) {
-      isRebasing = implementationResult.value == REBASING_POOL_IMPLEMENTATION_ADDRESS
+      isRebasing = REBASING_POOL_IMPLEMENTATION_ADDRESSES.includes(implementationResult.value)
     }
     log.info('New factory pool (metapool: {}, base pool: {}) added {} with id {}', [
       metapool.toString(),

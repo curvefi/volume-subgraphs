@@ -32,6 +32,6 @@
   "aethMapping": "  - kind: ethereum/contract\n    name: AETH\n    network: mainnet\n    source:\n      address: \"0x6a9366f02B6E252e0cbe2E6B9CF0a8adDd7B641C\"\n      startBlock: 10970706\n      abi: AETH\n    mapping:\n      kind: ethereum/events\n      apiVersion: 0.0.7\n      language: wasm/assemblyscript\n      entities:\n        - TokenSnapshot\n      abis:\n        - name: AETH\n          file: ./abis/AETH.json\n      eventHandlers:\n        - event: RatioUpdate(uint256)\n          handler: handleAethRewards\n      file: ./src/services/rebase/mappingAeth.ts",
   "importChainRebaseAprModule": "import { getMainnetPoolApr } from './mainnet'",
   "returnChainRebaseApr": "return getMainnetPoolApr(pool, reserves, timestamp, tvl)",
-  "rebasingPoolImplementation": "0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9",
+  "rebasingPoolImplementations": "['0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9']",
   "tvlThreshold": "50000000000"
 }
