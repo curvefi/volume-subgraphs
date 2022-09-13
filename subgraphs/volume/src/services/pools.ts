@@ -59,7 +59,6 @@ export function createNewPool(
   pool.creationTx = tx
   pool.creationDate = timestamp
   pool.poolType = poolType
-  pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol)
   pool.basePool = basePool
   pool.cumulativeVolume = BIG_DECIMAL_ZERO
   pool.cumulativeVolumeUSD = BIG_DECIMAL_ZERO
@@ -112,6 +111,7 @@ export function createNewPool(
   pool.coins = coins
   pool.coinNames = coinNames
   pool.coinDecimals = coinDecimals
+  pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol, pool.coinNames)
   pool.save()
 }
 
@@ -329,20 +329,33 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
   return basePool
 }
 
-export function getAssetType(name: string, symbol: string): i32 {
-  const description = name.toUpperCase() + '-' + symbol.toUpperCase()
+
+export function compareAgainstKnownAssetNames(name: string): i32 {
   const stables = ['USD', 'DAI', 'MIM', 'TETHER']
   for (let i = 0; i < stables.length; i++) {
-    if (description.indexOf(stables[i]) >= 0) {
+    if (name.indexOf(stables[i]) >= 0) {
       return 0
     }
   }
-
-  if (description.indexOf('BTC') >= 0) {
+  if (name.indexOf('BTC') >= 0) {
     return 2
-  } else if (description.indexOf('ETH') >= 0) {
+  } else if (name.indexOf('ETH') >= 0) {
     return 1
-  } else {
-    return 3
   }
+  return -1
+}
+
+export function getAssetType(name: string, symbol: string, coinNames: string[]): i32 {
+  const description = name.toUpperCase() + '-' + symbol.toUpperCase()
+  let inferredATFromDesc = compareAgainstKnownAssetNames(description)
+  if (inferredATFromDesc != -1) {
+    return inferredATFromDesc
+  }
+  for (let i = 0; i < coinNames.length; i++) {
+    inferredATFromDesc = compareAgainstKnownAssetNames(coinNames[i].toUpperCase())
+    if (inferredATFromDesc != -1) {
+      return inferredATFromDesc
+    }
+  }
+  return 3
 }
