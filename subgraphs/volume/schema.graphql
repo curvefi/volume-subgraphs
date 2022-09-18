@@ -37,6 +37,7 @@ type Pool @entity {
   coinNames: [String!]!
   assetType: Int!
   poolType: PoolType!
+  c128: Boolean! # whether the pool uses int128 for coins
   isV2: Boolean!
   isRebasing: Boolean!
   cumulativeVolume: BigDecimal!
