@@ -100,6 +100,7 @@ export function createNewPool(
     pool.coins = coins
     pool.coinNames = coinNames
     pool.coinDecimals = coinDecimals
+    pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol, pool.coinNames)
     pool.save()
     return
   }
