@@ -7,7 +7,14 @@ import {
   LiquidityVolumeSnapshot,
   DailyPlatformSnapshot,
 } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigDecimal,
+  BigInt,
+  Bytes,
+  ethereum,
+  log
+} from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
@@ -42,6 +49,9 @@ import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/Cur
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
+import {
+  CurveLendingPool
+} from '../../generated/templates/RegistryTemplate/CurveLendingPool'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -379,15 +389,22 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.normalizedReserves = new Array<BigInt>()
   dailySnapshot.fee = BIG_DECIMAL_ZERO
   dailySnapshot.adminFee = BIG_DECIMAL_ZERO
+  dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
   dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.eventFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
   dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.tvl = BIG_DECIMAL_ZERO
+  dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
   return dailySnapshot
+}
+
+export function getOffPegFeeMultiplierResult(pool: Address): ethereum.CallResult<BigInt> {
+  const testLending = CurveLendingPool.bind(pool)
+  return testLending.try_offpeg_fee_multiplier()
 }
 
 export function takePoolSnapshots(timestamp: BigInt): void {
@@ -425,6 +442,14 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
       getReserves(pool, dailySnapshot, poolContract, timestamp)
 
+      // fetch params
+      const AResult = poolContract.try_A()
+      dailySnapshot.A = AResult.reverted ? BIG_INT_ZERO : AResult.value
+      const offPegFeeResult = getOffPegFeeMultiplierResult(bytesToAddress(poolAddress))
+      dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted ? BIG_DECIMAL_ZERO :
+        offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+
+      // compute base APR
       let baseApr = BIG_DECIMAL_ZERO
       if (pool.isV2) {
         const xcpProfitResult = poolContract.try_xcp_profit()
@@ -459,11 +484,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
       dailySnapshot.lpPriceUSD = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : dailySnapshot.tvl.div(supply)
-      if (!pool.isV2) {
-        const feeResult = poolContract.try_fee()
-        const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
-        dailySnapshot.fee = fee
-      }
+
+      const feeResult = poolContract.try_fee()
+      const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
+      dailySnapshot.fee = fee
+
       const adminFeeResult = poolContract.try_admin_fee()
       const adminFee = adminFeeResult.reverted
         ? BIG_DECIMAL_ZERO

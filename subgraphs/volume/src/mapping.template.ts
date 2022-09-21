@@ -40,6 +40,7 @@ import {
   processAddLiquidity,
   processLiquidityRemoval
 } from './services/liquidity'
+import { getOffPegFeeMultiplierResult } from './services/snapshots'
 {{{ importExistingMetaPools }}}
 
 
@@ -116,7 +117,7 @@ export function addRegistryPool(pool: Address,
   const testLending = CurveLendingPool.bind(pool)
   // The test would not work on mainnet because there are no
   // specific functions for lending pools there.
-  const testLendingResult = testLending.try_offpeg_fee_multiplier()
+  const testLendingResult = getOffPegFeeMultiplierResult(pool)
   if (!testLendingResult.reverted || LENDING_POOLS.includes(pool)) {
     // Lending pool
     log.info('New lending pool {} added from registry at {}', [

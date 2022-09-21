@@ -94,6 +94,7 @@ type DailyPoolSnapshot @entity {
   lpPriceUSD: BigDecimal!
   tvl: BigDecimal!
   fee: BigDecimal!
+  offPegFeeMultiplier: BigDecimal!
   adminFee: BigDecimal!
   adminFeesUSD: BigDecimal!
   lpFeesUSD: BigDecimal!
@@ -102,6 +103,7 @@ type DailyPoolSnapshot @entity {
   reserves: [BigInt!]!
   normalizedReserves: [BigInt!]!
   reservesUSD: [BigDecimal!]!
+  A: BigInt!
   xcpProfit: BigDecimal!
   xcpProfitA: BigDecimal!
   baseApr: BigDecimal!

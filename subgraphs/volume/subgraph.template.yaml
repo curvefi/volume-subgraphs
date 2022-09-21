@@ -129,6 +129,8 @@ templates:
           file: ./abis/LidoOracle.json
         - name: MetaPool
           file: ./abis/MetaPool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
         - name: CurvePoolV2
@@ -168,6 +170,8 @@ templates:
           file: ./abis/CurvePool.json
         - name: MetaPool
           file: ./abis/MetaPool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
@@ -233,6 +237,8 @@ templates:
           file: ./abis/CLAggregator.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: MetaPool
           file: ./abis/MetaPool.json
         - name: CurvePoolV2
@@ -286,6 +292,8 @@ templates:
           file: ./abis/CurvePool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: CToken
@@ -339,6 +347,8 @@ templates:
           file: ./abis/CurvePool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: CToken
