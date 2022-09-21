@@ -100,6 +100,7 @@ type DailyPoolSnapshot @entity {
   eventFeesUSD: BigDecimal!
   totalDailyFeesUSD: BigDecimal!
   reserves: [BigInt!]!
+  normalizedReserves: [BigInt!]!
   reservesUSD: [BigDecimal!]!
   xcpProfit: BigDecimal!
   xcpProfitA: BigDecimal!
