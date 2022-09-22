@@ -59,6 +59,7 @@ export function createNewPool(
   pool.creationTx = tx
   pool.creationDate = timestamp
   pool.poolType = poolType
+  pool.c128 = false
   pool.basePool = basePool
   pool.cumulativeVolume = BIG_DECIMAL_ZERO
   pool.cumulativeVolumeUSD = BIG_DECIMAL_ZERO
@@ -81,11 +82,13 @@ export function createNewPool(
     log.debug('Call to coins reverted for pool ({}), attempting 128 bytes call', [pool.id])
     const poolContract = CurvePoolCoin128.bind(poolAddress)
     const coins = pool.coins
+    pool.c128 = true
     const coinNames = pool.coinNames
     const coinDecimals = pool.coinDecimals
     let coinResult = poolContract.try_coins(BigInt.fromI32(i))
     if (coinResult.reverted) {
       log.warning('Call to int128 coins failed for {}', [pool.id])
+      pool.c128 = false
     }
     while (!coinResult.reverted) {
       coins.push(coinResult.value)
@@ -97,6 +100,7 @@ export function createNewPool(
     pool.coins = coins
     pool.coinNames = coinNames
     pool.coinDecimals = coinDecimals
+    pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol, pool.coinNames)
     pool.save()
     return
   }

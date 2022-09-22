@@ -7,7 +7,14 @@ import {
   LiquidityVolumeSnapshot,
   DailyPlatformSnapshot,
 } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigDecimal,
+  BigInt,
+  Bytes,
+  ethereum,
+  log
+} from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import {
@@ -33,7 +40,7 @@ import {
   TVL_THRESHOLD,
   CURVE_ONLY_TOKENS,
 } from '../../../../packages/constants'
-import { bytesToAddress } from '../../../../packages/utils'
+import { BigDecimalToBigInt, bytesToAddress } from '../../../../packages/utils'
 import { getPlatform } from './platform'
 import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
@@ -42,6 +49,9 @@ import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/Cur
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
+import {
+  CurveLendingPool
+} from '../../generated/templates/RegistryTemplate/CurveLendingPool'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -323,6 +333,80 @@ function getPreviousDayTvl(pool: Pool, timestamp: BigInt): BigDecimal {
   return previousDaySnapshot.tvl
 }
 
+function getReserves(pool: Pool,
+                     dailySnapshot: DailyPoolSnapshot,
+                     poolContract: CurvePoolV2,
+                     timestamp: BigInt): void {
+
+  const reserves = dailySnapshot.reserves
+  const normalizedReserves = dailySnapshot.normalizedReserves
+  const reservesUsd = dailySnapshot.reservesUSD
+  let tvl = BIG_DECIMAL_ZERO
+  for (let j = 0; j < pool.coins.length; j++) {
+    let balance = BIG_INT_ZERO
+    let balanceResult = poolContract.try_balances(BigInt.fromI32(j))
+    if (balanceResult.reverted) {
+      log.warning('Unable to fetch balances for {}, trying with int128 ABI', [pool.id])
+      const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
+      balanceResult = poolContract128.try_balances(BigInt.fromI32(j))
+      if (!balanceResult.reverted) {
+        balance = balanceResult.value
+      }
+    } else {
+      balance = balanceResult.value
+    }
+    reserves.push(balance)
+    const currentCoin = bytesToAddress(pool.coins[j])
+    // need to handle the fact that balances doesn't actually return token balance
+    // for cTokens
+    const isCToken = CTOKENS.includes(currentCoin.toHexString())
+    if (isCToken) {
+      const tokenContract = ERC20.bind(currentCoin)
+      const balanceResult = tokenContract.try_balanceOf(Address.fromString(pool.id))
+      balance = balanceResult.reverted ? balance : balanceResult.value
+    }
+    const price = pool.isV2
+      ? getCryptoSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
+      : getStableSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
+    const reserveUsdValue = balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price)
+    reservesUsd.push(reserveUsdValue)
+    tvl = tvl.plus(reserveUsdValue)
+    // handle "normalized" reserves: all balances normalized to 1e18
+    // and including exchange rate for c tokens
+    normalizedReserves.push(isCToken ? BigDecimalToBigInt(reserveUsdValue.times(BIG_DECIMAL_1E18)) :
+      BigDecimalToBigInt(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(BIG_DECIMAL_1E18)))
+  }
+  dailySnapshot.tvl = tvl
+  dailySnapshot.reserves = reserves
+  dailySnapshot.normalizedReserves = normalizedReserves
+  dailySnapshot.reservesUSD = reservesUsd
+}
+
+function createNewSnapshot(snapId: string): DailyPoolSnapshot {
+  const dailySnapshot = new DailyPoolSnapshot(snapId)
+  dailySnapshot.reserves = new Array<BigInt>()
+  dailySnapshot.reservesUSD = new Array<BigDecimal>()
+  dailySnapshot.normalizedReserves = new Array<BigInt>()
+  dailySnapshot.fee = BIG_DECIMAL_ZERO
+  dailySnapshot.adminFee = BIG_DECIMAL_ZERO
+  dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
+  dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.eventFeesUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.tvl = BIG_DECIMAL_ZERO
+  dailySnapshot.A = BIG_INT_ZERO
+  dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
+  dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+  return dailySnapshot
+}
+
+export function getOffPegFeeMultiplierResult(pool: Address): ethereum.CallResult<BigInt> {
+  const testLending = CurveLendingPool.bind(pool)
+  return testLending.try_offpeg_fee_multiplier()
+}
+
 export function takePoolSnapshots(timestamp: BigInt): void {
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -344,19 +428,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     }
     const snapId = pool.id + '-' + time.toString()
     if (!DailyPoolSnapshot.load(snapId)) {
-      const dailySnapshot = new DailyPoolSnapshot(snapId)
-      dailySnapshot.reserves = new Array<BigInt>()
-      dailySnapshot.reservesUSD = new Array<BigDecimal>()
-      dailySnapshot.fee = BIG_DECIMAL_ZERO
-      dailySnapshot.adminFee = BIG_DECIMAL_ZERO
-      dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.eventFeesUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
-      dailySnapshot.tvl = BIG_DECIMAL_ZERO
-      dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
-      dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+      const dailySnapshot = createNewSnapshot(snapId)
       dailySnapshot.pool = pool.id
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
@@ -368,48 +440,16 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.virtualPrice = vPrice
 
-      const reserves = dailySnapshot.reserves
-      const reservesUsd = dailySnapshot.reservesUSD
-      let tvl = BIG_DECIMAL_ZERO
-      for (let j = 0; j < pool.coins.length; j++) {
-        let balance = BIG_INT_ZERO
-        let balanceResult = poolContract.try_balances(BigInt.fromI32(j))
-        if (balanceResult.reverted) {
-          log.warning('Unable to fetch balances for {}, trying with int128 ABI', [pool.id])
-          const poolContract128 = CurvePoolCoin128.bind(Address.fromString(pool.id))
-          balanceResult = poolContract128.try_balances(BigInt.fromI32(j))
-          if (!balanceResult.reverted) {
-            balance = balanceResult.value
-          }
-        } else {
-          balance = balanceResult.value
-        }
-        reserves.push(balance)
-        const currentCoin = bytesToAddress(pool.coins[j])
-        // need to handle the fact that balances doesn't actually return token balance
-        // for cTokens
-        if (CTOKENS.includes(currentCoin.toHexString())) {
-          const tokenContract = ERC20.bind(currentCoin)
-          const balanceResult = tokenContract.try_balanceOf(Address.fromString(pool.id))
-          balance = balanceResult.reverted ? balance : balanceResult.value
-        }
-        const price = pool.isV2
-          ? getCryptoSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
-          : getStableSwapTokenPriceFromSnapshot(pool, currentCoin, timestamp)
-        const reserveUsdValue = balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price)
-        reservesUsd.push(reserveUsdValue)
-        tvl = tvl.plus(reserveUsdValue)
-      }
+      getReserves(pool, dailySnapshot, poolContract, timestamp)
 
-      // sanity check
-      if (tvl.gt(TVL_THRESHOLD)) {
-        log.warning('TVL for pool {} exceeds threshold {}', [pool.id, TVL_THRESHOLD.toString()])
-        tvl = BIG_DECIMAL_ZERO
-      }
+      // fetch params
+      const AResult = poolContract.try_A()
+      dailySnapshot.A = AResult.reverted ? BIG_INT_ZERO : AResult.value
+      const offPegFeeResult = getOffPegFeeMultiplierResult(bytesToAddress(poolAddress))
+      dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted ? BIG_DECIMAL_ZERO :
+        offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
 
-      dailySnapshot.tvl = tvl
-      dailySnapshot.reserves = reserves
-      dailySnapshot.reservesUSD = reservesUsd
+      // compute base APR
       let baseApr = BIG_DECIMAL_ZERO
       if (pool.isV2) {
         const xcpProfitResult = poolContract.try_xcp_profit()
@@ -422,7 +462,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       // handle rebasing pools
       // TODO: handle decimals to work with depeg (instead of using USD value)
-      const deductibleApr = getDeductibleApr(pool, reservesUsd, timestamp)
+      const deductibleApr = getDeductibleApr(pool, dailySnapshot.reservesUSD, timestamp)
       if (deductibleApr.gt(BIG_DECIMAL_ZERO)) {
         log.info('Deductible APR for pool {}: {} (from base APR {})', [
           pool.id,
@@ -443,12 +483,12 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
-      dailySnapshot.lpPriceUSD = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : tvl.div(supply)
-      if (!pool.isV2) {
-        const feeResult = poolContract.try_fee()
-        const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
-        dailySnapshot.fee = fee
-      }
+      dailySnapshot.lpPriceUSD = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : dailySnapshot.tvl.div(supply)
+
+      const feeResult = poolContract.try_fee()
+      const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
+      dailySnapshot.fee = fee
+
       const adminFeeResult = poolContract.try_admin_fee()
       const adminFee = adminFeeResult.reverted
         ? BIG_DECIMAL_ZERO

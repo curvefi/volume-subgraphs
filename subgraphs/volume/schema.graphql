@@ -37,6 +37,7 @@ type Pool @entity {
   coinNames: [String!]!
   assetType: Int!
   poolType: PoolType!
+  c128: Boolean! # whether the pool uses int128 for coins
   isV2: Boolean!
   isRebasing: Boolean!
   cumulativeVolume: BigDecimal!
@@ -93,13 +94,16 @@ type DailyPoolSnapshot @entity {
   lpPriceUSD: BigDecimal!
   tvl: BigDecimal!
   fee: BigDecimal!
+  offPegFeeMultiplier: BigDecimal!
   adminFee: BigDecimal!
   adminFeesUSD: BigDecimal!
   lpFeesUSD: BigDecimal!
   eventFeesUSD: BigDecimal!
   totalDailyFeesUSD: BigDecimal!
   reserves: [BigInt!]!
+  normalizedReserves: [BigInt!]!
   reservesUSD: [BigDecimal!]!
+  A: BigInt!
   xcpProfit: BigDecimal!
   xcpProfitA: BigDecimal!
   baseApr: BigDecimal!
