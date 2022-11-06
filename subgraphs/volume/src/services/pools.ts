@@ -335,7 +335,7 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
 
 
 export function compareAgainstKnownAssetNames(name: string): i32 {
-  const stables = ['USD', 'DAI', 'MIM', 'TETHER']
+  const stables = ['USD', 'DAI', 'MIM', 'TETHER', 'FRAX']
   for (let i = 0; i < stables.length; i++) {
     if (name.indexOf(stables[i]) >= 0) {
       return 0
