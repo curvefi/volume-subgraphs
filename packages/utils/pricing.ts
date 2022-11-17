@@ -3,7 +3,8 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ONE,
-  BIG_DECIMAL_TWO,
+  CRV_FRAX_ADDRESS,
+  FRAXBP_ADDRESS,
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
   CTOKENS,
@@ -26,6 +27,7 @@ import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemp
 import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
 import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
 import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
+import { CurvePoolV2 } from '../../subgraphs/volume/generated/templates/RegistryTemplate/CurvePoolV2'
 
 export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
   const factory = Factory.bind(factoryContract)
@@ -162,6 +164,18 @@ export function getYTokenExchangeRate(token: Address): BigDecimal {
   return exchangeRate.toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
+export function getFraxBpVirtualPrice(): BigDecimal {
+  const poolContract = CurvePoolV2.bind(FRAXBP_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for FraxBP', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  return vPrice
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
@@ -170,7 +184,10 @@ export function getUsdRate(token: Address): BigDecimal {
     return getCTokenExchangeRate(token)
   } else if (YTOKENS.includes(token.toHexString())) {
     return getYTokenExchangeRate(token)
-  } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+  } else if (token == CRV_FRAX_ADDRESS) {
+    return getFraxBpVirtualPrice()
+  }
+  else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     let usdPrice = getTokenAValueInTokenB(token, USDT_ADDRESS)
     // if it fails we try to go directly via a stable pair
     if (usdPrice == BIG_DECIMAL_ZERO) {
