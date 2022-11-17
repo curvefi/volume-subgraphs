@@ -501,6 +501,10 @@ export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD
 
 export const CURVE_REGISTRY_V1 = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5')
 
+export const CRV_FRAX = "0x3175df0976dfa876431c2e9ee6bc45b65d3473cc"
+export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
+export const FRAXBP_ADDRESS = Address.fromString("0xdcef968d416a41cdac0ed8702fac8128a64241a2")
+
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
 export const CRYPTO_FACTORY = 'CRYPTO_FACTORY'
 export const STABLE_FACTORY = 'STABLE_FACTORY'
