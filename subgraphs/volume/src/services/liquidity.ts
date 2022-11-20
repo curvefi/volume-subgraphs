@@ -66,7 +66,6 @@ export function processLiquidityRemoval(
   liquidityEvent.block = block
   liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
-  liquidityEvent.volumeUSD = volumeUSD
   liquidityEvent.removal = true
 
   hourlySnapshot.save()
@@ -127,7 +126,6 @@ export function processAddLiquidity(
   liquidityEvent.block = block
   liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
-  liquidityEvent.volumeUSD = volumeUSD
   liquidityEvent.removal = false
 
   hourlySnapshot.save()

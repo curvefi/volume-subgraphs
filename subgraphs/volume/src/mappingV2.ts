@@ -154,19 +154,3 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     event.transaction.hash
   )
 }
-
-export function handleClaimAdminFee(event: ClaimAdminFee): void {
-  takePoolSnapshots(event.block.timestamp)
-  const pool = Pool.load(event.address.toHexString())
-  if (!pool) {
-    return
-  }
-  const time = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = pool.id + '-' + time.toString()
-  const snapshot = DailyPoolSnapshot.load(snapId)
-  if (snapshot) {
-    const adminFees = event.params.tokens.toBigDecimal().div(BIG_DECIMAL_1E18).times(snapshot.lpPriceUSD)
-    snapshot.eventFeesUSD = snapshot.eventFeesUSD.plus(adminFees)
-    snapshot.save()
-  }
-}

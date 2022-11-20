@@ -392,7 +392,6 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
   dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
-  dailySnapshot.eventFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
   dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.tvl = BIG_DECIMAL_ZERO
