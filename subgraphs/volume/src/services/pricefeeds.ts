@@ -45,7 +45,10 @@ export function updatePriceFeed(
     return
   }
   const assetPrice = amountBought.div(amountSold)
-
+  // sanity check for prices
+  if (assetPrice.gt(BigDecimal.fromString("10000000"))) {
+    return
+  }
   const price = getPriceFeed(pool, tokenSold, tokenBought, soldId, boughtId, isUnderlying)
   price.lastBlock = blockNumber
   price.lastUpdated = timestamp

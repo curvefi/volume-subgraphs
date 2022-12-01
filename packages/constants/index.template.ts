@@ -424,7 +424,8 @@ export const BENCHMARK_STABLE_ASSETS = [WBTC_TOKEN,
 export const SCAM_POOLS = ["0x0950ea36770ed3b95a428c83a532b1ffa46088bc",
 "0xb5be5a8126244da7e388a88f16ee8be54d22117c",
 "0xdaedd59fa2c5c63d46a3bae5ed115247df9eb6ec",
-"0x5e0458211702142aa0833a4a60a4535cd891dcc7"]
+"0x5e0458211702142aa0833a4a60a4535cd891dcc7",
+"0x84997fafc913f1613f51bb0e2b5854222900514b"]
 
 // We use this as a way to deal with potential aberations that are not handled
 // (particularly necessary for matic) and avoid issues when calculating fees
