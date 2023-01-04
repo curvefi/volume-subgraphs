@@ -7,192 +7,322 @@ enum PoolType {
   LENDING
 }
 
-type Platform @entity {
-  id: ID!
-  pools: [Pool!]! @derivedFrom(field: "platform")
-  poolAddresses: [Bytes!]!
-  latestPoolSnapshot: BigInt!
-}
-
-type Registry @entity {
-  id: ID!
-}
-
-type Factory @entity {
-  id: ID!
-  poolCount: BigInt!
-}
-
 type Pool @entity {
+  """ Entity ID """
   id: ID!
+  """ Pool contract address """
   address: Bytes!
+  """ Platform """
   platform: Platform!
+  """ Pool name (from registry from LP token) """
   name: String!
+  """ LP token symbol """
   symbol: String!
+  """ Whether the pool is a metapool or a plain pool """
   metapool: Boolean!
+  """ LP Token contract address """
   lpToken: Bytes!
+  """ Base pool (for metapools) """
   basePool: Bytes!
+  """ Pool coins """
   coins: [Bytes!]!
+  """ Pool coins decimals (same order as coins) """
   coinDecimals: [BigInt!]!
+  """ Pool coins names (same order as coins) """
   coinNames: [String!]!
+  """ Pool asset type (USD: 0, ETH: 1, BTC: 2, Other: 3, Crypto: 4) """
   assetType: Int!
+  """ Pool type (for ABI variations) """
   poolType: PoolType!
-  c128: Boolean! # whether the pool uses int128 for coins
+  """ Whether the pool uses int128 for coins (legacy contracts) """
+  c128: Boolean!
+  """ Whether the pool is a Curve v2 pool """
   isV2: Boolean!
+  """ Whether one of the pool's assets is rebasing"""
   isRebasing: Boolean!
+  """ Pool cumulative volume since inception """
   cumulativeVolume: BigDecimal!
+  """ Pool cumulative volume since inception (in USD)"""
   cumulativeVolumeUSD: BigDecimal!
 
+  """ Pool cumulative fees since inception (in USD)"""
   cumulativeFeesUSD: BigDecimal!
 
+  """ Latest virtual price """
   virtualPrice: BigDecimal!
+  """ Latest base APR (from trading fees) """
   baseApr: BigDecimal!
 
+  """ Pool creation date """
   creationDate: BigInt!
+  """ Pool creation transaction hash """
   creationTx: Bytes!
+  """ Pool creation block """
   creationBlock: BigInt!
 
+  """ Daily pool attribute snapshot """
   dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
 
+  """ Pool OHLC candle data """
   candles: [Candle!] @derivedFrom(field: "pool")
+  """ Pool prices from executed trades (internal use) """
   prices: [PriceFeed!] @derivedFrom(field: "pool")
+  """ Pool swaps """
   swapEvents: [SwapEvent!] @derivedFrom(field: "pool")
 
+  """ Pool swap volume snapshots """
   swapVolumeSnapshots: [SwapVolumeSnapshot!] @derivedFrom(field: "pool")
 
+  """ Pool liquidity events (currently disabled) """
   liquidityEvents: [LiquidityEvent!] @derivedFrom(field: "pool")
 
+  """ Pool liquidity volume snapshots (currently disabled) """
   liquidityVolumeSnapshots: [LiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
 }
 
-type BasePool @entity {
-  id: ID!
-  coins: [Bytes!]!
-  coinDecimals: [BigInt!]!
-}
-
-type TokenSnapshot @entity {
-  id: ID!
-  token: Bytes!
-  price: BigDecimal!
-  timestamp: BigInt!
-}
-
-type DailyPlatformSnapshot @entity {
-  id: ID!
-  adminFeesUSD: BigDecimal!
-  lpFeesUSD: BigDecimal!
-  totalDailyFeesUSD: BigDecimal!
-  timestamp: BigInt!
-}
-
 type DailyPoolSnapshot @entity {
+  """ Entity ID """
   id: ID!
+  """ Pool ID """
   pool: Pool!
+  """ Pool virtual price """
   virtualPrice: BigDecimal!
+  """ Pool LP token price (in USD) """
   lpPriceUSD: BigDecimal!
+  """ Pool TVL (in USD) """
   tvl: BigDecimal!
+  """ Pool fee value """
   fee: BigDecimal!
-  offPegFeeMultiplier: BigDecimal!
+  """ Pool admin fee value """
   adminFee: BigDecimal!
+  """ Off peg fee multiplier (for lending pools) """
+  offPegFeeMultiplier: BigDecimal!
+  """ Value of fees paid to the DAO (in USD)  """
   adminFeesUSD: BigDecimal!
+  """ Value of fees paid to the LPs (in USD)  """
   lpFeesUSD: BigDecimal!
-  eventFeesUSD: BigDecimal!
+  """ Total value of fees collected (in USD) """
   totalDailyFeesUSD: BigDecimal!
+  """ Total reserves (asset and asset decimals denomination, same order as the pool's coins) """
   reserves: [BigInt!]!
+  """ Total reserves (asset denomination, 18 decimals, same order as the pool's coins) """
   normalizedReserves: [BigInt!]!
+  """ Total reserves (USD denomination, same order as the pool's coins) """
   reservesUSD: [BigDecimal!]!
+  """ A factor """
   A: BigInt!
+  """ xcpProfit value """
   xcpProfit: BigDecimal!
+  """ xcpProfitA value """
   xcpProfitA: BigDecimal!
+  """ base APR from fees (annualized from daily variation) """
   baseApr: BigDecimal!
+  """ APR from rebase - if applicable (annualized from daily variation) """
   rebaseApr: BigDecimal!
+  """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
 type SwapVolumeSnapshot @entity {
+  """ Entity ID """
   id: ID!
+  """ Pool ID """
   pool: Pool!
+  """ Snapshot period: hourly (3600), daily (86400) or weekly (604800) """
   period: BigInt!
+  """ Amount sold (token denomination, normalized decimals) """
   amountSold: BigDecimal!
+  """ Amount bought (token denomination, normalized decimals) """
   amountBought: BigDecimal!
+  """ Amount sold (USD denomination, normalized decimals) """
   amountSoldUSD: BigDecimal!
+  """ Amount bought (USD denomination, normalized decimals) """
   amountBoughtUSD: BigDecimal!
+  """ Number of swaps over the period """
   count: BigInt!
+  """ Volume (token denomination) """
   volume: BigDecimal!
+  """ Volume (USD denomination) """
   volumeUSD: BigDecimal!
+  """ Snapshot timestamp """
+  timestamp: BigInt!
+}
+
+type DailyPlatformSnapshot @entity {
+  """ Entity ID """
+  id: ID!
+  """ Total admin fees collected (in USD) """
+  adminFeesUSD: BigDecimal!
+  """ Total fees distributed to LPs (in USD) """
+  lpFeesUSD: BigDecimal!
+  """ Total fees collected (in USD) """
+  totalDailyFeesUSD: BigDecimal!
+  """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
 type SwapEvent @entity {
   id: ID!
+  """ Pool ID """
   pool: Pool!
+  """ Even block """
   block: BigInt!
+  """ Event transaction hash """
   tx: Bytes!
+  """ Transaction gas limit """
   gasLimit: BigInt!
+  """ Transaction gas used """
   gasUsed: BigInt!
+  """ Buyer address """
   buyer: Bytes!
+  """ Sold token address """
   tokenSold: Bytes!
+  """ Bought token address """
   tokenBought: Bytes!
+  """ Amount sold """
   amountSold: BigDecimal!
+  """ Amount bought """
   amountBought: BigDecimal!
+  """ Amount sold (USD denomination) """
   amountSoldUSD: BigDecimal!
+  """ Amount bought (USD denomination) """
   amountBoughtUSD: BigDecimal!
+  """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
-type LiquidityVolumeSnapshot @entity {
+type Candle @entity {
+  """ Entity ID (time + period + srcToken + dstToken) """
   id: ID!
+  """ Pool ID """
   pool: Pool!
+  """ Candle timestamp """
+  timestamp: BigInt!
+  """ Candle period: hourly (3600), daily (86400) or weekly (604800) """
+  period: Int!
+  """ Last block included in the candle """
+  lastBlock: BigInt!
+  """ First asset address """
+  token0: Bytes!
+  """ Second asset address """
+  token1: Bytes!
+  """ Number of transactions """
+  txs: BigInt!
+
+  """ First asset volume """
+  token0TotalAmount: BigDecimal!
+  """ Second asset volume """
+  token1TotalAmount: BigDecimal!
+  """ Open price """
+  open: BigDecimal!
+  """ Close price """
+  close: BigDecimal!
+  """ Lowest price """
+  low: BigDecimal!
+  """ Highest price """
+  high: BigDecimal!
+}
+
+type LiquidityVolumeSnapshot @entity {
+  """ Entity ID """
+  id: ID!
+  """ Pool ID """
+  pool: Pool!
+  """ Snapshot period: hourly (3600), daily (86400) or weekly (604800) """
   period: BigInt!
+  """ Amounts of assets added to LP (same order as the pool's coins) """
   amountAdded: [BigDecimal!]!
+  """ Amounts of assets removed from LP (same order as the pool's coins) """
   amountRemoved: [BigDecimal!]!
+  """ Number of liquidity additions """
   addCount: BigInt!
+  """ Number of liquidity removals """
   removeCount: BigInt!
+  """ Liquidity based volume (USD denomination) """
   volumeUSD: BigDecimal!
+  """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
 type LiquidityEvent @entity {
+  """ Entity ID """
   id: ID!
+  """ Address of the liquidity provider """
   liquidityProvider: Bytes!
+  """ Event timestamp """
   timestamp: BigInt!
+  """ Event block """
   block: BigInt!
+  """ Pool ID """
   pool: Pool!
+  """ Amounts added or removed (same order as the pool's coins) """
   tokenAmounts: [BigInt!]!
-  volumeUSD: BigDecimal!
+  """ Whether the event is a liquidity removal or not """
   removal: Boolean!
 }
 
-type Candle @entity {
-  id: ID! # time + period + srcToken + dstToken
-  pool: Pool!
-  timestamp: BigInt!
-  period: Int!
-  lastBlock: BigInt!
-  token0: Bytes!
-  token1: Bytes!
-  txs: BigInt!
-
-  token0TotalAmount: BigDecimal!
-  token1TotalAmount: BigDecimal!
-  open: BigDecimal!
-  close: BigDecimal!
-  low: BigDecimal!
-  high: BigDecimal!
-}
-
 type PriceFeed @entity {
-  id: ID! # pool + srcToken + dstToken
+  """ Entity ID (pool + srcToken + dstToken) """
+  id: ID!
+  """ Pool ID """
   pool: Pool!
+  """ Last update timestamp """
   lastUpdated: BigInt!
+  """ Last update block """
   lastBlock: BigInt!
+  """ From token index """
   fromIndex: Int!
+  """ To token index """
   toIndex: Int!
+  """ Was exchange underlying """
   isUnderlying: Boolean!
+  """ First asset address """
   token0: Bytes!
+  """ Second asset address """
   token1: Bytes!
+  """ Realized price """
   price: BigDecimal!
 }
 
+type TokenSnapshot @entity {
+  """ Entity ID """
+  id: ID!
+  """ Token address """
+  token: Bytes!
+  """ Token price """
+  price: BigDecimal!
+  """ Snapshot timestamp """
+  timestamp: BigInt!
+}
+
+type BasePool @entity {
+  """ Entity ID """
+  id: ID!
+  """ Base pool coins """
+  coins: [Bytes!]!
+  """ Base pool coin decimals """
+  coinDecimals: [BigInt!]!
+}
+type Platform @entity {
+  """ Entity ID """
+  id: ID!
+  """ List of all pools """
+  pools: [Pool!]! @derivedFrom(field: "platform")
+  """ Addresses of all pools on the platform """
+  poolAddresses: [Bytes!]!
+  """ Timestamp of the latest snapshot """
+  latestPoolSnapshot: BigInt!
+}
+
+type Registry @entity {
+  """ Entity ID (Registry address) """
+  id: ID!
+}
+
+type Factory @entity {
+  """ Entity ID (Factory address) """
+  id: ID!
+  """ Number of pools deployed by the Factory contract """
+  poolCount: BigInt!
+}

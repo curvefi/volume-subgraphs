@@ -182,8 +182,11 @@ export function handleExchange(
   )
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
-  const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
-
+  let volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
+  // sanity check for usd volume
+  if (volumeUSD.gt(BigDecimal.fromString("1000000000"))) {
+    volumeUSD = BigDecimal.zero()
+  }
   // create hourly, daily & weekly snapshots
   for (let i = 0; i < PERIODS.length; i++) {
     const snapshot = getSwapSnapshot(pool, timestamp, PERIODS[i])
