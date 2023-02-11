@@ -17,7 +17,7 @@ import {
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
-  YTOKENS,
+  YTOKENS, TRIPOOL_ADDRESS
 } from 'const'
 import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
 import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
@@ -176,18 +176,35 @@ export function getFraxBpVirtualPrice(): BigDecimal {
   return vPrice
 }
 
+
+export function get3CrvVirtualPrice(): BigDecimal {
+  const poolContract = CurvePoolV2.bind(TRIPOOL_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for TriPool', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  return vPrice
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
     token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
-  } else if (CTOKENS.includes(token.toHexString())) {
+  }
+  if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
   } else if (YTOKENS.includes(token.toHexString())) {
     return getYTokenExchangeRate(token)
   } else if (token == CRV_FRAX_ADDRESS) {
     return getFraxBpVirtualPrice()
   }
-  else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+  else if (token == THREE_CRV_ADDRESS) {
+    return get3CrvVirtualPrice()
+  }
+  else if (token != USDT_ADDRESS) {
     let usdPrice = getTokenAValueInTokenB(token, USDT_ADDRESS)
     // if it fails we try to go directly via a stable pair
     if (usdPrice == BIG_DECIMAL_ZERO) {
