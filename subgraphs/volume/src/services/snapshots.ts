@@ -7,19 +7,11 @@ import {
   LiquidityVolumeSnapshot,
   DailyPlatformSnapshot,
 } from '../../generated/schema'
-import {
-  Address,
-  BigDecimal,
-  BigInt,
-  Bytes,
-  ethereum,
-  log
-} from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp, HOUR } from '../../../../packages/utils/time'
-import { getUsdRate } from '../../../../packages/utils/pricing'
+import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
+import { DAY, getIntervalFromTimestamp, HOUR } from 'utils/time'
+import { getForexUsdRate, getUsdRate } from 'utils/pricing'
 import {
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_1E8,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   FOREX_ORACLES,
@@ -37,36 +29,17 @@ import {
   YC_LENDING_TOKENS,
   USDN_POOL,
   SCAM_POOLS,
-  TVL_THRESHOLD,
   CURVE_ONLY_TOKENS,
-} from '../../../../packages/constants'
-import { BigDecimalToBigInt, bytesToAddress } from '../../../../packages/utils'
+} from 'const'
+import { BigDecimalToBigInt, bytesToAddress } from 'utils'
 import { getPlatform } from './platform'
-import { ChainlinkAggregator } from '../../generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from '../../generated/templates/RegistryTemplate/CurvePoolV2'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { exponentToBigDecimal } from 'utils/maths'
 import { CurvePoolCoin128 } from '../../generated/templates/RegistryTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
-import {
-  CurveLendingPool
-} from '../../generated/templates/RegistryTemplate/CurveLendingPool'
-
-export function getForexUsdRate(token: string): BigDecimal {
-  // returns the amount of USD 1 unit of the foreign currency is worth
-  const priceOracle = ChainlinkAggregator.bind(FOREX_ORACLES[token])
-  const conversionRateReponse = priceOracle.try_latestAnswer()
-  const conversionRate = conversionRateReponse.reverted
-    ? BIG_DECIMAL_ONE
-    : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
-  log.debug('Answer from Forex oracle {} for token {}: {}', [
-    FOREX_ORACLES[token].toHexString(),
-    token,
-    conversionRate.toString(),
-  ])
-  return conversionRate
-}
+import { CurveLendingPool } from '../../generated/templates/RegistryTemplate/CurveLendingPool'
 
 export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
@@ -333,11 +306,7 @@ function getPreviousDayTvl(pool: Pool, timestamp: BigInt): BigDecimal {
   return previousDaySnapshot.tvl
 }
 
-function getReserves(pool: Pool,
-                     dailySnapshot: DailyPoolSnapshot,
-                     poolContract: CurvePoolV2,
-                     timestamp: BigInt): void {
-
+function getReserves(pool: Pool, dailySnapshot: DailyPoolSnapshot, poolContract: CurvePoolV2, timestamp: BigInt): void {
   const reserves = dailySnapshot.reserves
   const normalizedReserves = dailySnapshot.normalizedReserves
   const reservesUsd = dailySnapshot.reservesUSD
@@ -373,8 +342,13 @@ function getReserves(pool: Pool,
     tvl = tvl.plus(reserveUsdValue)
     // handle "normalized" reserves: all balances normalized to 1e18
     // and including exchange rate for c tokens
-    normalizedReserves.push(isCToken ? BigDecimalToBigInt(reserveUsdValue.times(BIG_DECIMAL_1E18)) :
-      BigDecimalToBigInt(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(BIG_DECIMAL_1E18)))
+    normalizedReserves.push(
+      isCToken
+        ? BigDecimalToBigInt(reserveUsdValue.times(BIG_DECIMAL_1E18))
+        : BigDecimalToBigInt(
+            balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(BIG_DECIMAL_1E18)
+          )
+    )
   }
   dailySnapshot.tvl = tvl
   dailySnapshot.reserves = reserves
@@ -445,8 +419,9 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const AResult = poolContract.try_A()
       dailySnapshot.A = AResult.reverted ? BIG_INT_ZERO : AResult.value
       const offPegFeeResult = getOffPegFeeMultiplierResult(bytesToAddress(poolAddress))
-      dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted ? BIG_DECIMAL_ZERO :
-        offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+      dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted
+        ? BIG_DECIMAL_ZERO
+        : offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
 
       // compute base APR
       let baseApr = BIG_DECIMAL_ZERO

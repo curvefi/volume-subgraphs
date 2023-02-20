@@ -506,6 +506,8 @@ export const CRV_FRAX = "0x3175df0976dfa876431c2e9ee6bc45b65d3473cc"
 export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
 export const FRAXBP_ADDRESS = Address.fromString("0xdcef968d416a41cdac0ed8702fac8128a64241a2")
 
+export const MATIC_FOUR_EUR_LP_TOKEN_ADDRESS = Address.fromString("0xad326c253a84e9805559b73a08724e11e49ca651")
+
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
 export const CRYPTO_FACTORY = 'CRYPTO_FACTORY'
 export const STABLE_FACTORY = 'STABLE_FACTORY'
