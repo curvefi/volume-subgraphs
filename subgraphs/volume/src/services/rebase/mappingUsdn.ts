@@ -1,7 +1,7 @@
 import { Reward, USDN } from '../../../generated/USDN/USDN'
 import { TokenSnapshot } from '../../../generated/schema'
-import { DAY, getIntervalFromTimestamp } from '../../../../../packages/utils/time'
-import { BIG_DECIMAL_ZERO, BIG_INT_ZERO } from '../../../../../packages/constants'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
+import { BIG_DECIMAL_ZERO, BIG_INT_ZERO } from 'const'
 
 // We need to keep track of USDN rewards to compute the rebase APR
 // because all the contract's variables are private and the graph does not

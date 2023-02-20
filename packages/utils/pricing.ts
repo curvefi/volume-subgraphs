@@ -24,16 +24,16 @@ import {
   FOREX_ORACLES,
   BIG_DECIMAL_1E8,
 } from 'const'
-import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
-import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
+import { Factory } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Factory'
+import { Pair } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Pair'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
-import { FactoryV3 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
-import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Quoter'
-import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
-import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
-import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
-import { ChainlinkAggregator } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
-import { CurvePoolV2 } from '../../subgraphs/volume/generated/templates/RegistryTemplate/CurvePoolV2'
+import { FactoryV3 } from 'curve-volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
+import { Quoter } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Quoter'
+import { ERC20 } from 'curve-volume/generated/templates/CurvePoolTemplateV2/ERC20'
+import { CToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/CToken'
+import { YToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/YToken'
+import { ChainlinkAggregator } from 'curve-volume/generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
+import { CurvePoolV2 } from 'curve-volume/generated/templates/RegistryTemplate/CurvePoolV2'
 
 export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
   const factory = Factory.bind(factoryContract)

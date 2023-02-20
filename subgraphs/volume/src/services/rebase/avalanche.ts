@@ -1,8 +1,8 @@
 import { Pool } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { getATokenDailyApr } from './rebase'
-import { AVALANCHE_ATOKENS, BIG_DECIMAL_ZERO } from '../../../../../packages/constants'
-import { bytesToAddress } from '../../../../../packages/utils'
+import { AVALANCHE_ATOKENS, BIG_DECIMAL_ZERO } from 'const'
+import { bytesToAddress } from 'utils'
 
 function getGeneralAvalanchePoolApr(
   pool: Pool,

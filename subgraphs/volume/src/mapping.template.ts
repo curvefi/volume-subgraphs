@@ -4,10 +4,9 @@ import {
   UNKNOWN_METAPOOLS,
   BIG_INT_ZERO,
   EARLY_V2_POOLS,
-  METAPOOL_FACTORY,
   LENDING,
   LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, TRANSFER_TOPIC
-} from '../../../packages/constants'
+} from 'const'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
 import {

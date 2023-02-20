@@ -1,5 +1,5 @@
 import { TokenSnapshot } from '../../../generated/schema'
-import { DAY, getIntervalFromTimestamp } from '../../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { RatioUpdate } from '../../../generated/AETH/AETH'
 
 // We need to keep track of AETH ratio to compute the rebase APR

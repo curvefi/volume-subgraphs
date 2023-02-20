@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts/index'
-import { getDecimals, getName } from '../../../../packages/utils/pricing'
+import { getDecimals, getName } from 'utils/pricing'
 import { BasePool, Pool } from '../../generated/schema'
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { CurvePool } from '../../generated/templates/RegistryTemplate/CurvePool'
@@ -7,13 +7,12 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_ZERO,
   BIG_INT_ONE,
-  BIG_INT_ZERO,
   CRYPTO_FACTORY,
   METAPOOL_FACTORY,
   METAPOOL_FACTORY_ADDRESS,
   REBASING_POOL_IMPLEMENTATION_ADDRESSES,
   STABLE_FACTORY,
-} from '../../../../packages/constants'
+} from 'const'
 import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { CurveLendingPool } from '../../generated/templates/CurvePoolTemplate/CurveLendingPool'
 import { CurveLendingPoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurveLendingPoolCoin128'
@@ -332,7 +331,6 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
   }
   return basePool
 }
-
 
 export function compareAgainstKnownAssetNames(name: string): i32 {
   const stables = ['USD', 'DAI', 'MIM', 'TETHER', 'FRAX']

@@ -1,6 +1,6 @@
 import { log } from '@graphprotocol/graph-ts/index'
 import { PoolAdded } from '../generated/AddressProvider/CryptoRegistry'
-import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_INT_ZERO, REGISTRY_V2 } from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_INT_ZERO, REGISTRY_V2 } from 'const'
 import { TokenExchange } from '../generated/templates/RegistryTemplate/CurvePoolV2'
 import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
@@ -8,16 +8,9 @@ import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
 import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate/CryptoFactory'
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
-import {
-  RemoveLiquidity,
-  RemoveLiquidityOne,
-  AddLiquidity,
-  ClaimAdminFee,
-} from '../generated/AddressProvider/CurvePoolV2'
-import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
-import { DailyPoolSnapshot, Pool } from '../generated/schema'
+import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
+import { Pool } from '../generated/schema'
 import { processAddLiquidity, processLiquidityRemoval } from './services/liquidity'
-import { takePoolSnapshots } from './services/snapshots'
 
 export function addCryptoRegistryPool(
   pool: Address,
