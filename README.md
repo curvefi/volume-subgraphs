@@ -24,10 +24,7 @@ Currently supported chains:
 - `arbitrum`
 - `xdai`
 - `optimism`
-
-Currently unsupported chains with Curve deployments:
-
-- `harmony` (not supported by The Graph)
+- `aurora`
 
 ### Deployment addresses
 

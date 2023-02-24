@@ -15,7 +15,7 @@
     "prepare:matic": "mustache ../../config/matic.json index.template.ts > index.ts",
     "prepare:xdai": "mustache ../../config/xdai.json index.template.ts > index.ts",
     "prepare:optimism": "mustache ../../config/optimism.json index.template.ts > index.ts",
-    "prepare:harmony": "mustache ../../config/harmony.json index.template.ts > index.ts",
+    "prepare:aurora": "mustache ../../config/aurora.json index.template.ts > index.ts",
     "prepare:moonbeam": "mustache ../../config/moonbeam.json index.template.ts > index.ts",
     "deploy:mainnet": "true",
     "deploy:avalanche": "true",
@@ -24,7 +24,7 @@
     "deploy:matic": "true",
     "deploy:xdai": "true",
     "deploy:optimism": "true",
-    "deploy:harmony": "true",
+    "deploy:aurora": "true",
     "deploy:moonbeam": "true",
     "stage:mainnet": "true",
     "stage:avalanche": "true",
@@ -33,7 +33,7 @@
     "stage:matic": "true",
     "stage:xdai": "true",
     "stage:optimism": "true",
-    "stage:harmony": "true",
+    "stage:aurora": "true",
     "stage:moonbeam": "true",
     "test:mainnet": "true",
     "test:avalanche": "true",
@@ -42,7 +42,7 @@
     "test:matic": "true",
     "test:xdai": "true",
     "test:optimism": "true",
-    "test:harmony": "true",
+    "test:aurora": "true",
     "test:moonbeam": "true"
   }
 }
