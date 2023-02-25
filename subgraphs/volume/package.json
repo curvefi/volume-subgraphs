@@ -1,6 +1,6 @@
 {
   "name": "curve-volume",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "version": "1.0.0",
   "scripts": {
     "codegen": "graph codegen",
@@ -14,6 +14,7 @@
     "prepare:optimism": "mustache ../../config/optimism.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/optimism.json src/mapping.template.ts > src/mapping.ts && mustache ../../config/optimism.json src/services/rebase/rebase.template.ts > src/services/rebase/rebase.ts",
     "prepare:aurora": "mustache ../../config/aurora.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/aurora.json src/mapping.template.ts > src/mapping.ts && mustache ../../config/aurora.json src/services/rebase/rebase.template.ts > src/services/rebase/rebase.ts",
     "prepare:moonbeam": "mustache ../../config/moonbeam.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/moonbeam.json src/mapping.template.ts > src/mapping.ts && mustache ../../config/moonbeam.json src/services/rebase/rebase.template.ts > src/services/rebase/rebase.ts",
+    "prepare:celo": "mustache ../../config/celo.json subgraph.template.yaml > subgraph.yaml && mustache ../../config/celo.json src/mapping.template.ts > src/mapping.ts && mustache ../../config/celo.json src/services/rebase/rebase.template.ts > src/services/rebase/rebase.ts",
     "deploy:mainnet": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-mainnet",
     "deploy:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche",
     "deploy:fantom": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-fantom",
@@ -23,6 +24,7 @@
     "deploy:optimism": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-optimism",
     "deploy:aurora": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-aurora",
     "deploy:moonbeam": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-moonbeam",
+    "deploy:celo": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-celo",
     "stage:mainnet": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-mainnet-staging",
     "stage:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche-staging",
     "stage:fantom": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-fantom-staging",
@@ -32,6 +34,7 @@
     "stage:optimism": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-optimism-staging",
     "stage:aurora": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-aurora-staging",
     "stage:moonbeam": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-moonbeam-staging",
+    "stage:celo": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-celo-staging",
     "test:mainnet": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-mainnet-test",
     "test:avalanche": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-avalanche-test",
     "test:fantom": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-fantom-test",
@@ -40,7 +43,8 @@
     "test:xdai": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-xdai-test",
     "test:optimism": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-optimism-test",
     "test:aurora": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-aurora-test",
-    "test:moonbeam": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-moonbeam-test"
+    "test:moonbeam": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-moonbeam-test",
+    "test:celo": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/volume-celo-test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.30.3",

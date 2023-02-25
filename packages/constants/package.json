@@ -17,6 +17,7 @@
     "prepare:optimism": "mustache ../../config/optimism.json index.template.ts > index.ts",
     "prepare:aurora": "mustache ../../config/aurora.json index.template.ts > index.ts",
     "prepare:moonbeam": "mustache ../../config/moonbeam.json index.template.ts > index.ts",
+    "prepare:celo": "mustache ../../config/celo.json index.template.ts > index.ts",
     "deploy:mainnet": "true",
     "deploy:avalanche": "true",
     "deploy:fantom": "true",
@@ -26,6 +27,7 @@
     "deploy:optimism": "true",
     "deploy:aurora": "true",
     "deploy:moonbeam": "true",
+    "deploy:celo": "true",
     "stage:mainnet": "true",
     "stage:avalanche": "true",
     "stage:fantom": "true",
@@ -35,6 +37,7 @@
     "stage:optimism": "true",
     "stage:aurora": "true",
     "stage:moonbeam": "true",
+    "stage:celo": "true",
     "test:mainnet": "true",
     "test:avalanche": "true",
     "test:fantom": "true",
@@ -43,6 +46,7 @@
     "test:xdai": "true",
     "test:optimism": "true",
     "test:aurora": "true",
-    "test:moonbeam": "true"
+    "test:moonbeam": "true",
+    "test:celo": "true"
   }
 }
