@@ -201,7 +201,7 @@ export function getFourEurPrice(): BigDecimal {
   const virtualPriceResult = poolContract.try_get_virtual_price()
   let vPrice = BIG_DECIMAL_ONE
   if (virtualPriceResult.reverted) {
-    log.warning('Unable to fetch virtual price for TriPool', [])
+    log.warning('Unable to fetch virtual price for 4EUR', [])
   } else {
     vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   }
