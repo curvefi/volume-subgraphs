@@ -15,8 +15,9 @@
     "prepare:matic": "true",
     "prepare:xdai": "true",
     "prepare:optimism": "true",
-    "prepare:harmony": "true",
+    "prepare:aurora": "true",
     "prepare:moonbeam": "true",
+    "prepare:celo": "true",
     "deploy:mainnet": "true",
     "deploy:avalanche": "true",
     "deploy:fantom": "true",
@@ -24,8 +25,9 @@
     "deploy:matic": "true",
     "deploy:xdai": "true",
     "deploy:optimism": "true",
-    "deploy:harmony": "true",
+    "deploy:aurora": "true",
     "deploy:moonbeam": "true",
+    "deploy:celo": "true",
     "stage:mainnet": "true",
     "stage:avalanche": "true",
     "stage:fantom": "true",
@@ -33,8 +35,9 @@
     "stage:matic": "true",
     "stage:xdai": "true",
     "stage:optimism": "true",
-    "stage:harmony": "true",
+    "stage:aurora": "true",
     "stage:moonbeam": "true",
+    "stage:celo": "true",
     "test:mainnet": "true",
     "test:avalanche": "true",
     "test:fantom": "true",
@@ -42,7 +45,8 @@
     "test:matic": "true",
     "test:xdai": "true",
     "test:optimism": "true",
-    "test:harmony": "true",
-    "test:moonbeam": "true"
+    "test:aurora": "true",
+    "test:moonbeam": "true",
+    "test:celo": "true"
   }
 }

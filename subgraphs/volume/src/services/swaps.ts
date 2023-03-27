@@ -14,11 +14,11 @@ import {
   LENDING,
   METAPOOL_FACTORY,
   STABLE_FACTORY,
-} from '../../../../packages/constants'
-import { PERIODS } from '../../../../packages/utils/time'
+} from 'const'
+import { PERIODS } from 'utils/time'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
-import { bytesToAddress } from '../../../../packages/utils'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { bytesToAddress } from 'utils'
+import { exponentToBigDecimal } from 'utils/maths'
 import { updateCandles } from './candles'
 import { updatePriceFeed } from './pricefeeds'
 
@@ -184,7 +184,7 @@ export function handleExchange(
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
   let volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
   // sanity check for usd volume
-  if (volumeUSD.gt(BigDecimal.fromString("1000000000"))) {
+  if (volumeUSD.gt(BigDecimal.fromString('1000000000'))) {
     volumeUSD = BigDecimal.zero()
   }
   // create hourly, daily & weekly snapshots

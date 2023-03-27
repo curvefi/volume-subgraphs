@@ -18,16 +18,22 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
   YTOKENS,
+  TRIPOOL_ADDRESS,
+  MATIC_FOUR_EUR_LP_TOKEN_ADDRESS,
+  POLYGON_AGEUR_TOKEN,
+  FOREX_ORACLES,
+  BIG_DECIMAL_1E8,
 } from 'const'
-import { Factory } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Factory'
-import { Pair } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Pair'
+import { Factory } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Factory'
+import { Pair } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Pair'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
-import { FactoryV3 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
-import { Quoter } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/Quoter'
-import { ERC20 } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/ERC20'
-import { CToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/CToken'
-import { YToken } from '../../subgraphs/volume/generated/templates/CurvePoolTemplateV2/YToken'
-import { CurvePoolV2 } from '../../subgraphs/volume/generated/templates/RegistryTemplate/CurvePoolV2'
+import { FactoryV3 } from 'curve-volume/generated/templates/CurvePoolTemplateV2/FactoryV3'
+import { Quoter } from 'curve-volume/generated/templates/CurvePoolTemplateV2/Quoter'
+import { ERC20 } from 'curve-volume/generated/templates/CurvePoolTemplateV2/ERC20'
+import { CToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/CToken'
+import { YToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/YToken'
+import { ChainlinkAggregator } from 'curve-volume/generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
+import { CurvePoolV2 } from 'curve-volume/generated/templates/RegistryTemplate/CurvePoolV2'
 
 export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
   const factory = Factory.bind(factoryContract)
@@ -54,7 +60,6 @@ export function getRateFromUniFork(token: Address, numeraire: Address, factoryCo
 }
 
 export function getNumeraireRate(token: Address, numeraire: Address): BigDecimal {
-
   if (token != numeraire) {
     const sushiPrice = getRateFromUniFork(token, numeraire, SUSHI_FACTORY_ADDRESS)
     if (sushiPrice != BIG_DECIMAL_ZERO) {
@@ -110,6 +115,21 @@ export function getName(token: Address): string {
   const tokenContract = ERC20.bind(token)
   const nameResult = tokenContract.try_symbol()
   return nameResult.reverted ? token.toHexString().slice(0, 6) : nameResult.value
+}
+
+export function getForexUsdRate(token: string): BigDecimal {
+  // returns the amount of USD 1 unit of the foreign currency is worth
+  const priceOracle = ChainlinkAggregator.bind(FOREX_ORACLES[token])
+  const conversionRateReponse = priceOracle.try_latestAnswer()
+  const conversionRate = conversionRateReponse.reverted
+    ? BIG_DECIMAL_ONE
+    : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
+  log.debug('Answer from Forex oracle {} for token {}: {}', [
+    FOREX_ORACLES[token].toHexString(),
+    token,
+    conversionRate.toString(),
+  ])
+  return conversionRate
 }
 
 // Computes the value of one unit of Token A in units of Token B
@@ -176,18 +196,47 @@ export function getFraxBpVirtualPrice(): BigDecimal {
   return vPrice
 }
 
+export function getFourEurPrice(): BigDecimal {
+  const poolContract = CurvePoolV2.bind(MATIC_FOUR_EUR_LP_TOKEN_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for 4EUR', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  // multiply vPrice by euro exchange rate
+  return vPrice.times(getForexUsdRate(POLYGON_AGEUR_TOKEN))
+}
+
+export function get3CrvVirtualPrice(): BigDecimal {
+  const poolContract = CurvePoolV2.bind(TRIPOOL_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for TriPool', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  return vPrice
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
     token = SIDECHAIN_SUBSTITUTES[token.toHexString()]
-  } else if (CTOKENS.includes(token.toHexString())) {
+  }
+  if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
   } else if (YTOKENS.includes(token.toHexString())) {
     return getYTokenExchangeRate(token)
   } else if (token == CRV_FRAX_ADDRESS) {
     return getFraxBpVirtualPrice()
-  }
-  else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+  } else if (token == MATIC_FOUR_EUR_LP_TOKEN_ADDRESS) {
+    return getFourEurPrice()
+  } else if (token == THREE_CRV_ADDRESS) {
+    return get3CrvVirtualPrice()
+  } else if (token != USDT_ADDRESS) {
     let usdPrice = getTokenAValueInTokenB(token, USDT_ADDRESS)
     // if it fails we try to go directly via a stable pair
     if (usdPrice == BIG_DECIMAL_ZERO) {

@@ -1,8 +1,8 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { TokenSnapshot } from '../../../generated/schema'
-import { DAY, getIntervalFromTimestamp } from '../../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { AToken } from '../../../generated/templates/CurvePoolTemplate/AToken'
-import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_TOKEN, AETH_TOKEN } from '../../../../../packages/constants'
+import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_TOKEN, AETH_TOKEN } from 'const'
 
 // Used to calculate rebase APR of aTokens
 // We store the total supply / total supply scaled ratio as price

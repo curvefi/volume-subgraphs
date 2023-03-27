@@ -1,5 +1,5 @@
 import { Platform } from '../../generated/schema'
-import { BIG_INT_ZERO, CURVE_PLATFORM_ID } from '../../../../packages/constants'
+import { BIG_INT_ZERO, CURVE_PLATFORM_ID } from 'const'
 import { Bytes } from '@graphprotocol/graph-ts'
 
 export function getPlatform(): Platform {

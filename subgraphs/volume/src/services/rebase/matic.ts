@@ -1,8 +1,8 @@
 import { Pool } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { getATokenDailyApr } from './rebase'
-import { AVALANCHE_ATOKENS, BIG_DECIMAL_ZERO, MATIC_ATOKENS } from '../../../../../packages/constants'
-import { bytesToAddress } from '../../../../../packages/utils'
+import { BIG_DECIMAL_ZERO, MATIC_ATOKENS } from 'const'
+import { bytesToAddress } from 'utils'
 
 function getATokenMaticPoolApr(
   pool: Pool,

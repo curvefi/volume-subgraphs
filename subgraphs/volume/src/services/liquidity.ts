@@ -7,10 +7,10 @@ import {
   getStableSwapTokenPriceFromSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO } from '../../../../packages/constants'
-import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { bytesToAddress } from '../../../../packages/utils'
+import { BIG_DECIMAL_ZERO, BIG_INT_ONE, BIG_INT_ZERO } from 'const'
+import { DAY, HOUR, WEEK } from 'utils/time'
+import { exponentToBigDecimal } from 'utils/maths'
+import { bytesToAddress } from 'utils'
 
 export function processLiquidityRemoval(
   pool: Pool,

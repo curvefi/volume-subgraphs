@@ -1,13 +1,13 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   BIG_DECIMAL_ZERO, YC_LENDING_TOKENS
-} from '../../../../../packages/constants'
+} from 'const'
 import { Pool } from '../../../generated/schema'
 import { getATokenSnapshotPrice } from './snapshots'
-import { growthRate } from '../../../../../packages/utils/maths'
-import { DAY } from '../../../../../packages/utils/time'
+import { growthRate } from 'utils/maths'
+import { DAY } from 'utils/time'
 import { getTokenSnapshot } from '../snapshots'
-import { bytesToAddress } from '../../../../../packages/utils'
+import { bytesToAddress } from 'utils'
 
 {{{ importChainRebaseAprModule }}}
 

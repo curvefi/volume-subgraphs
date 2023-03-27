@@ -1,8 +1,8 @@
 import { Pool } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { getATokenDailyApr, getCompOrYPoolApr } from './rebase'
-import { AVALANCHE_ATOKENS, BIG_DECIMAL_ZERO, GEIST_POOL_FTM, IB_POOL_FTM } from '../../../../../packages/constants'
-import { bytesToAddress } from '../../../../../packages/utils'
+import { BIG_DECIMAL_ZERO, GEIST_POOL_FTM, IB_POOL_FTM } from 'const'
+import { bytesToAddress } from 'utils'
 
 function getFantomGeistPoolApr(
   pool: Pool,

@@ -11,9 +11,9 @@ import {
   STETH_POOLS,
   USDN_POOL,
   Y_AND_C_POOLS,
-} from '../../../../../packages/constants'
-import { bytesToAddress } from '../../../../../packages/utils'
-import { DAY } from '../../../../../packages/utils/time'
+} from 'const'
+import { bytesToAddress } from 'utils'
+import { DAY } from 'utils/time'
 import { getATokenDailyApr, getCompOrYPoolApr } from './rebase'
 
 function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {

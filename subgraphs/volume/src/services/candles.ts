@@ -1,6 +1,6 @@
 import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { Candle, Pool } from '../../generated/schema'
-import { BIG_DECIMAL_ZERO, BIG_INT_ONE } from '../../../../packages/constants'
+import { BIG_DECIMAL_ZERO, BIG_INT_ONE } from 'const'
 
 export function updateCandles(
   pool: Pool,

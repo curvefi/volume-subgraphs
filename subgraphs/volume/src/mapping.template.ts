@@ -7,7 +7,7 @@ import {
   METAPOOL_FACTORY,
   LENDING,
   LENDING_POOLS, BIG_INT_ONE, REGISTRY_V1, TRANSFER_TOPIC
-} from '../../../packages/constants'
+} from 'const'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Factory, Pool, Registry } from '../generated/schema'
 import {
@@ -105,7 +105,7 @@ export function handleAddressModified(event: AddressModified): void {
 export function getLpToken(pool: Address, registryAddress: Address): Address {
   const registry = MainRegistry.bind(registryAddress)
   const lpTokenResult = registry.try_get_lp_token(pool)
-  return lpTokenResult.reverted ? pool : lpTokenResult.value
+  return (lpTokenResult.reverted || lpTokenResult.value == ADDRESS_ZERO) ? pool : lpTokenResult.value
 }
 
 export function addRegistryPool(pool: Address,
@@ -164,7 +164,7 @@ export function addRegistryPool(pool: Address,
       hash
   )
   } else {
-    log.info('New plain pool {} added from registry at {}', [pool.toHexString(), hash.toHexString()])
+    log.info('New plain pool {} added from registry {} at {}', [pool.toHexString(), registry.toHexString(), hash.toHexString()])
     createNewRegistryPool(
       pool,
       ADDRESS_ZERO,
