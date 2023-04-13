@@ -37,8 +37,7 @@ import {
   RemoveLiquidityOne
 } from '../generated/AddressProvider/CurvePool'
 import {
-  processAddLiquidity,
-  processLiquidityRemoval
+  processLiquidityEvent,
 } from './services/liquidity'
 import { getOffPegFeeMultiplierResult } from './services/snapshots'
 {{{ importExistingMetaPools }}}
@@ -202,12 +201,14 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
           for (let j=0; j<pool.coins.length;j++) {
             tokenAmounts.push(pool.coins[j] == coin ? event.params.coin_amount : BIG_INT_ZERO)
           }
-          processLiquidityRemoval(pool,
+          processLiquidityEvent(pool,
             event.params.provider,
             tokenAmounts,
             event.block.timestamp,
             event.block.number,
-            event.transaction.hash)
+            event.transaction.hash,
+            event.transaction.index,
+            true)
       }
     }
   }
@@ -220,12 +221,14 @@ export function handleRemoveLiquidityImbalance(event: RemoveLiquidityImbalance):
     return
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(pool,
+  processLiquidityEvent(pool,
     event.params.provider,
     event.params.token_amounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash)
+    event.transaction.hash,
+    event.transaction.index,
+    true)
 
 }
 
@@ -235,12 +238,14 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     return
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(pool,
+  processLiquidityEvent(pool,
     event.params.provider,
     event.params.token_amounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash)
+    event.transaction.hash,
+    event.transaction.index,
+    true)
 }
 
 export function handleAddLiquidity(event: AddLiquidity): void {
@@ -249,12 +254,14 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   if (!pool) {
     return
   }
-  processAddLiquidity(pool,
+  processLiquidityEvent(pool,
     event.params.provider,
     event.params.token_amounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash)
+    event.transaction.hash,
+    event.transaction.index,
+    false)
 }
 
 export function handleMainRegistryPoolAdded(event: PoolAdded): void {

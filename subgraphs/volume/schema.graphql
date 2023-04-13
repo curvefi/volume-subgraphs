@@ -224,27 +224,6 @@ type Candle @entity {
   high: BigDecimal!
 }
 
-type LiquidityVolumeSnapshot @entity {
-  """ Entity ID """
-  id: ID!
-  """ Pool ID """
-  pool: Pool!
-  """ Snapshot period: hourly (3600), daily (86400) or weekly (604800) """
-  period: BigInt!
-  """ Amounts of assets added to LP (same order as the pool's coins) """
-  amountAdded: [BigDecimal!]!
-  """ Amounts of assets removed from LP (same order as the pool's coins) """
-  amountRemoved: [BigDecimal!]!
-  """ Number of liquidity additions """
-  addCount: BigInt!
-  """ Number of liquidity removals """
-  removeCount: BigInt!
-  """ Liquidity based volume (USD denomination) """
-  volumeUSD: BigDecimal!
-  """ Snapshot timestamp """
-  timestamp: BigInt!
-}
-
 type LiquidityEvent @entity {
   """ Entity ID """
   id: ID!

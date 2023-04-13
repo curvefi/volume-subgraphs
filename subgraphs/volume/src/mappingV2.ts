@@ -10,7 +10,7 @@ import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
 import { Pool } from '../generated/schema'
-import { processAddLiquidity, processLiquidityRemoval } from './services/liquidity'
+import { processLiquidityEvent } from './services/liquidity'
 
 export function addCryptoRegistryPool(
   pool: Address,
@@ -102,13 +102,15 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     return
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     event.params.token_amounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.transaction.index,
+    true
   )
 }
 
@@ -122,13 +124,15 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
     tokenAmounts.push(i == event.params.coin_index.toI32() ? event.params.coin_amount : BIG_INT_ZERO)
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     tokenAmounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.transaction.index,
+    true
   )
 }
 
@@ -138,12 +142,14 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     return
   }
   log.info('Added liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processAddLiquidity(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     event.params.token_amounts,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.transaction.index,
+    false
   )
 }
