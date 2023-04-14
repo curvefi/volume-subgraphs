@@ -28,8 +28,6 @@
   "transactionHash": "call.transaction.hash.toHexString()",
   "factoryAddress": "call.to.toHexString()",
   "unknownMetapoolType": "METAPOOL_FACTORY",
-  "usdnMapping": "  - kind: ethereum/contract\n    name: USDN\n    network: mainnet\n    source:\n      address: \"0x674C6Ad92Fd080e4004b2312b45f796a192D27a0\"\n      startBlock: 10970706\n      abi: USDN\n    mapping:\n      kind: ethereum/events\n      apiVersion: 0.0.7\n      language: wasm/assemblyscript\n      entities:\n        - TokenSnapshot\n      abis:\n        - name: USDN\n          file: ./abis/USDN.json\n      eventHandlers:\n        - event: Reward(uint256,uint256)\n          handler: handleUsdnRewards\n      file: ./src/services/rebase/mappingUsdn.ts",
-  "aethMapping": "  - kind: ethereum/contract\n    name: AETH\n    network: mainnet\n    source:\n      address: \"0x6a9366f02B6E252e0cbe2E6B9CF0a8adDd7B641C\"\n      startBlock: 10970706\n      abi: AETH\n    mapping:\n      kind: ethereum/events\n      apiVersion: 0.0.7\n      language: wasm/assemblyscript\n      entities:\n        - TokenSnapshot\n      abis:\n        - name: AETH\n          file: ./abis/AETH.json\n      eventHandlers:\n        - event: RatioUpdate(uint256)\n          handler: handleAethRewards\n      file: ./src/services/rebase/mappingAeth.ts",
   "importChainRebaseAprModule": "import { getMainnetPoolApr } from './mainnet'",
   "returnChainRebaseApr": "return getMainnetPoolApr(pool, reserves, timestamp, tvl)",
   "rebasingPoolImplementations": "['0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9']",

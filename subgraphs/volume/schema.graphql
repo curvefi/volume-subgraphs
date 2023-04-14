@@ -40,13 +40,6 @@ type Pool @entity {
   isV2: Boolean!
   """ Whether one of the pool's assets is rebasing"""
   isRebasing: Boolean!
-  """ Pool cumulative volume since inception """
-  cumulativeVolume: BigDecimal!
-  """ Pool cumulative volume since inception (in USD)"""
-  cumulativeVolumeUSD: BigDecimal!
-
-  """ Pool cumulative fees since inception (in USD)"""
-  cumulativeFeesUSD: BigDecimal!
 
   """ Latest virtual price """
   virtualPrice: BigDecimal!
@@ -70,14 +63,8 @@ type Pool @entity {
   """ Pool swaps """
   swapEvents: [SwapEvent!] @derivedFrom(field: "pool")
 
-  """ Pool swap volume snapshots """
-  swapVolumeSnapshots: [SwapVolumeSnapshot!] @derivedFrom(field: "pool")
-
   """ Pool liquidity events (currently disabled) """
   liquidityEvents: [LiquidityEvent!] @derivedFrom(field: "pool")
-
-  """ Pool liquidity volume snapshots (currently disabled) """
-  liquidityVolumeSnapshots: [LiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
 }
 
@@ -88,79 +75,28 @@ type DailyPoolSnapshot @entity {
   pool: Pool!
   """ Pool virtual price """
   virtualPrice: BigDecimal!
-  """ Pool LP token price (in USD) """
-  lpPriceUSD: BigDecimal!
-  """ Pool TVL (in USD) """
-  tvl: BigDecimal!
   """ Pool fee value """
   fee: BigDecimal!
   """ Pool admin fee value """
   adminFee: BigDecimal!
   """ Off peg fee multiplier (for lending pools) """
   offPegFeeMultiplier: BigDecimal!
-  """ Value of fees paid to the DAO (in USD)  """
-  adminFeesUSD: BigDecimal!
-  """ Value of fees paid to the LPs (in USD)  """
-  lpFeesUSD: BigDecimal!
-  """ Total value of fees collected (in USD) """
-  totalDailyFeesUSD: BigDecimal!
   """ Total reserves (asset and asset decimals denomination, same order as the pool's coins) """
   reserves: [BigInt!]!
   """ Total reserves (asset denomination, 18 decimals, same order as the pool's coins) """
   normalizedReserves: [BigInt!]!
-  """ Total reserves (USD denomination, same order as the pool's coins) """
-  reservesUSD: [BigDecimal!]!
   """ A factor """
   A: BigInt!
   """ xcpProfit value """
   xcpProfit: BigDecimal!
   """ xcpProfitA value """
   xcpProfitA: BigDecimal!
-  """ base APR from fees (annualized from daily variation) """
-  baseApr: BigDecimal!
-  """ APR from rebase - if applicable (annualized from daily variation) """
-  rebaseApr: BigDecimal!
+  """ LP Token Supply """
+  lpTokenSupply: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
-type SwapVolumeSnapshot @entity {
-  """ Entity ID """
-  id: ID!
-  """ Pool ID """
-  pool: Pool!
-  """ Snapshot period: hourly (3600), daily (86400) or weekly (604800) """
-  period: BigInt!
-  """ Amount sold (token denomination, normalized decimals) """
-  amountSold: BigDecimal!
-  """ Amount bought (token denomination, normalized decimals) """
-  amountBought: BigDecimal!
-  """ Amount sold (USD denomination, normalized decimals) """
-  amountSoldUSD: BigDecimal!
-  """ Amount bought (USD denomination, normalized decimals) """
-  amountBoughtUSD: BigDecimal!
-  """ Number of swaps over the period """
-  count: BigInt!
-  """ Volume (token denomination) """
-  volume: BigDecimal!
-  """ Volume (USD denomination) """
-  volumeUSD: BigDecimal!
-  """ Snapshot timestamp """
-  timestamp: BigInt!
-}
-
-type DailyPlatformSnapshot @entity {
-  """ Entity ID """
-  id: ID!
-  """ Total admin fees collected (in USD) """
-  adminFeesUSD: BigDecimal!
-  """ Total fees distributed to LPs (in USD) """
-  lpFeesUSD: BigDecimal!
-  """ Total fees collected (in USD) """
-  totalDailyFeesUSD: BigDecimal!
-  """ Snapshot timestamp """
-  timestamp: BigInt!
-}
 
 type SwapEvent @entity {
   id: ID!
@@ -184,10 +120,6 @@ type SwapEvent @entity {
   amountSold: BigDecimal!
   """ Amount bought """
   amountBought: BigDecimal!
-  """ Amount sold (USD denomination) """
-  amountSoldUSD: BigDecimal!
-  """ Amount bought (USD denomination) """
-  amountBoughtUSD: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
 }
@@ -239,6 +171,8 @@ type LiquidityEvent @entity {
   tokenAmounts: [BigInt!]!
   """ Whether the event is a liquidity removal or not """
   removal: Boolean!
+  """ Supply of LP Tokens after the event """
+  totalSupply: BigInt!
 }
 
 type PriceFeed @entity {
@@ -283,6 +217,7 @@ type BasePool @entity {
   """ Base pool coin decimals """
   coinDecimals: [BigInt!]!
 }
+
 type Platform @entity {
   """ Entity ID """
   id: ID!

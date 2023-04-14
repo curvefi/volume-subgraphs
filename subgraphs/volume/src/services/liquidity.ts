@@ -7,6 +7,7 @@ export function processLiquidityEvent(
   pool: Pool,
   provider: Address,
   tokenAmounts: Array<BigInt>,
+  tokenSupply: BigInt,
   timestamp: BigInt,
   block: BigInt,
   hash: Bytes,
@@ -23,4 +24,6 @@ export function processLiquidityEvent(
   liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
   liquidityEvent.removal = removal
+  liquidityEvent.totalSupply = tokenSupply
+  liquidityEvent.save()
 }

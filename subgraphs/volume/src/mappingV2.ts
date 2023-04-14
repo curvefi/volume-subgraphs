@@ -11,6 +11,7 @@ import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
 import { Pool } from '../generated/schema'
 import { processLiquidityEvent } from './services/liquidity'
+import { ERC20 } from '../generated/templates/CurvePoolTemplate/ERC20'
 
 export function addCryptoRegistryPool(
   pool: Address,
@@ -106,6 +107,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     pool,
     event.params.provider,
     event.params.token_amounts,
+    event.params.token_supply,
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
@@ -128,6 +130,7 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
     pool,
     event.params.provider,
     tokenAmounts,
+    ERC20.bind(Address.fromBytes(pool.lpToken)).totalSupply(), // not all pools have token_supply in the event
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
@@ -146,6 +149,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     pool,
     event.params.provider,
     event.params.token_amounts,
+    event.params.token_supply,
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
