@@ -6,7 +6,6 @@ import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from 'utils'
 import { exponentToBigDecimal } from 'utils/maths'
 import { updateCandles } from './candles'
-import { updatePriceFeed } from './pricefeeds'
 
 export function handleExchange(
   buyer: Address,
@@ -18,6 +17,7 @@ export function handleExchange(
   blockNumber: BigInt,
   address: Address,
   txhash: Bytes,
+  index: BigInt,
   gasLimit: BigInt,
   gasUsed: BigInt,
   exchangeUnderlying: boolean
@@ -123,7 +123,7 @@ export function handleExchange(
   const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
 
-  const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
+  const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString() + '-' + index.toString())
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
@@ -134,23 +134,11 @@ export function handleExchange(
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought
   swapEvent.amountSold = amountSold
+  swapEvent.isUnderlying = exchangeUnderlying
   swapEvent.timestamp = timestamp
   swapEvent.save()
 
   updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, blockNumber)
-
-  updatePriceFeed(
-    pool,
-    tokenSold,
-    tokenBought,
-    amountSold,
-    amountBought,
-    soldId,
-    boughtId,
-    exchangeUnderlying,
-    blockNumber,
-    timestamp
-  )
 
   pool.save()
 }

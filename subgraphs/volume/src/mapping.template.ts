@@ -291,6 +291,7 @@ export function handleTokenExchange(event: TokenExchange): void {
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.transaction.index,
     event.transaction.gasLimit,
     gasUsed,
     false
@@ -312,6 +313,7 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.transaction.index,
     event.transaction.gasLimit,
     gasUsed,
     true

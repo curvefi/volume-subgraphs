@@ -91,6 +91,7 @@ export function handleTokenExchangeV2(event: TokenExchange): void {
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.transaction.index,
     event.transaction.gasLimit,
     gasUsed,
     false
