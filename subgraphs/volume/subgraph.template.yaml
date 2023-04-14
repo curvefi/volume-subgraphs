@@ -52,8 +52,6 @@ dataSources:
         - event: AddressModified(indexed uint256,address,uint256)
           handler: handleAddressModified
       file: ./src/mapping.ts
-{{{usdnMapping}}}
-{{{aethMapping}}}
 
 templates:
   - name: RegistryTemplate
