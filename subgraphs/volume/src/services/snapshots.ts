@@ -70,6 +70,7 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+  dailySnapshot.timestamp = BIG_INT_ZERO
   return dailySnapshot
 }
 
