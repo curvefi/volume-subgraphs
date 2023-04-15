@@ -1,7 +1,15 @@
-import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { Pool, SwapEvent } from '../../generated/schema'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { LiquidityEvent, Pool, SwapEvent } from '../../generated/schema'
 import { takePoolSnapshots } from './snapshots'
-import { ADDRESS_ZERO, BIG_DECIMAL_ZERO, BIG_INT_ZERO, LENDING, METAPOOL_FACTORY, STABLE_FACTORY } from 'const'
+import {
+  ADDRESS_ZERO,
+  BIG_DECIMAL_ZERO,
+  BIG_INT_ONE,
+  BIG_INT_ZERO,
+  LENDING,
+  METAPOOL_FACTORY,
+  STABLE_FACTORY,
+} from 'const'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from 'utils'
 import { exponentToBigDecimal } from 'utils/maths'
@@ -11,7 +19,42 @@ import { updateCandles } from './candles'
 // where that value is overwritten and emitted during the event
 // original dx is added as liquidity to basepool (while amount of
 // lp tokens received gets recorded in the event)
-function getLiquidityEventFromBasepool(txhash: Bytes)
+function getLiquidityEventFromBasepool(
+  tx: Bytes,
+  pool: string,
+  underlyingSoldIndex: i32,
+  basePool: string,
+  eventIndex: BigInt
+): BigDecimal {
+  // we try to load the most recent liquidity add event we have on file
+  for (let i = 1; i < 10; i++) {
+    const addLiqEvent = LiquidityEvent.load(tx.toHexString() + '-' + eventIndex.minus(BIG_INT_ONE).toString())
+    if (!addLiqEvent) {
+      log.warning('Unable to match tx for {} index {}', [tx.toHexString(), eventIndex.toString()])
+      continue
+    }
+    // we check that:
+    // a. the base pool is the same
+    // b. the event is a liquidity addition
+    // c. the liquidity provider is the pool
+    // might be good to also add check on amounts - but maybe too many edge cases
+    else if (
+      addLiqEvent.pool == basePool &&
+      !addLiqEvent.removal &&
+      addLiqEvent.liquidityProvider.toHexString() == pool
+    ) {
+      return addLiqEvent.tokenAmounts[underlyingSoldIndex].toBigDecimal()
+    }
+    log.warning('Unable to match params {}, {}, {} with swap {}, {}', [
+      addLiqEvent.pool,
+      addLiqEvent.removal ? 'Removal' : 'Deposit',
+      addLiqEvent.liquidityProvider.toHexString(),
+      pool,
+      basePool,
+    ])
+  }
+  return BIG_DECIMAL_ZERO
+}
 
 export function handleExchange(
   buyer: Address,
@@ -63,6 +106,7 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
+    tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
     if (
       ((pool.assetType == 2 && (pool.poolType == METAPOOL_FACTORY || pool.poolType == STABLE_FACTORY)) ||
         (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
@@ -73,9 +117,7 @@ export function handleExchange(
       // for BTC metapools and for USD Metapool from factory v1.2
       // the actual dx is overwritten by the value of an LP token
       // so it will give different amount and decimals
-      tokenSoldDecimals = BigInt.fromI32(18)
-    } else {
-      tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
+      amountSold = getLiquidityEventFromBasepool(txhash, pool.id, underlyingSoldIndex, basePool.id, index)
     }
   } else {
     if (soldId > pool.coins.length - 1) {
