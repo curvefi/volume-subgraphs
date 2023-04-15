@@ -24,6 +24,7 @@ export function processLiquidityEvent(
   liquidityEvent.pool = pool.id
   liquidityEvent.tokenAmounts = tokenAmounts
   liquidityEvent.removal = removal
+  liquidityEvent.tx = hash
   liquidityEvent.totalSupply = tokenSupply
   liquidityEvent.save()
 }

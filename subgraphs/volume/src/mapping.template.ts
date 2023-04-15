@@ -208,7 +208,7 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
             event.block.timestamp,
             event.block.number,
             event.transaction.hash,
-            event.transaction.index,
+            event.logIndex,
             true)
       }
     }
@@ -229,7 +229,7 @@ export function handleRemoveLiquidityImbalance(event: RemoveLiquidityImbalance):
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
-    event.transaction.index,
+    event.logIndex,
     true)
 
 }
@@ -247,7 +247,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
-    event.transaction.index,
+    event.logIndex,
     true)
 }
 
@@ -264,7 +264,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     event.block.timestamp,
     event.block.number,
     event.transaction.hash,
-    event.transaction.index,
+    event.logIndex,
     false)
 }
 
@@ -291,7 +291,7 @@ export function handleTokenExchange(event: TokenExchange): void {
     event.block.number,
     event.address,
     event.transaction.hash,
-    event.transaction.index,
+    event.logIndex,
     event.transaction.gasLimit,
     gasUsed,
     false
@@ -313,7 +313,7 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
     event.block.number,
     event.address,
     event.transaction.hash,
-    event.transaction.index,
+    event.logIndex,
     event.transaction.gasLimit,
     gasUsed,
     true

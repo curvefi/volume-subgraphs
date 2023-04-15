@@ -166,6 +166,8 @@ type LiquidityEvent @entity {
   timestamp: BigInt!
   """ Event block """
   block: BigInt!
+  """ Tx hash"""
+  tx: Bytes!
   """ Pool ID """
   pool: Pool!
   """ Amounts added or removed (same order as the pool's coins) """

@@ -1,11 +1,17 @@
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import { takePoolSnapshots } from './snapshots'
-import { ADDRESS_ZERO, BIG_INT_ZERO, LENDING, METAPOOL_FACTORY, STABLE_FACTORY } from 'const'
+import { ADDRESS_ZERO, BIG_DECIMAL_ZERO, BIG_INT_ZERO, LENDING, METAPOOL_FACTORY, STABLE_FACTORY } from 'const'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from 'utils'
 import { exponentToBigDecimal } from 'utils/maths'
 import { updateCandles } from './candles'
+
+// this is used to retrieve the original dx value from metapools
+// where that value is overwritten and emitted during the event
+// original dx is added as liquidity to basepool (while amount of
+// lp tokens received gets recorded in the event)
+function getLiquidityEventFromBasepool(txhash: Bytes)
 
 export function handleExchange(
   buyer: Address,
@@ -29,6 +35,7 @@ export function handleExchange(
   takePoolSnapshots(timestamp)
   const soldId = sold_id.toI32()
   const boughtId = bought_id.toI32()
+  let amountSold = BIG_DECIMAL_ZERO
   let tokenSold: Bytes, tokenBought: Bytes
   let tokenSoldDecimals: BigInt, tokenBoughtDecimals: BigInt
 
@@ -64,6 +71,8 @@ export function handleExchange(
     ) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
+      // the actual dx is overwritten by the value of an LP token
+      // so it will give different amount and decimals
       tokenSoldDecimals = BigInt.fromI32(18)
     } else {
       tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
@@ -120,7 +129,11 @@ export function handleExchange(
     return
   }
 
-  const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
+  // Update amount sold unless we already did when handling metapool edge case
+  amountSold =
+    amountSold == BIG_DECIMAL_ZERO
+      ? tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
+      : amountSold
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString() + '-' + index.toString())
