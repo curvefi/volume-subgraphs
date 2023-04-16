@@ -3,7 +3,9 @@
 ### Overview
 
 This repository contains the code and templates needed to deploy a subgraph
-tracking the volume of Curve pools on all supported chains.
+tracking the USD volume of Curve pools on all supported chains. It also tracks revenue and approximate USD prices of token exchanges.
+
+It does not track liquidity events and some prices are approximated due to issues with the contracts' event params. For liquidity events and accurate (non-USD denominated) prices, check out the <a href="https://github.com/curvefi/volume-subgraphs/tree/lightweight">`lightweight` branch of the repository</a>.
 
 The subgraph is based on the address provider contract which is located at `0x0000000022d53366457f9d5e68ec105046fc4383` on all chains.
 The subgraph listens to the events on the address provider to track all added Stable Registry, Stable Factory, Crypto Registry and Crypto Factory contracts.
@@ -25,6 +27,9 @@ Currently supported chains:
 - `xdai`
 - `optimism`
 - `aurora`
+- `moonbeam`
+- `celo`
+-
 
 ### Deployment addresses
 
@@ -35,6 +40,9 @@ Currently supported chains:
 - Avalanche: https://thegraph.com/hosted-service/subgraph/convex-community/volume-avalanche
 - Matic: https://thegraph.com/hosted-service/subgraph/convex-community/volume-matic
 - Optimism: https://thegraph.com/hosted-service/subgraph/convex-community/volume-optimism
+- Optimism: https://thegraph.com/hosted-service/subgraph/convex-community/volume-optimism
+- Aurora: https://thegraph.com/hosted-service/subgraph/convex-community/volume-aurora
+- Celo: https://thegraph.com/hosted-service/subgraph/convex-community/volume-celo
 
 ### Installation and deployment
 
