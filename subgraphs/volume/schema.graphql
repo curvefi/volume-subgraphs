@@ -245,23 +245,6 @@ type LiquidityVolumeSnapshot @entity {
   timestamp: BigInt!
 }
 
-type LiquidityEvent @entity {
-  """ Entity ID """
-  id: ID!
-  """ Address of the liquidity provider """
-  liquidityProvider: Bytes!
-  """ Event timestamp """
-  timestamp: BigInt!
-  """ Event block """
-  block: BigInt!
-  """ Pool ID """
-  pool: Pool!
-  """ Amounts added or removed (same order as the pool's coins) """
-  tokenAmounts: [BigInt!]!
-  """ Whether the event is a liquidity removal or not """
-  removal: Boolean!
-}
-
 type PriceFeed @entity {
   """ Entity ID (pool + srcToken + dstToken) """
   id: ID!
