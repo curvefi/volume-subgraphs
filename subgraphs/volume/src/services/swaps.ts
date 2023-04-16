@@ -1,26 +1,60 @@
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { Pool, SwapEvent } from '../../generated/schema'
-import {
-  getCryptoSwapTokenPriceFromSnapshot,
-  getStableSwapTokenPriceFromSnapshot,
-  getSwapSnapshot,
-  takePoolSnapshots,
-} from './snapshots'
+import { LiquidityEvent, Pool, SwapEvent } from '../../generated/schema'
+import { takePoolSnapshots } from './snapshots'
 import {
   ADDRESS_ZERO,
-  BIG_DECIMAL_TWO,
+  BIG_DECIMAL_ZERO,
   BIG_INT_ONE,
   BIG_INT_ZERO,
   LENDING,
   METAPOOL_FACTORY,
   STABLE_FACTORY,
 } from 'const'
-import { PERIODS } from 'utils/time'
 import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from 'utils'
 import { exponentToBigDecimal } from 'utils/maths'
 import { updateCandles } from './candles'
-import { updatePriceFeed } from './pricefeeds'
+
+// this is used to retrieve the original dx value from metapools
+// where that value is overwritten and emitted during the event
+// original dx is added as liquidity to basepool (while amount of
+// lp tokens received gets recorded in the event)
+function getLiquidityEventFromBasepool(
+  tx: Bytes,
+  pool: string,
+  underlyingSoldIndex: i32,
+  basePool: string,
+  eventIndex: BigInt
+): BigDecimal {
+  // we try to load the most recent liquidity add event we have on file
+  for (let i = 1; i < 10; i++) {
+    const addLiqEvent = LiquidityEvent.load(tx.toHexString() + '-' + eventIndex.minus(BIG_INT_ONE).toString())
+    if (!addLiqEvent) {
+      log.warning('Unable to match tx for {} index {}', [tx.toHexString(), eventIndex.toString()])
+      continue
+    }
+    // we check that:
+    // a. the base pool is the same
+    // b. the event is a liquidity addition
+    // c. the liquidity provider is the pool
+    // might be good to also add check on amounts - but maybe too many edge cases
+    else if (
+      addLiqEvent.pool == basePool &&
+      !addLiqEvent.removal &&
+      addLiqEvent.liquidityProvider.toHexString() == pool
+    ) {
+      return addLiqEvent.tokenAmounts[underlyingSoldIndex].toBigDecimal()
+    }
+    log.warning('Unable to match params {}, {}, {} with swap {}, {}', [
+      addLiqEvent.pool,
+      addLiqEvent.removal ? 'Removal' : 'Deposit',
+      addLiqEvent.liquidityProvider.toHexString(),
+      pool,
+      basePool,
+    ])
+  }
+  return BIG_DECIMAL_ZERO
+}
 
 export function handleExchange(
   buyer: Address,
@@ -32,6 +66,7 @@ export function handleExchange(
   blockNumber: BigInt,
   address: Address,
   txhash: Bytes,
+  index: BigInt,
   gasLimit: BigInt,
   gasUsed: BigInt,
   exchangeUnderlying: boolean
@@ -43,6 +78,7 @@ export function handleExchange(
   takePoolSnapshots(timestamp)
   const soldId = sold_id.toI32()
   const boughtId = bought_id.toI32()
+  let amountSold = BIG_DECIMAL_ZERO
   let tokenSold: Bytes, tokenBought: Bytes
   let tokenSoldDecimals: BigInt, tokenBoughtDecimals: BigInt
 
@@ -70,6 +106,7 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
+    tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
     if (
       ((pool.assetType == 2 && (pool.poolType == METAPOOL_FACTORY || pool.poolType == STABLE_FACTORY)) ||
         (pool.assetType == 0 && pool.poolType == STABLE_FACTORY)) &&
@@ -78,9 +115,9 @@ export function handleExchange(
     ) {
       // handling an edge-case in the way the dx is logged in the event
       // for BTC metapools and for USD Metapool from factory v1.2
-      tokenSoldDecimals = BigInt.fromI32(18)
-    } else {
-      tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
+      // the actual dx is overwritten by the value of an LP token
+      // so it will give different amount and decimals
+      amountSold = getLiquidityEventFromBasepool(txhash, pool.id, underlyingSoldIndex, basePool.id, index)
     }
   } else {
     if (soldId > pool.coins.length - 1) {
@@ -134,23 +171,14 @@ export function handleExchange(
     return
   }
 
-  const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
+  // Update amount sold unless we already did when handling metapool edge case
+  amountSold =
+    amountSold == BIG_DECIMAL_ZERO
+      ? tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
+      : amountSold
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
-  log.debug('Getting token snaphsot for {}', [pool.id])
-  let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
-  if (!pool.isV2) {
-    const latestBoughtSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
-    const latestSoldSnapshotPrice = getStableSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
-    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
-  } else {
-    const latestBoughtSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenBought), timestamp)
-    const latestSoldSnapshotPrice = getCryptoSwapTokenPriceFromSnapshot(pool, bytesToAddress(tokenSold), timestamp)
-    amountBoughtUSD = amountBought.times(latestBoughtSnapshotPrice)
-    amountSoldUSD = amountSold.times(latestSoldSnapshotPrice)
-  }
 
-  const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
+  const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString() + '-' + index.toString())
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
   swapEvent.buyer = buyer
@@ -161,47 +189,11 @@ export function handleExchange(
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought
   swapEvent.amountSold = amountSold
-  swapEvent.amountBoughtUSD = amountBoughtUSD
-  swapEvent.amountSoldUSD = amountSoldUSD
+  swapEvent.isUnderlying = exchangeUnderlying
   swapEvent.timestamp = timestamp
   swapEvent.save()
 
   updateCandles(pool, timestamp, tokenBought, amountBought, tokenSold, amountSold, blockNumber)
-
-  updatePriceFeed(
-    pool,
-    tokenSold,
-    tokenBought,
-    amountSold,
-    amountBought,
-    soldId,
-    boughtId,
-    exchangeUnderlying,
-    blockNumber,
-    timestamp
-  )
-
-  const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
-  let volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
-  // sanity check for usd volume
-  if (volumeUSD.gt(BigDecimal.fromString('1000000000'))) {
-    volumeUSD = BigDecimal.zero()
-  }
-  // create hourly, daily & weekly snapshots
-  for (let i = 0; i < PERIODS.length; i++) {
-    const snapshot = getSwapSnapshot(pool, timestamp, PERIODS[i])
-    snapshot.count = snapshot.count.plus(BIG_INT_ONE)
-    snapshot.amountSold = snapshot.amountSold.plus(amountSold)
-    snapshot.amountBought = snapshot.amountBought.plus(amountBought)
-    snapshot.amountSoldUSD = snapshot.amountSoldUSD.plus(amountSoldUSD)
-    snapshot.amountBoughtUSD = snapshot.amountBoughtUSD.plus(amountBoughtUSD)
-    snapshot.volume = snapshot.volume.plus(volume)
-    snapshot.volumeUSD = snapshot.volumeUSD.plus(volumeUSD)
-    snapshot.save()
-  }
-
-  pool.cumulativeVolume = pool.cumulativeVolume.plus(volume)
-  pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(volumeUSD)
 
   pool.save()
 }

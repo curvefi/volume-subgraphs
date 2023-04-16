@@ -28,8 +28,6 @@
   "transactionHash": "LENDING",
   "factoryAddress": "'0x0000000000000000000000000000000000000001'",
   "unknownMetapoolType": "METAPOOL_FACTORY",
-  "usdnMapping": "",
-  "aethMapping": "",
   "importChainRebaseAprModule": "",
   "returnChainRebaseApr": "return BIG_DECIMAL_ZERO",
   "rebasingPoolImplementations": "['0xadf698e4d8df08b3e2c79682891636ef00f6e205']",

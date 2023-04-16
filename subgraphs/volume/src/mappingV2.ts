@@ -10,7 +10,8 @@ import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
 import { Pool } from '../generated/schema'
-import { processAddLiquidity, processLiquidityRemoval } from './services/liquidity'
+import { processLiquidityEvent } from './services/liquidity'
+import { ERC20 } from '../generated/templates/CurvePoolTemplate/ERC20'
 
 export function addCryptoRegistryPool(
   pool: Address,
@@ -90,6 +91,7 @@ export function handleTokenExchangeV2(event: TokenExchange): void {
     event.block.number,
     event.address,
     event.transaction.hash,
+    event.logIndex,
     event.transaction.gasLimit,
     gasUsed,
     false
@@ -102,13 +104,16 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     return
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     event.params.token_amounts,
+    event.params.token_supply,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.logIndex,
+    true
   )
 }
 
@@ -122,13 +127,16 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
     tokenAmounts.push(i == event.params.coin_index.toI32() ? event.params.coin_amount : BIG_INT_ZERO)
   }
   log.info('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processLiquidityRemoval(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     tokenAmounts,
+    ERC20.bind(Address.fromBytes(pool.lpToken)).totalSupply(), // not all pools have token_supply in the event
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.logIndex,
+    true
   )
 }
 
@@ -138,12 +146,15 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     return
   }
   log.info('Added liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processAddLiquidity(
+  processLiquidityEvent(
     pool,
     event.params.provider,
     event.params.token_amounts,
+    event.params.token_supply,
     event.block.timestamp,
     event.block.number,
-    event.transaction.hash
+    event.transaction.hash,
+    event.logIndex,
+    false
   )
 }

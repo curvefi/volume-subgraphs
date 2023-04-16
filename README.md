@@ -1,9 +1,11 @@
-# Curve volume subgraphs
+# Curve lightweight subgraphs
 
 ### Overview
 
-This repository contains the code and templates needed to deploy a subgraph
-tracking the volume of Curve pools on all supported chains.
+This repository contains a lightweight version of the Curve subgraph.
+It tracks all token exchanges and all liquidity movements for all pools.
+Unlike the volume subgraph, this subgraph does not price transactions in USD.
+You can use third party data to convert the amounts from the subgraph to USD.
 
 The subgraph is based on the address provider contract which is located at `0x0000000022d53366457f9d5e68ec105046fc4383` on all chains.
 The subgraph listens to the events on the address provider to track all added Stable Registry, Stable Factory, Crypto Registry and Crypto Factory contracts.
@@ -25,6 +27,8 @@ Currently supported chains:
 - `xdai`
 - `optimism`
 - `aurora`
+- `celo`
+- `moonbeam`
 
 ### Deployment addresses
 
