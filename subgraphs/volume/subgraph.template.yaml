@@ -260,6 +260,12 @@ templates:
           handler: handleRemoveLiquidityImbalance
         - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
           handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[3],uint256[3],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityImbalance(indexed address,uint256[3],uint256[3],uint256,uint256)
+          handler: handleRemoveLiquidityImbalance
+        - event: AddLiquidity(indexed address,uint256[3],uint256[3],uint256,uint256)
+          handler: handleAddLiquidity
       file: ./src/mapping.ts
   - name: CryptoFactoryTemplate
     kind: ethereum/contract
@@ -380,5 +386,9 @@ templates:
         - event: RemoveLiquidity(indexed address,uint256[2],uint256)
           handler: handleRemoveLiquidity
         - event: AddLiquidity(indexed address,uint256[2],uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[3],uint256)
+          handler: handleRemoveLiquidity
+        - event: AddLiquidity(indexed address,uint256[3],uint256,uint256)
           handler: handleAddLiquidity
       file: ./src/mappingV2.ts
