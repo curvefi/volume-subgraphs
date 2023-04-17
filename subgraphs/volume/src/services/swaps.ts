@@ -28,9 +28,12 @@ function getLiquidityEventFromBasepool(
 ): BigDecimal {
   // we try to load the most recent liquidity add event we have on file
   for (let i = 1; i < 10; i++) {
-    const addLiqEvent = LiquidityEvent.load(tx.toHexString() + '-' + eventIndex.minus(BIG_INT_ONE).toString())
+    const addLiqEvent = LiquidityEvent.load(tx.toHexString() + '-' + eventIndex.minus(BigInt.fromI32(i)).toString())
     if (!addLiqEvent) {
-      log.warning('Unable to match tx for {} index {}', [tx.toHexString(), eventIndex.toString()])
+      log.warning('Unable to match tx for {} index {}', [
+        tx.toHexString(),
+        eventIndex.minus(BigInt.fromI32(i)).toString(),
+      ])
       continue
     }
     // we check that:
