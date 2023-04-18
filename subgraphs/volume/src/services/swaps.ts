@@ -178,7 +178,7 @@ export function handleExchange(
   amountSold =
     amountSold == BIG_DECIMAL_ZERO
       ? tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
-      : amountSold
+      : amountSold.div(exponentToBigDecimal(tokenSoldDecimals))
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString() + '-' + index.toString())
