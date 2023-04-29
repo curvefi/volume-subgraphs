@@ -4,7 +4,6 @@ import {
   DailyPoolSnapshot,
   PriceFeed,
   SwapVolumeSnapshot,
-  LiquidityVolumeSnapshot,
   DailyPlatformSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
@@ -145,29 +144,6 @@ export function getSwapSnapshot(pool: Pool, timestamp: BigInt, period: BigInt): 
     snapshot.volume = BIG_DECIMAL_ZERO
     snapshot.volumeUSD = BIG_DECIMAL_ZERO
     snapshot.count = BIG_INT_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getLiquiditySnapshot(pool: Pool, timestamp: BigInt, period: BigInt): LiquidityVolumeSnapshot {
-  const interval = getIntervalFromTimestamp(timestamp, period)
-  const snapshotId = pool.id + '-' + period.toString() + '-' + interval.toString()
-  let snapshot = LiquidityVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new LiquidityVolumeSnapshot(snapshotId)
-    const coinArray = new Array<BigDecimal>()
-    for (let i = 0; i < pool.coins.length; i++) {
-      coinArray.push(BIG_DECIMAL_ZERO)
-    }
-    snapshot.pool = pool.id
-    snapshot.period = period
-    snapshot.timestamp = interval
-    snapshot.amountAdded = coinArray
-    snapshot.amountRemoved = coinArray
-    snapshot.addCount = BIG_INT_ZERO
-    snapshot.removeCount = BIG_INT_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
     snapshot.save()
   }
   return snapshot
@@ -372,6 +348,19 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+
+  dailySnapshot.gamma = BIG_INT_ZERO
+  dailySnapshot.midFee = BIG_INT_ZERO
+  dailySnapshot.outFee = BIG_INT_ZERO
+  dailySnapshot.feeGamma = BIG_INT_ZERO
+  dailySnapshot.allowedExtraProfit = BIG_INT_ZERO
+  dailySnapshot.adjustmentStep = BIG_INT_ZERO
+  dailySnapshot.maHalfTime = BIG_INT_ZERO
+  dailySnapshot.priceScale = BIG_INT_ZERO
+  dailySnapshot.priceOracle = BIG_INT_ZERO
+  dailySnapshot.lastPrices = BIG_INT_ZERO
+  dailySnapshot.lastPricesTimestamp = BIG_INT_ZERO
+
   return dailySnapshot
 }
 
