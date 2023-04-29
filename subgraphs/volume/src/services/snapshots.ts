@@ -29,6 +29,7 @@ import {
   USDN_POOL,
   SCAM_POOLS,
   CURVE_ONLY_TOKENS,
+  DEPRECATED_POOLS,
 } from 'const'
 import { BigDecimalToBigInt, bytesToAddress } from 'utils'
 import { getPlatform } from './platform'
@@ -393,6 +394,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = createNewSnapshot(snapId)
       dailySnapshot.pool = pool.id
+      dailySnapshot.timestamp = time
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
       let vPrice = BIG_DECIMAL_ZERO
@@ -402,6 +404,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }
       dailySnapshot.virtualPrice = vPrice
+      // we stop recording snapshots for those
+      if (DEPRECATED_POOLS.has(pool.id) && DEPRECATED_POOLS[pool.id].gt(timestamp)) {
+        dailySnapshot.save()
+        continue
+      }
 
       getReserves(pool, dailySnapshot, poolContract, timestamp)
 
@@ -444,7 +451,6 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.baseApr = baseApr
       baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
-      dailySnapshot.timestamp = time
 
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)

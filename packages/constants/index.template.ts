@@ -528,3 +528,8 @@ export const REGISTRY_V2 = 'REGISTRY_V2'
 export const LENDING = 'LENDING'
 
 export const MULTICALL = '{{ multicall }}'
+
+// these are pools that have been hacked or went awry and for which
+// we can not calculate stats anymore past a certain date
+export const DEPRECATED_POOLS = new Map<string, BigInt>()
+DEPRECATED_POOLS.set("0x06364f10b501e868329afbc005b3492902d6c763", BigInt.fromI32(1680315890))
