@@ -39,6 +39,7 @@ import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
 import { CurveLendingPool } from '../../generated/templates/RegistryTemplate/CurveLendingPool'
+import { fillV2PoolParamsSnapshot } from './multicall'
 
 export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
@@ -420,6 +421,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         dailySnapshot.xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
         dailySnapshot.xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
         baseApr = getV2PoolBaseApr(pool, dailySnapshot.xcpProfit, dailySnapshot.xcpProfitA, timestamp)
+        fillV2PoolParamsSnapshot(dailySnapshot, pool)
       } else {
         baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
       }
