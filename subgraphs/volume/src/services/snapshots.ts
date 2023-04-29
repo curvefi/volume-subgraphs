@@ -350,6 +350,8 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+  dailySnapshot.baseApr = BIG_DECIMAL_ZERO
+  dailySnapshot.rebaseApr = BIG_DECIMAL_ZERO
 
   dailySnapshot.gamma = BIG_INT_ZERO
   dailySnapshot.midFee = BIG_INT_ZERO
@@ -405,7 +407,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.virtualPrice = vPrice
       // we stop recording snapshots for those
-      if (DEPRECATED_POOLS.has(pool.id) && DEPRECATED_POOLS[pool.id].gt(timestamp)) {
+      if (DEPRECATED_POOLS.has(pool.id) && timestamp.gt(DEPRECATED_POOLS[pool.id])) {
         dailySnapshot.save()
         continue
       }
