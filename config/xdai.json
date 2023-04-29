@@ -33,5 +33,6 @@
   "importChainRebaseAprModule": "",
   "returnChainRebaseApr": "return BIG_DECIMAL_ZERO",
   "rebasingPoolImplementations": "['0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9']",
-  "tvlThreshold": "1000000000"
+  "tvlThreshold": "1000000000",
+  "multicall": "0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a"
 }

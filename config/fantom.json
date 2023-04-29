@@ -33,5 +33,6 @@
   "importChainRebaseAprModule": "import { getFantomPoolApr } from './fantom'",
   "returnChainRebaseApr": "return getFantomPoolApr(pool, reserves, timestamp, tvl)",
   "rebasingPoolImplementations": "['0x55aa9bf126bcabf0bdc17fa9e39ec9239e1ce7a9']",
-  "tvlThreshold": "1000000000"
+  "tvlThreshold": "1000000000",
+  "multicall": "0xb828c456600857abd4ed6c32facc607bd0464f4f"
 }
