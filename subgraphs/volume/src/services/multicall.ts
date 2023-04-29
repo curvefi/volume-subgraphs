@@ -2,10 +2,11 @@ import { DailyPoolSnapshot, Pool } from '../../generated/schema'
 import { MULTICALL } from 'const'
 import { Multicall } from '../../generated/AddressProvider/Multicall'
 import { Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts/index'
 
 export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool): void {
   const multicall = Multicall.bind(Address.fromString(MULTICALL))
-  const callAddress = Address.fromBytes(pool.address)
+  const callAddress = ethereum.Value.fromAddress(Address.fromBytes(pool.address))
 
   const signatures = [
     '0x72d4f0e2', // gamma
