@@ -30,16 +30,7 @@ import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvide
 import { getFactory } from './services/factory'
 import { getPlatform } from './services/platform'
 import { catchUp } from './services/catchup'
-import {
-  AddLiquidity,
-  RemoveLiquidity,
-  RemoveLiquidityImbalance,
-  RemoveLiquidityOne
-} from '../generated/AddressProvider/CurvePool'
-import {
-  processAddLiquidity,
-  processLiquidityRemoval
-} from './services/liquidity'
+
 import { getOffPegFeeMultiplierResult } from './services/snapshots'
 {{{ importExistingMetaPools }}}
 

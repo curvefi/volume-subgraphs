@@ -8,9 +8,6 @@ import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
 import { CryptoPoolDeployed } from '../generated/templates/CryptoFactoryTemplate/CryptoFactory'
 import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
-import { RemoveLiquidity, RemoveLiquidityOne, AddLiquidity } from '../generated/AddressProvider/CurvePoolV2'
-import { Pool } from '../generated/schema'
-import { processAddLiquidity, processLiquidityRemoval } from './services/liquidity'
 
 export function addCryptoRegistryPool(
   pool: Address,
