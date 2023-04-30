@@ -1,5 +1,5 @@
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
-import { MULTICALL } from 'const'
+import { BIG_INT_ZERO, MULTICALL } from 'const'
 import { Multicall } from '../../generated/AddressProvider/Multicall'
 import { Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { BigInt } from '@graphprotocol/graph-ts/index'
@@ -37,7 +37,8 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
   const multiResults = callResult.value[1].toBytesArray()
   const intResults: Array<BigInt> = []
   for (let i = 0; i < multiResults.length; i++) {
-    intResults.push(ethereum.decode('uint256', multiResults[i])!.toBigInt())
+    const res = ethereum.decode('uint256', multiResults[i])
+    intResults.push(res ? res.toBigInt() : BIG_INT_ZERO)
   }
   snapshot.gamma = intResults[0]
   snapshot.midFee = intResults[1]

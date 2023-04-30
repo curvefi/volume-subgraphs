@@ -336,17 +336,18 @@ function getReserves(pool: Pool, dailySnapshot: DailyPoolSnapshot, poolContract:
 
 function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   const dailySnapshot = new DailyPoolSnapshot(snapId)
-  dailySnapshot.reserves = new Array<BigInt>()
-  dailySnapshot.reservesUSD = new Array<BigDecimal>()
-  dailySnapshot.normalizedReserves = new Array<BigInt>()
+  dailySnapshot.virtualPrice = BIG_DECIMAL_ZERO
+  dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.tvl = BIG_DECIMAL_ZERO
   dailySnapshot.fee = BIG_DECIMAL_ZERO
   dailySnapshot.adminFee = BIG_DECIMAL_ZERO
   dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
   dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
-  dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
   dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
-  dailySnapshot.tvl = BIG_DECIMAL_ZERO
+  dailySnapshot.reserves = new Array<BigInt>()
+  dailySnapshot.reservesUSD = new Array<BigDecimal>()
+  dailySnapshot.normalizedReserves = new Array<BigInt>()
   dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
@@ -354,6 +355,7 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.rebaseApr = BIG_DECIMAL_ZERO
 
   dailySnapshot.gamma = BIG_INT_ZERO
+  dailySnapshot.timestamp = BIG_INT_ZERO
   dailySnapshot.midFee = BIG_INT_ZERO
   dailySnapshot.outFee = BIG_INT_ZERO
   dailySnapshot.feeGamma = BIG_INT_ZERO
