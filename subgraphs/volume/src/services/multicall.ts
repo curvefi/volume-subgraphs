@@ -9,7 +9,7 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
   const callAddress = ethereum.Value.fromAddress(Address.fromBytes(pool.address))
 
   const signatures = [
-    '0x72d4f0e2', // gamma
+    '0xb1373929', // gamma
     '0x92526c0c', // mid_fee
     '0xee8de675', // out_fee
     '0x49fe9e77', // allowed_extra_profit
