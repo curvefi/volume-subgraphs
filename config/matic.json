@@ -33,5 +33,6 @@
   "importChainRebaseAprModule": "import { getMaticPoolApr } from './matic'",
   "returnChainRebaseApr": "return getMaticPoolApr(pool, reserves, timestamp, tvl)",
   "rebasingPoolImplementations": "['0xc7c46488566b9ef9b981b87e328939caa5ca152f', '0x39fe1824f98cd828050d7c51da443e84121c7cf1']",
-  "tvlThreshold": "1000000000"
+  "tvlThreshold": "1000000000",
+  "multicall": "0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507"
 }

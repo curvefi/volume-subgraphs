@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
@@ -46,6 +46,8 @@ dataSources:
           file: ./abis/CurveLendingPool.json
         - name: CurveLendingPoolCoin128
           file: ./abis/CurveLendingPoolCoin128.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: NewAddressIdentifier(indexed uint256,address,string)
           handler: handleNewAddressIdentifier
@@ -93,6 +95,8 @@ templates:
           file: ./abis/CurveLendingPoolCoin128.json
         - name: CurvePoolCoin128
           file: ./abis/CurvePoolCoin128.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: PoolAdded(indexed address,bytes)
           handler: handleMainRegistryPoolAdded
@@ -135,6 +139,8 @@ templates:
           file: ./abis/CurvePoolCoin128.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: PlainPoolDeployed(address[4],uint256,uint256,address)
           handler: handlePlainPoolDeployed
@@ -180,6 +186,8 @@ templates:
           file: ./abis/CToken.json
         - name: YToken
           file: ./abis/YToken.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: PoolAdded(indexed address)
           handler: handleCryptoPoolAdded
@@ -243,6 +251,8 @@ templates:
           file: ./abis/MetaPool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
@@ -302,6 +312,8 @@ templates:
           file: ./abis/CurvePoolCoin128.json
         - name: MetaPool
           file: ./abis/MetaPool.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: CryptoPoolDeployed(address,address[2],uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)
           handler: handleCryptoPoolDeployed
@@ -361,6 +373,8 @@ templates:
           file: ./abis/CurvePoolCoin128.json
         - name: MetaPool
           file: ./abis/MetaPool.json
+        - name: Multicall
+          file: ./abis/Multicall.json
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeV2

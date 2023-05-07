@@ -54,8 +54,8 @@
     "test:all": "yarn workspaces run prepare:mainnet && yarn workspaces run test:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run test:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run test:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run test:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run test:matic && yarn workspaces run prepare:xdai && yarn workspaces run test:xdai && yarn workspaces run prepare:optimism && yarn workspaces run test:optimism && yarn workspaces run test:aurora && yarn workspaces run test:moonbeam"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "0.30.3",
-    "@graphprotocol/graph-ts": "0.27.0",
+    "@graphprotocol/graph-cli": "0.48.0",
+    "@graphprotocol/graph-ts": "0.28.0",
     "@protofire/subgraph-toolkit": "^0.1.2",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
@@ -64,7 +64,7 @@
     "husky": ">=6",
     "lint-staged": ">=10",
     "prettier": "^2.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^5.0.0"
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",

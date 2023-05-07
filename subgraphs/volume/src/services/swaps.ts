@@ -11,6 +11,7 @@ import {
   BIG_DECIMAL_TWO,
   BIG_INT_ONE,
   BIG_INT_ZERO,
+  DEPRECATED_POOLS,
   LENDING,
   METAPOOL_FACTORY,
   STABLE_FACTORY,
@@ -41,6 +42,9 @@ export function handleExchange(
     return
   }
   takePoolSnapshots(timestamp)
+  if (DEPRECATED_POOLS.has(pool.id) && DEPRECATED_POOLS[pool.id].gt(timestamp)) {
+    return
+  }
   const soldId = sold_id.toI32()
   const boughtId = bought_id.toI32()
   let tokenSold: Bytes, tokenBought: Bytes

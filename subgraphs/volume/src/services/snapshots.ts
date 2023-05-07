@@ -4,7 +4,6 @@ import {
   DailyPoolSnapshot,
   PriceFeed,
   SwapVolumeSnapshot,
-  LiquidityVolumeSnapshot,
   DailyPlatformSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
@@ -30,6 +29,7 @@ import {
   USDN_POOL,
   SCAM_POOLS,
   CURVE_ONLY_TOKENS,
+  DEPRECATED_POOLS,
 } from 'const'
 import { BigDecimalToBigInt, bytesToAddress } from 'utils'
 import { getPlatform } from './platform'
@@ -40,6 +40,7 @@ import { ERC20 } from '../../generated/AddressProvider/ERC20'
 import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
 import { CurveLendingPool } from '../../generated/templates/RegistryTemplate/CurveLendingPool'
+import { fillV2PoolParamsSnapshot } from './multicall'
 
 export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
@@ -145,29 +146,6 @@ export function getSwapSnapshot(pool: Pool, timestamp: BigInt, period: BigInt): 
     snapshot.volume = BIG_DECIMAL_ZERO
     snapshot.volumeUSD = BIG_DECIMAL_ZERO
     snapshot.count = BIG_INT_ZERO
-    snapshot.save()
-  }
-  return snapshot
-}
-
-export function getLiquiditySnapshot(pool: Pool, timestamp: BigInt, period: BigInt): LiquidityVolumeSnapshot {
-  const interval = getIntervalFromTimestamp(timestamp, period)
-  const snapshotId = pool.id + '-' + period.toString() + '-' + interval.toString()
-  let snapshot = LiquidityVolumeSnapshot.load(snapshotId)
-  if (!snapshot) {
-    snapshot = new LiquidityVolumeSnapshot(snapshotId)
-    const coinArray = new Array<BigDecimal>()
-    for (let i = 0; i < pool.coins.length; i++) {
-      coinArray.push(BIG_DECIMAL_ZERO)
-    }
-    snapshot.pool = pool.id
-    snapshot.period = period
-    snapshot.timestamp = interval
-    snapshot.amountAdded = coinArray
-    snapshot.amountRemoved = coinArray
-    snapshot.addCount = BIG_INT_ZERO
-    snapshot.removeCount = BIG_INT_ZERO
-    snapshot.volumeUSD = BIG_DECIMAL_ZERO
     snapshot.save()
   }
   return snapshot
@@ -358,20 +336,37 @@ function getReserves(pool: Pool, dailySnapshot: DailyPoolSnapshot, poolContract:
 
 function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   const dailySnapshot = new DailyPoolSnapshot(snapId)
-  dailySnapshot.reserves = new Array<BigInt>()
-  dailySnapshot.reservesUSD = new Array<BigDecimal>()
-  dailySnapshot.normalizedReserves = new Array<BigInt>()
+  dailySnapshot.virtualPrice = BIG_DECIMAL_ZERO
+  dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
+  dailySnapshot.tvl = BIG_DECIMAL_ZERO
   dailySnapshot.fee = BIG_DECIMAL_ZERO
   dailySnapshot.adminFee = BIG_DECIMAL_ZERO
   dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
   dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
-  dailySnapshot.lpPriceUSD = BIG_DECIMAL_ZERO
   dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
-  dailySnapshot.tvl = BIG_DECIMAL_ZERO
+  dailySnapshot.reserves = new Array<BigInt>()
+  dailySnapshot.reservesUSD = new Array<BigDecimal>()
+  dailySnapshot.normalizedReserves = new Array<BigInt>()
   dailySnapshot.A = BIG_INT_ZERO
   dailySnapshot.xcpProfit = BIG_DECIMAL_ZERO
   dailySnapshot.xcpProfitA = BIG_DECIMAL_ZERO
+  dailySnapshot.baseApr = BIG_DECIMAL_ZERO
+  dailySnapshot.rebaseApr = BIG_DECIMAL_ZERO
+
+  dailySnapshot.gamma = BIG_INT_ZERO
+  dailySnapshot.timestamp = BIG_INT_ZERO
+  dailySnapshot.midFee = BIG_INT_ZERO
+  dailySnapshot.outFee = BIG_INT_ZERO
+  dailySnapshot.feeGamma = BIG_INT_ZERO
+  dailySnapshot.allowedExtraProfit = BIG_INT_ZERO
+  dailySnapshot.adjustmentStep = BIG_INT_ZERO
+  dailySnapshot.maHalfTime = BIG_INT_ZERO
+  dailySnapshot.priceScale = BIG_INT_ZERO
+  dailySnapshot.priceOracle = BIG_INT_ZERO
+  dailySnapshot.lastPrices = BIG_INT_ZERO
+  dailySnapshot.lastPricesTimestamp = BIG_INT_ZERO
+
   return dailySnapshot
 }
 
@@ -403,6 +398,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = createNewSnapshot(snapId)
       dailySnapshot.pool = pool.id
+      dailySnapshot.timestamp = time
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
       let vPrice = BIG_DECIMAL_ZERO
@@ -412,6 +408,11 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         vPrice = virtualPriceResult.value.toBigDecimal()
       }
       dailySnapshot.virtualPrice = vPrice
+      // we stop recording snapshots for those
+      if (DEPRECATED_POOLS.has(pool.id) && timestamp.gt(DEPRECATED_POOLS[pool.id])) {
+        dailySnapshot.save()
+        continue
+      }
 
       getReserves(pool, dailySnapshot, poolContract, timestamp)
 
@@ -431,6 +432,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         dailySnapshot.xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
         dailySnapshot.xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
         baseApr = getV2PoolBaseApr(pool, dailySnapshot.xcpProfit, dailySnapshot.xcpProfitA, timestamp)
+        fillV2PoolParamsSnapshot(dailySnapshot, pool)
       } else {
         baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
       }
@@ -453,7 +455,6 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       dailySnapshot.baseApr = baseApr
       baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
-      dailySnapshot.timestamp = time
 
       // compute lpUsdPrice from reserves & lp supply
       const supply = getPoolLpTokenTotalSupply(pool)
