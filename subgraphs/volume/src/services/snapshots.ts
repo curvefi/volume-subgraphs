@@ -80,6 +80,7 @@ export function getOffPegFeeMultiplierResult(pool: Address): ethereum.CallResult
 }
 
 export function takePoolSnapshots(timestamp: BigInt): void {
+  log.warning('Taking pool snapshots for {}', [timestamp.toString()])
   const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
   if (platform.latestPoolSnapshot == time) {

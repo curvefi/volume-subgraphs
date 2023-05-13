@@ -190,7 +190,10 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
             (entry.topics[1].toHexString().slice(26) == event.address.toHexString().slice(2)) &&
             (entry.topics[2].toHexString().slice(26) == event.params.provider.toHexString().slice(2)) &&
             (BigInt.fromUnsignedBytes(changetype<ByteArray>(entry.data.reverse())) == event.params.coin_amount)) {
-            log.info("Found remove coin {} at tx {}", [entry.address.toHexString(), event.transaction.hash.toHexString()])
+            log.info("Found remove coin {} at tx {} for pool {}", [entry.address.toHexString(), event.transaction.hash.toHexString(), event.address.toHexString()])
+          }
+          else {
+            continue
           }
           const coin = entry.address
           const pool = Pool.load(event.address.toHexString())
@@ -201,15 +204,19 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
           for (let j=0; j<pool.coins.length;j++) {
             tokenAmounts.push(pool.coins[j] == coin ? event.params.coin_amount : BIG_INT_ZERO)
           }
+          // not all pools have token_supply in the event
+          const trySupply = ERC20.bind(Address.fromBytes(pool.lpToken)).try_totalSupply()
+          const supply = trySupply.reverted ? BIG_INT_ZERO : trySupply.value
           processLiquidityEvent(pool,
             event.params.provider,
             tokenAmounts,
-            ERC20.bind(Address.fromBytes(pool.lpToken)).totalSupply(), // not all pools have token_supply in the event
+            supply,
             event.block.timestamp,
             event.block.number,
             event.transaction.hash,
             event.logIndex,
             true)
+          break
       }
     }
   }
