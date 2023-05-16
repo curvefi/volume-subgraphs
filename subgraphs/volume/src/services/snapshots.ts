@@ -485,6 +485,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         totalFees = adminFee == BIG_DECIMAL_ONE ? BIG_DECIMAL_ZERO : lpFees.div(BIG_DECIMAL_ONE.minus(adminFee))
         adminFees = totalFees.minus(lpFees)
       }
+      dailySnapshot.adminFee = adminFee
       dailySnapshot.adminFeesUSD = adminFees
       dailySnapshot.lpFeesUSD = lpFees
       dailySnapshot.totalDailyFeesUSD = totalFees
