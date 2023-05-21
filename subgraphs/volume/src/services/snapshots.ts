@@ -453,7 +453,10 @@ export function takePoolSnapshots(timestamp: BigInt): void {
         baseApr = prevSnapshot ? prevSnapshot.baseApr : BIG_DECIMAL_ZERO
       }
       dailySnapshot.baseApr = baseApr
-      baseApr = baseApr.gt(deductibleApr) ? baseApr.minus(deductibleApr) : BIG_DECIMAL_ZERO
+      baseApr =
+        baseApr.gt(deductibleApr) && deductibleApr.gt(BigDecimal.zero())
+          ? baseApr.minus(deductibleApr)
+          : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
 
       // compute lpUsdPrice from reserves & lp supply
