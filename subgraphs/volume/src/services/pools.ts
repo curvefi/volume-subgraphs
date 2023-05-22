@@ -7,6 +7,7 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_ZERO,
   BIG_INT_ONE,
+  CRVUSD,
   CRYPTO_FACTORY,
   METAPOOL_FACTORY,
   METAPOOL_FACTORY_ADDRESS,
@@ -99,7 +100,7 @@ export function createNewPool(
     pool.coins = coins
     pool.coinNames = coinNames
     pool.coinDecimals = coinDecimals
-    pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol, pool.coinNames)
+    pool.assetType = isV2 ? 4 : poolType == CRVUSD ? 0 : getAssetType(pool.name, pool.symbol, pool.coinNames)
     pool.save()
     return
   }
@@ -114,7 +115,7 @@ export function createNewPool(
   pool.coins = coins
   pool.coinNames = coinNames
   pool.coinDecimals = coinDecimals
-  pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol, pool.coinNames)
+  pool.assetType = isV2 ? 4 : poolType == CRVUSD ? 0 : getAssetType(pool.name, pool.symbol, pool.coinNames)
   pool.save()
 }
 
@@ -136,6 +137,7 @@ export function createNewFactoryPool(
   if (version == 1) {
     const factory = StableFactory.bind(factoryContract)
     poolType = factoryContract == Address.fromString(METAPOOL_FACTORY_ADDRESS) ? METAPOOL_FACTORY : STABLE_FACTORY
+    poolType = factoryEntity.crvUsd ? CRVUSD : poolType
     factoryPool = factory.pool_list(poolCount)
     const implementationResult = factory.try_get_implementation_address(factoryPool)
     if (!implementationResult.reverted) {

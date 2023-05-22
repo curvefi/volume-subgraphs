@@ -528,6 +528,7 @@ export const STABLE_FACTORY = 'STABLE_FACTORY'
 export const REGISTRY_V1 = 'REGISTRY_V1'
 export const REGISTRY_V2 = 'REGISTRY_V2'
 export const LENDING = 'LENDING'
+export const CRVUSD = 'CRVUSD'
 
 export const MULTICALL = '{{ multicall }}'
 

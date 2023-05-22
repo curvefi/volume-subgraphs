@@ -5,6 +5,7 @@ enum PoolType {
   REGISTRY_V1
   REGISTRY_V2
   LENDING
+  CRVUSD
 }
 
 type Pool @entity {
@@ -324,4 +325,6 @@ type Factory @entity {
   id: ID!
   """ Number of pools deployed by the Factory contract """
   poolCount: BigInt!
+  """ Whether the factory is for crvUSD pools """
+  crvUsd: Boolean!
 }
