@@ -30,6 +30,7 @@
   "unknownMetapoolType": "METAPOOL_FACTORY",
   "usdnMapping": "",
   "aethMapping": "",
+  "lidoMapping": "",
   "importChainRebaseAprModule": "",
   "returnChainRebaseApr": "return BIG_DECIMAL_ZERO",
   "rebasingPoolImplementations": "[]",

@@ -1,7 +1,7 @@
 import { Pool } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
-import { getAethSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
+import { getAethSnapshotPrice, getLidoSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
 import {
   AETH_POOL,
   ATOKEN_POOLS,
@@ -17,24 +17,31 @@ import { DAY } from 'utils/time'
 import { getATokenDailyApr, getCompOrYPoolApr } from './rebase'
 
 function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
-  const lidoOracleContract = LidoOracle.bind(LIDO_ORACLE_ADDRESS)
-  const reportResult = lidoOracleContract.try_getLastCompletedReportDelta()
-  if (reportResult.reverted) {
-    log.warning('LIDO oracle call reverted', [])
-    return BIG_DECIMAL_ZERO
-  }
-  const baseApr = reportResult.value.value0
-    .minus(reportResult.value.value1)
-    .toBigDecimal()
-    .div(reportResult.value.value1.toBigDecimal())
-  // TODO: get fee from lido contract dynamically
-  const feeResult = BigDecimal.fromString('1000').div(BigDecimal.fromString('10000'))
-  const userApr = baseApr.times(BIG_DECIMAL_ONE.minus(feeResult))
-
   // rebase only applies to steth part of the pool
   const stEthRatio = reserves[1].div(tvl)
-  log.info('Deductible APR for LIDO: {} APR, {} Ratio', [userApr.toString(), stEthRatio.toString()])
-  return userApr.times(stEthRatio)
+
+  if (timestamp.lt(BigInt.fromI32(1682899200))) {
+    // V2 launched may 2nd, should replace by block #17172465
+    const lidoOracleContract = LidoOracle.bind(LIDO_ORACLE_ADDRESS)
+    const reportResult = lidoOracleContract.try_getLastCompletedReportDelta()
+    if (reportResult.reverted) {
+      log.warning('LIDO oracle call reverted', [])
+      return BIG_DECIMAL_ZERO
+    }
+    const baseApr = reportResult.value.value0
+      .minus(reportResult.value.value1)
+      .toBigDecimal()
+      .div(reportResult.value.value1.toBigDecimal())
+    // TODO: get fee from lido contract dynamically
+    const feeResult = BigDecimal.fromString('1000').div(BigDecimal.fromString('10000'))
+    const userApr = baseApr.times(BIG_DECIMAL_ONE.minus(feeResult))
+    log.info('Deductible APR for LIDO: {} APR, {} Ratio', [userApr.toString(), stEthRatio.toString()])
+    return userApr.times(stEthRatio)
+  } else {
+    const apr = getLidoSnapshotPrice(timestamp.minus(DAY))
+    log.info('Deductible APR for LIDO V2: {} APR, {} Ratio', [apr.toString(), stEthRatio.toString()])
+    return apr.times(stEthRatio)
+  }
 }
 
 function getAavePoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {

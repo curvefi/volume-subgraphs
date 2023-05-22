@@ -2,7 +2,7 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { TokenSnapshot } from '../../../generated/schema'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { AToken } from '../../../generated/templates/CurvePoolTemplate/AToken'
-import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_TOKEN, AETH_TOKEN } from 'const'
+import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_TOKEN, AETH_TOKEN, LIDO_STETH_CONTRACT } from 'const'
 
 // Used to calculate rebase APR of aTokens
 // We store the total supply / total supply scaled ratio as price
@@ -36,6 +36,17 @@ export function getATokenSnapshotPrice(token: Address, timestamp: BigInt): BigDe
 export function getUsdnSnapshotPrice(timestamp: BigInt): BigDecimal {
   const day = getIntervalFromTimestamp(timestamp, DAY)
   const snapshotId = USDN_TOKEN + '-' + day.toString() + '-rebase'
+  const snapshot = TokenSnapshot.load(snapshotId)
+  if (!snapshot) {
+    return BIG_DECIMAL_ZERO
+  }
+  return snapshot.price
+}
+
+// Used to calculate rebase APR of Lido steth
+export function getLidoSnapshotPrice(timestamp: BigInt): BigDecimal {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const snapshotId = LIDO_STETH_CONTRACT + '-' + day.toString() + '-rebase'
   const snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     return BIG_DECIMAL_ZERO
