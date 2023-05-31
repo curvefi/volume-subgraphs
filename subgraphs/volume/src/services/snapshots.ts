@@ -454,7 +454,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       }
       dailySnapshot.baseApr = baseApr
       baseApr =
-        baseApr.gt(deductibleApr) && deductibleApr.gt(BigDecimal.zero())
+        baseApr.gt(deductibleApr) && deductibleApr.ge(BigDecimal.zero())
           ? baseApr.minus(deductibleApr)
           : BIG_DECIMAL_ZERO
       dailySnapshot.rebaseApr = deductibleApr
