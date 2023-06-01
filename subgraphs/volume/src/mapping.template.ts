@@ -29,7 +29,7 @@ import { handleExchange } from './services/swaps'
 import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
 import { getFactory } from './services/factory'
 import { getPlatform } from './services/platform'
-import { catchUp } from './services/catchup'
+import { catchUp, catchUpTriCrypto } from './services/catchup'
 
 import { getOffPegFeeMultiplierResult } from './services/snapshots'
 {{{ importExistingMetaPools }}}
@@ -95,7 +95,7 @@ export function addAddress(providedId: BigInt,
     triCryptoFactory = getFactory(addedAddress, false)
     triCryptoFactory.save()
     TriCryptoFactoryTemplate.create(addedAddress)
-    catchUp(addedAddress, true, 1, block, timestamp, hash)
+    catchUpTriCrypto(addedAddress, block, timestamp, hash)
   }
 }
 }
