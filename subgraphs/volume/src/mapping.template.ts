@@ -79,12 +79,12 @@ export function addAddress(providedId: BigInt,
       catchUp(addedAddress, true, 2, block, timestamp, hash)
     }
   } else if (providedId == BigInt.fromString('8')) {
-    let cryptoFactory = Factory.load(addedAddress.toHexString())
-    if (!cryptoFactory) {
+    let crvUsdFactory = Factory.load(addedAddress.toHexString())
+    if (!crvUsdFactory) {
       log.info('New crvUSD factory added: {}', [addedAddress.toHexString()])
-      cryptoFactory = getFactory(addedAddress, true)
-      cryptoFactory.save()
-      CryptoFactoryTemplate.create(addedAddress)
+      crvUsdFactory = getFactory(addedAddress, true)
+      crvUsdFactory.save()
+      StableFactoryTemplate.create(addedAddress)
       catchUp(addedAddress, true, 1, block, timestamp, hash)
     }
   }
