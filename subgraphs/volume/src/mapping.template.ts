@@ -15,7 +15,7 @@ import {
   CryptoRegistryTemplate,
   CurvePoolTemplate,
   RegistryTemplate,
-  StableFactoryTemplate,
+  StableFactoryTemplate, TriCryptoFactoryTemplate
 } from '../generated/templates'
 import { Address, Bytes, ByteArray, log } from '@graphprotocol/graph-ts'
 import { MainRegistry, PoolAdded } from '../generated/AddressProvider/MainRegistry'
@@ -88,6 +88,16 @@ export function addAddress(providedId: BigInt,
       catchUp(addedAddress, true, 1, block, timestamp, hash)
     }
   }
+  else if (providedId == BigInt.fromString('11')) {
+  let triCryptoFactory = Factory.load(addedAddress.toHexString())
+  if (!triCryptoFactory) {
+    log.info('New tricrypto factory added: {}', [addedAddress.toHexString()])
+    triCryptoFactory = getFactory(addedAddress, false)
+    triCryptoFactory.save()
+    TriCryptoFactoryTemplate.create(addedAddress)
+    catchUp(addedAddress, true, 1, block, timestamp, hash)
+  }
+}
 }
 
 export function handleNewAddressIdentifier(event: NewAddressIdentifier): void {

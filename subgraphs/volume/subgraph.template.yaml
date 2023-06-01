@@ -500,4 +500,4 @@ templates:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleTokenExchangeTriCrypto
           receipt: true
-      file: ./src/./src/mapping-tricrypto.ts
+      file: ./src/mapping-tricrypto.ts

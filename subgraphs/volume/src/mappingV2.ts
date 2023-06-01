@@ -2,7 +2,10 @@ import { log } from '@graphprotocol/graph-ts/index'
 import { PoolAdded } from '../generated/AddressProvider/CryptoRegistry'
 import { ADDRESS_ZERO, BIG_INT_ZERO, REGISTRY_V2 } from 'const'
 import { TokenExchange } from '../generated/templates/RegistryTemplate/CurvePoolV2'
-import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
+import {
+  createNewFactoryPool,
+  createNewRegistryPool
+} from './services/pools'
 import { MetaPool } from '../generated/templates/RegistryTemplate/MetaPool'
 import { getLpToken } from './mapping'
 import { handleExchange } from './services/swaps'
