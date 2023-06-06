@@ -5,7 +5,7 @@ import {
     ethereum,
     log,
 } from "@graphprotocol/graph-ts";
-import {DAY, getIntervalFromTimestamp, YEAR} from "./time";
+import { DAY, getIntervalFromTimestamp, HOUR, YEAR } from './time'
 import {Multicall} from "../../generated/templates/Llamma/Multicall";
 import {MonetaryPolicy} from "../../generated/templates/Llamma/MonetaryPolicy";
 import {getBalanceOf, getDecimals} from "./erc20";
@@ -205,7 +205,7 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): void {
         log.error("Received event from unknown amm {}", [amm.toHexString()])
         return
     }
-    const day = getIntervalFromTimestamp(block.timestamp, DAY)
+    const day = getIntervalFromTimestamp(block.timestamp, HOUR)
     const id = llamma.id.toHexString() + '-' + day.toString()
     const market = Market.load(llamma.market)
 
