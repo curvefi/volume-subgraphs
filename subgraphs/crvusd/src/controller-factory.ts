@@ -3,26 +3,20 @@ import {
   SetDebtCeiling as SetDebtCeilingEvent,
   MintForMarket as MintForMarketEvent,
   RemoveFromMarket as RemoveFromMarketEvent,
-} from "../generated/crvUSDControllerFactory/crvUSDControllerFactory"
-import {
-  Amm, Burn, DebtCeiling,
-  Market, Mint,
-} from "../generated/schema"
-import {BigInt, Bytes, log} from "@graphprotocol/graph-ts";
+} from '../generated/crvUSDControllerFactory/crvUSDControllerFactory'
+import { Amm, Burn, DebtCeiling, Market, Mint } from '../generated/schema'
+import { BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import {
   Llamma as LlammaTemplate,
   ControllerTemplate,
-  MonetaryPolicy as MonetaryPolicyTemplate
-} from "../generated/templates";
-import {getOrCreatePolicy} from "./services/policies";
-import {Llamma as LlamaAbi} from "../generated/templates/Llamma/Llamma";
-import {getDecimals, getName} from "./services/erc20";
-
+  MonetaryPolicy as MonetaryPolicyTemplate,
+} from '../generated/templates'
+import { getOrCreatePolicy } from './services/policies'
+import { Llamma as LlamaAbi } from '../generated/templates/Llamma/Llamma'
+import { getDecimals, getName } from './services/erc20'
 
 export function handleAddMarket(event: AddMarketEvent): void {
-  let market = new Market(
-    event.params.controller
-  )
+  const market = new Market(event.params.controller)
   market.collateral = event.params.collateral
   market.collateralPrecision = getDecimals(event.params.collateral)
   market.collateralName = getName(event.params.collateral)
@@ -36,13 +30,17 @@ export function handleAddMarket(event: AddMarketEvent): void {
   market.transactionHash = event.transaction.hash
   market.amm = event.params.amm
 
-  log.info("New market deployed. Collateral: {}, Controller: {}, AMM: {}, Monetary Policy: {}", [market.collateral.toHexString(), market.controller.toHexString(), market.amm.toHexString(), market.monetaryPolicy.toHexString()])
-
+  log.info('New market deployed. Collateral: {}, Controller: {}, AMM: {}, Monetary Policy: {}', [
+    market.collateral.toHexString(),
+    market.controller.toHexString(),
+    market.amm.toHexString(),
+    market.monetaryPolicy.toHexString(),
+  ])
 
   ControllerTemplate.create(event.params.controller)
 
-  let amm = new Amm(event.params.amm)
-  let ammContract = LlamaAbi.bind(event.params.amm)
+  const amm = new Amm(event.params.amm)
+  const ammContract = LlamaAbi.bind(event.params.amm)
   amm.A = ammContract.A()
   amm.coins = new Array<Bytes>()
   amm.coinDecimals = new Array<BigInt>()
@@ -76,19 +74,16 @@ export function handleAddMarket(event: AddMarketEvent): void {
   amm.save()
   LlammaTemplate.create(event.params.amm)
 
-
-  let policy = getOrCreatePolicy(event.params.monetary_policy)
+  const policy = getOrCreatePolicy(event.params.monetary_policy)
   MonetaryPolicyTemplate.create(event.params.monetary_policy)
 
   market.save()
 }
 
 export function handleSetDebtCeiling(event: SetDebtCeilingEvent): void {
-  log.info("Debt ceiling set for {} at {}", [event.params.addr.toHexString(), event.transaction.hash.toHexString()])
+  log.info('Debt ceiling set for {} at {}', [event.params.addr.toHexString(), event.transaction.hash.toHexString()])
 
-  let ceiling = new DebtCeiling(
-      event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
+  const ceiling = new DebtCeiling(event.transaction.hash.concatI32(event.logIndex.toI32()))
   ceiling.addr = event.params.addr
   ceiling.debtCeiling = event.params.debt_ceiling
 
@@ -97,14 +92,11 @@ export function handleSetDebtCeiling(event: SetDebtCeilingEvent): void {
   ceiling.transactionHash = event.transaction.hash
 
   ceiling.save()
-
 }
 
 export function handleMintForMarket(event: MintForMarketEvent): void {
-  let mint = new Mint(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  log.info("Mint {} for {}", [event.params.amount.toString(), event.params.addr.toHexString()])
+  const mint = new Mint(event.transaction.hash.concatI32(event.logIndex.toI32()))
+  log.info('Mint {} for {}', [event.params.amount.toString(), event.params.addr.toHexString()])
   mint.addr = event.params.addr
   mint.amount = event.params.amount
   mint.blockNumber = event.block.number
@@ -114,10 +106,8 @@ export function handleMintForMarket(event: MintForMarketEvent): void {
 }
 
 export function handleRemoveFromMarket(event: RemoveFromMarketEvent): void {
-  let burn = new Burn(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  log.info("Burn {} for {}", [event.params.amount.toString(), event.params.addr.toHexString()])
+  const burn = new Burn(event.transaction.hash.concatI32(event.logIndex.toI32()))
+  log.info('Burn {} for {}', [event.params.amount.toString(), event.params.addr.toHexString()])
   burn.addr = event.params.addr
   burn.amount = event.params.amount
   burn.blockNumber = event.block.number
