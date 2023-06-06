@@ -15,7 +15,7 @@ import {
   CryptoRegistryTemplate,
   CurvePoolTemplate,
   RegistryTemplate,
-  StableFactoryTemplate,
+  StableFactoryTemplate, TriCryptoFactoryTemplate
 } from '../generated/templates'
 import { Address, Bytes, ByteArray, log } from '@graphprotocol/graph-ts'
 import { MainRegistry, PoolAdded } from '../generated/AddressProvider/MainRegistry'
@@ -29,7 +29,7 @@ import { handleExchange } from './services/swaps'
 import { MetaPoolDeployed, PlainPoolDeployed } from '../generated/AddressProvider/StableFactory'
 import { getFactory } from './services/factory'
 import { getPlatform } from './services/platform'
-import { catchUp } from './services/catchup'
+import { catchUp, catchUpTriCrypto } from './services/catchup'
 
 import { getOffPegFeeMultiplierResult } from './services/snapshots'
 {{{ importExistingMetaPools }}}
@@ -79,15 +79,25 @@ export function addAddress(providedId: BigInt,
       catchUp(addedAddress, true, 2, block, timestamp, hash)
     }
   } else if (providedId == BigInt.fromString('8')) {
-    let cryptoFactory = Factory.load(addedAddress.toHexString())
-    if (!cryptoFactory) {
+    let crvUsdFactory = Factory.load(addedAddress.toHexString())
+    if (!crvUsdFactory) {
       log.info('New crvUSD factory added: {}', [addedAddress.toHexString()])
-      cryptoFactory = getFactory(addedAddress, true)
-      cryptoFactory.save()
-      CryptoFactoryTemplate.create(addedAddress)
+      crvUsdFactory = getFactory(addedAddress, true)
+      crvUsdFactory.save()
+      StableFactoryTemplate.create(addedAddress)
       catchUp(addedAddress, true, 1, block, timestamp, hash)
     }
   }
+  else if (providedId == BigInt.fromString('11')) {
+  let triCryptoFactory = Factory.load(addedAddress.toHexString())
+  if (!triCryptoFactory) {
+    log.info('New tricrypto factory added: {}', [addedAddress.toHexString()])
+    triCryptoFactory = getFactory(addedAddress, false)
+    triCryptoFactory.save()
+    TriCryptoFactoryTemplate.create(addedAddress)
+    catchUpTriCrypto(addedAddress, block, timestamp, hash)
+  }
+}
 }
 
 export function handleNewAddressIdentifier(event: NewAddressIdentifier): void {

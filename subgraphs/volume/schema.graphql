@@ -6,6 +6,7 @@ enum PoolType {
   REGISTRY_V2
   LENDING
   CRVUSD
+  TRICRYPTO_FACTORY
 }
 
 type Pool @entity {
