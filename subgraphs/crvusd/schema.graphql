@@ -1,0 +1,324 @@
+type Market @entity {
+  id: Bytes!
+  collateral: Bytes! # address
+  collateralPrecision: BigInt!
+  collateralName: String!
+  controller: Bytes!
+  amm: Amm!
+  monetaryPolicy: MonetaryPolicy!
+  index: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  borrows: [Borrow!] @derivedFrom(field: "market")
+  repayments: [Repayment!] @derivedFrom(field: "market")
+  removals: [Removal!] @derivedFrom(field: "market")
+  liquidations: [Liquidation!] @derivedFrom(field: "market")
+  snapshots: [Snapshot!] @derivedFrom(field: "market")
+}
+
+type Snapshot @entity(immutable: true) {
+  id: String!
+  market: Market!
+  llamma: Amm!
+  policy: MonetaryPolicy!
+
+  A: BigInt! #
+  rate: BigDecimal! #
+  futureRate: BigDecimal! #
+  liquidationDiscount: BigDecimal! #
+  loanDiscount: BigDecimal! #
+
+  minted: BigDecimal! #
+  redeemed: BigDecimal! #
+  totalKeeperDebt: BigDecimal! #
+  totalCollateral: BigDecimal! #
+  totalCollateralUsd: BigDecimal! #
+  totalSupply: BigDecimal! #
+  totalStableCoin: BigDecimal! #
+
+  totalDebt: BigDecimal! #
+  nLoans: BigInt! #
+
+  crvUsdAdminFees: BigDecimal! #
+  collateralAdminFees: BigDecimal! #
+  fee: BigDecimal! #
+  adminFee: BigDecimal! #
+
+  ammPrice: BigDecimal! #
+  oraclePrice: BigDecimal! #
+  basePrice: BigDecimal! #
+
+  activeBand: BigInt! #
+  minBand: BigInt! #
+  maxBand: BigInt! #
+  bandSnapshot: Boolean!
+  bands: [Band!] @derivedFrom(field: "snapshot")
+
+  blockNumber: BigInt! #
+  timestamp: BigInt! #
+}
+
+type Band @entity(immutable: true) {
+  id: String!
+  index: BigInt!
+  snapshot: Snapshot!
+  stableCoin: BigDecimal!
+  collateral: BigDecimal!
+  collateralUsd: BigDecimal!
+  priceOracleUp: BigDecimal!
+  priceOracleDown: BigDecimal!
+}
+
+type Mint @entity(immutable: true) {
+  id: Bytes!
+  addr: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Burn @entity(immutable: true) {
+  id: Bytes!
+  addr: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Amm @entity {
+  id: Bytes!
+  market: Market!
+  A: BigInt!
+  coins: [Bytes!]!
+  coinNames: [String!]!
+  basePrice: BigInt!
+  coinDecimals: [BigInt!]!
+  priceOracle: Bytes!
+  fee: BigInt!
+  adminFee: BigInt!
+  rates: [LlammaRate!] @derivedFrom(field: "llamma")
+  fees: [LlammaFee!] @derivedFrom(field: "llamma")
+  exchanges: [TokenExchange!] @derivedFrom(field: "llamma")
+  withdrawals: [LlammaWithdrawal!] @derivedFrom(field: "llamma")
+  deposits: [LlammaDeposit!] @derivedFrom(field: "llamma")
+}
+
+type LlammaRate @entity(immutable: true) {
+  id: Bytes!
+  llamma: Amm!
+  rate: BigInt!
+  rateMul: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LlammaFee @entity(immutable: true) {
+  id: Bytes!
+  llamma: Amm!
+  adminFee: BigInt!
+  fee: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LlammaDeposit @entity(immutable: true) {
+  id: Bytes!
+  llamma: Amm!
+  provider: User!
+  amount: BigInt!
+  n1: BigInt!
+  n2: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LlammaWithdrawal @entity(immutable: true) {
+  id: Bytes!
+  llamma: Amm!
+  provider: User!
+  amountBorrowed: BigInt!
+  amountCollateral: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenExchange @entity(immutable: true) {
+  id: Bytes!
+  buyer: User!
+  llamma: Amm!
+  sold_id: BigInt!
+  tokens_sold: BigInt!
+  bought_id: BigInt!
+  tokens_bought: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MonetaryPolicy @entity {
+  id: Bytes!
+  priceOracle: Bytes!
+  keepers: [Bytes!]!
+  pegKeepers: [PegKeeper!] @derivedFrom(field: "policy")
+  rates: [PolicyRate!] @derivedFrom(field: "policy")
+  benchmarkRates: [BenchmarkRate!] @derivedFrom(field: "policy")
+  debtFractions: [DebtFraction!] @derivedFrom(field: "policy")
+}
+
+type BenchmarkRate @entity(immutable: true) {
+  id: Bytes!
+  policy: MonetaryPolicy!
+  rate: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DebtFraction @entity(immutable: true) {
+  id: Bytes!
+  policy: MonetaryPolicy!
+  target: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PolicyRate @entity(immutable: true) {
+  id: Bytes!
+  policy: MonetaryPolicy!
+  rate: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PegKeeper @entity {
+  id: Bytes!
+  policy: MonetaryPolicy!
+  active: Boolean!
+  debt: BigInt!
+  totalProvided: BigInt!
+  totalWithdrawn: BigInt!
+  totalProfit: BigInt!
+  provides: [Provide!] @derivedFrom(field: "keeper")
+  withdrawals: [Withdraw!] @derivedFrom(field: "keeper")
+  profits: [Profit!] @derivedFrom(field: "keeper")
+}
+
+type Provide @entity(immutable: true) {
+  id: Bytes!
+  keeper: PegKeeper!
+  amount: BigInt!
+  debt: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Withdraw @entity(immutable: true) {
+  id: Bytes!
+  keeper: PegKeeper!
+  amount: BigInt!
+  debt: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Profit @entity(immutable: true) {
+  id: Bytes!
+  keeper: PegKeeper!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+
+type DebtCeiling @entity(immutable: true) {
+  id: Bytes!
+  addr: Bytes! # address
+  debtCeiling: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+
+type Borrow @entity(immutable: true) {
+  id: Bytes!
+  user: User!
+  market: Market!
+  collateralIncrease: BigInt!
+  loanIncrease: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Repayment @entity(immutable: true) {
+  id: Bytes!
+  user: User!
+  market: Market!
+  collateralDecrease: BigInt!
+  loanDecrease: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Removal @entity(immutable: true) {
+  id: Bytes!
+  user: User!
+  market: Market!
+  collateralDecrease: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Liquidation @entity(immutable: true) {
+  id: Bytes!
+  user: User!
+  liquidator: User!
+  market: Market!
+  collateralReceived: BigInt!
+  stablecoinReceived: BigInt!
+  debt: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UserState @entity(immutable: true) {
+  id: Bytes!
+  user: User!
+  market: Market!
+  collateral: BigInt!
+  n1: BigInt!
+  n2: BigInt!
+  debt: BigInt!
+  liquidationDiscount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type User @entity {
+  id: Bytes!
+  borrows: [Borrow!]  @derivedFrom(field: "user")
+  repayments: [Repayment!]  @derivedFrom(field: "user")
+  removals: [Removal!]  @derivedFrom(field: "user")
+  liquidations: [Liquidation!]  @derivedFrom(field: "user")
+  states: [UserState!]  @derivedFrom(field: "user")
+}
+
+
+

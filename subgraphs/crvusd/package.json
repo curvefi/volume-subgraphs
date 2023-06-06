@@ -1,0 +1,18 @@
+{
+  "name": "crvusd",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/crvusd",
+    "create-local": "graph create --node http://localhost:8020/ convex-community/crvusd",
+    "remove-local": "graph remove --node http://localhost:8020/ convex-community/crvusd",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 convex-community/crvusd",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.50.1",
+    "@graphprotocol/graph-ts": "0.30.0"
+  },
+  "devDependencies": { "matchstick-as": "0.5.0" }
+}
