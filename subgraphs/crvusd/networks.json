@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "crvUSDControllerFactory": {
+      "address": "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC",
+      "startBlock": 17257955
+    }
+  }
+}

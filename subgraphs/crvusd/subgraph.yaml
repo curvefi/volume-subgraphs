@@ -1,0 +1,186 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: crvUSDControllerFactory
+    network: mainnet
+    source:
+      address: "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC"
+      abi: crvUSDControllerFactory
+      startBlock: 17257955
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - DebtCeiling
+        - Repayment
+        - Amm
+        - Borrow
+        - Liquidation
+        - DebtCeiling
+        - Removal
+        - Mint
+        - Burn
+      abis:
+        - name: crvUSDControllerFactory
+          file: ./abis/crvUSDControllerFactory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Controller
+          file: ./abis/Controller.json
+        - name: Llamma
+          file: ./abis/Llamma.json
+        - name: MonetaryPolicy
+          file: ./abis/MonetaryPolicy.json
+        - name: PegKeeper
+          file: ./abis/PegKeeper.json
+      eventHandlers:
+        - event: AddMarket(indexed address,address,address,address,uint256)
+          handler: handleAddMarket
+        - event: SetDebtCeiling(indexed address,uint256)
+          handler: handleSetDebtCeiling
+        - event: MintForMarket(indexed address,uint256)
+          handler: handleMintForMarket
+        - event: RemoveFromMarket(indexed address,uint256)
+          handler: handleRemoveFromMarket
+      file: ./src/controller-factory.ts
+
+templates:
+  - name: ControllerTemplate
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: Controller
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Borrow
+        - Repayment
+        - Removal
+        - UserState
+        - Liquidation
+        - DebtCeiling
+        - Mint
+        - User
+      abis:
+        - name: Controller
+          file: ./abis/Controller.json
+      eventHandlers:
+        - event: Borrow(indexed address,uint256,uint256)
+          handler: handleBorrow
+        - event: Repay(indexed address,uint256,uint256)
+          handler: handleRepay
+        - event: RemoveCollateral(indexed address,uint256)
+          handler: handleRemoveCollateral
+        - event: Liquidate(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleLiquidate
+        - event: SetMonetaryPolicy(address)
+          handler: handleSetMonetaryPolicy
+        - event: UserState(indexed address,uint256,uint256,int256,int256,uint256)
+          handler: handleUserState
+      file: ./src/controller.ts
+  - name: Llamma
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: Llamma
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Controller
+        - Market
+        - Amm
+        - User
+        - LlamaRate
+      abis:
+        - name: Llamma
+          file: ./abis/Llamma.json
+        - name: Multicall
+          file: ./abis/Multicall.json
+        - name: MonetaryPolicy
+          file: ./abis/MonetaryPolicy.json
+        - name: PegKeeper
+          file: ./abis/PegKeeper.json
+        - name: Controller
+          file: ./abis/Controller.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleTokenExchange
+        - event: Deposit(indexed address,uint256,int256,int256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,uint256,uint256)
+          handler: handleWithdraw
+        - event: SetRate(uint256,uint256,uint256)
+          handler: handleSetRate
+        - event: SetFee(uint256)
+          handler: handleSetFee
+        - event: SetAdminFee(uint256)
+          handler: handleSetAdminFee
+      file: ./src/llamma.ts
+  - name: MonetaryPolicy
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: MonetaryPolicy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Registry
+        - MonetaryPolicy
+        - PegKeeper
+        - PolicyRate
+        - Market
+        - User
+      abis:
+        - name: MonetaryPolicy
+          file: ./abis/MonetaryPolicy.json
+        - name: PegKeeper
+          file: ./abis/PegKeeper.json
+      eventHandlers:
+        - event: AddPegKeeper(indexed address)
+          handler: handleAddPegKeeper
+        - event: RemovePegKeeper(indexed address)
+          handler: handleRemovePegKeeper
+        - event: SetTargetDebtFraction(uint256)
+          handler: handleSetTargetDebtFraction
+        - event: SetRate(uint256)
+          handler: handleSetRate
+      file: ./src/policy.ts
+  - name: PegKeeper
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: PegKeeper
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Registry
+        - MonetaryPolicy
+        - PegKeeper
+      abis:
+        - name: PegKeeper
+          file: ./abis/PegKeeper.json
+      eventHandlers:
+        - event: Provide(uint256)
+          handler: handleProvide
+        - event: Withdraw(uint256)
+          handler: handleWithdraw
+        - event: Profit(uint256)
+          handler: handleProfit
+      file: ./src/keeper.ts
+
