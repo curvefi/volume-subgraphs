@@ -52,6 +52,7 @@ type Snapshot @entity(immutable: true) {
   activeBand: BigInt! #
   minBand: BigInt! #
   maxBand: BigInt! #
+  bandSnapshot: Boolean!
   bands: [Band!] @derivedFrom(field: "snapshot")
 
   blockNumber: BigInt! #

@@ -1,7 +1,7 @@
 import { Amm, PegKeeper, MonetaryPolicy as MonetaryPolicyEntity, Market, Snapshot, Band } from '../../generated/schema'
 
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
-import { getIntervalFromTimestamp, HOUR, YEAR } from './time'
+import { DAY, getIntervalFromTimestamp, HOUR, YEAR } from './time'
 import { Multicall } from '../../generated/templates/Llamma/Multicall'
 import { MonetaryPolicy } from '../../generated/templates/Llamma/MonetaryPolicy'
 import { getBalanceOf, getDecimals } from './erc20'
@@ -178,8 +178,6 @@ function makeBands(snapshot: Snapshot, colPrecision: string): void {
   const amp = snapshot.A.toBigDecimal()
   const multiplier = amp.minus(BIG_DECIMAL_ONE).div(amp)
 
-  log.warning('Last value {}', [results[results.length - 1].toString()])
-  log.warning('Multiplier {} (test run: {})', [multiplier.toString(), multiplier.times(priceOracleUp).toString()])
   let resultIndex = 0
   while (currentBand <= maxBand) {
     const band = new Band(snapshot.id + currentBand.toString())
@@ -204,8 +202,10 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): void {
     log.error('Received event from unknown amm {}', [amm.toHexString()])
     return
   }
-  const day = getIntervalFromTimestamp(block.timestamp, HOUR)
-  const id = llamma.id.toHexString() + '-' + day.toString()
+  // we snapshot the params every hour but the bands daily
+  const hour = getIntervalFromTimestamp(block.timestamp, HOUR)
+  const day = getIntervalFromTimestamp(block.timestamp, DAY)
+  const id = llamma.id.toHexString() + '-' + hour.toString()
   const market = Market.load(llamma.market)
 
   if (!market) {
@@ -240,7 +240,13 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): void {
     snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
     snapshot.totalCollateral = controllerCollatBalance.minus(snapshot.collateralAdminFees)
     snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
-    makeBands(snapshot, precision)
+    if (hour == day) {
+      snapshot.bandSnapshot = true
+      makeBands(snapshot, precision)
+    }
+    else {
+      snapshot.bandSnapshot = false
+    }
     snapshot.save()
     return
   }
