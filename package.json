@@ -2,7 +2,7 @@
   "name": "curve-volume-subgraph",
   "private": true,
   "workspaces": [
-    "subgraphs/volume/*",
+    "subgraphs/*",
     "packages/*"
   ],
   "scripts": {
@@ -19,6 +19,7 @@
     "prepare:aurora": "yarn workspaces run prepare:aurora",
     "prepare:moonbeam": "yarn workspaces run prepare:moonbeam",
     "prepare:celo": "yarn workspaces run prepare:celo",
+    "prepare:harmony": "yarn workspaces run prepare:harmony",
     "deploy:mainnet": "yarn workspaces run deploy:mainnet",
     "deploy:avalanche": "yarn workspaces run deploy:avalanche",
     "deploy:fantom": "yarn workspaces run deploy:fantom",
@@ -29,6 +30,7 @@
     "deploy:aurora": "yarn workspaces run deploy:aurora",
     "deploy:moonbeam": "yarn workspaces run deploy:moonbeam",
     "deploy:celo": "yarn workspaces run deploy:celo",
+    "deploy:harmony": "yarn workspaces run deploy:harmony",
     "stage:mainnet": "yarn workspaces run stage:mainnet",
     "stage:avalanche": "yarn workspaces run stage:avalanche",
     "stage:fantom": "yarn workspaces run stage:fantom",
@@ -39,6 +41,7 @@
     "stage:aurora": "yarn workspaces run stage:aurora",
     "stage:moonbeam": "yarn workspaces run stage:moonbeam",
     "stage:celo": "yarn workspaces run stage:celo",
+    "stage:harmony": "yarn workspaces run stage:harmony",
     "test:mainnet": "yarn workspaces run test:mainnet",
     "test:avalanche": "yarn workspaces run test:avalanche",
     "test:fantom": "yarn workspaces run test:fantom",
@@ -49,6 +52,7 @@
     "test:aurora": "yarn workspaces run test:aurora",
     "test:moonbeam": "yarn workspaces run test:moonbeam",
     "test:celo": "yarn workspaces run test:celo",
+    "test:harmony": "yarn workspaces run test:harmony",
     "stage:all": "yarn workspaces run prepare:mainnet && yarn workspaces run stage:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run stage:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run stage:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run stage:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run stage:matic && yarn workspaces run prepare:xdai && yarn workspaces run stage:xdai && yarn workspaces run prepare:optimism && yarn workspaces run stage:optimism && yarn workspaces run prepare:aurora && yarn workspaces run stage:aurora && yarn workspaces run prepare:moonbeam && yarn workspaces run stage:moonbeam && yarn workspaces run prepare:celo && yarn workspaces run stage:celo",
     "deploy:all": "yarn workspaces run prepare:mainnet && yarn workspaces run deploy:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run deploy:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run deploy:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run deploy:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run deploy:matic && yarn workspaces run prepare:xdai && yarn workspaces run deploy:xdai && yarn workspaces run prepare:optimism && yarn workspaces run deploy:optimism && yarn workspaces run prepare:aurora && yarn workspaces run deploy:aurora && yarn workspaces run prepare:moonbeam && yarn workspaces run deploy:moonbeam && yarn workspaces run prepare:celo && yarn workspaces run deploy:celo",
     "test:all": "yarn workspaces run prepare:mainnet && yarn workspaces run test:mainnet && yarn workspaces run prepare:avalanche && yarn workspaces run test:avalanche && yarn workspaces run prepare:fantom && yarn workspaces run test:fantom && yarn workspaces run prepare:arbitrum && yarn workspaces run test:arbitrum && yarn workspaces run prepare:matic && yarn workspaces run test:matic && yarn workspaces run prepare:xdai && yarn workspaces run test:xdai && yarn workspaces run prepare:optimism && yarn workspaces run test:optimism && yarn workspaces run prepare:aurora && yarn workspaces run test:aurora && yarn workspaces run prepare:moonbeam && yarn workspaces run test:moonbeam && yarn workspaces run prepare:celo && yarn workspaces run test:celo"
