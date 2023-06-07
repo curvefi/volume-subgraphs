@@ -5,7 +5,7 @@ import {
   RemoveFromMarket as RemoveFromMarketEvent,
 } from '../generated/crvUSDControllerFactory/crvUSDControllerFactory'
 import { Amm, Burn, DebtCeiling, Market, Mint } from '../generated/schema'
-import { BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import {
   Llamma as LlammaTemplate,
   ControllerTemplate,
@@ -46,6 +46,10 @@ export function handleAddMarket(event: AddMarketEvent): void {
   amm.coinDecimals = new Array<BigInt>()
   amm.coinNames = new Array<string>()
   amm.basePrice = ammContract.get_base_price()
+
+  amm.totalSwapVolume = BigDecimal.zero()
+  amm.totalDepositVolume = BigDecimal.zero()
+  amm.totalVolume = BigDecimal.zero()
 
   const coins = amm.coins
   const coinDecimals = amm.coinDecimals

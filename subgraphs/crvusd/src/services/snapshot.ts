@@ -1,4 +1,12 @@
-import { Amm, PegKeeper, MonetaryPolicy as MonetaryPolicyEntity, Market, Snapshot, Band } from '../../generated/schema'
+import {
+  Amm,
+  PegKeeper,
+  MonetaryPolicy as MonetaryPolicyEntity,
+  Market,
+  Snapshot,
+  Band,
+  VolumeSnapshot
+} from '../../generated/schema'
 
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, YEAR } from './time'
@@ -56,8 +64,29 @@ function aggregateCalls(target: Address, inputValueTypes: string[][]): BigInt[] 
   return intResults
 }
 
-function toDecimal(number: BigInt, decimals: string): BigDecimal {
+export function toDecimal(number: BigInt, decimals: string): BigDecimal {
   return number.toBigDecimal().div(BigDecimal.fromString('1e' + decimals))
+}
+
+export function getVolumeSnapshot(timestamp: BigInt, llamma: Address): VolumeSnapshot {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const volId = llamma.toHexString() + '-' + day.toString()
+  let volumeSnapshot = VolumeSnapshot.load(volId)
+  if (!volumeSnapshot) {
+    volumeSnapshot = new VolumeSnapshot(volId)
+    volumeSnapshot.llamma = llamma
+    volumeSnapshot.amountBoughtUSD = BigDecimal.zero()
+    volumeSnapshot.amountSoldUSD = BigDecimal.zero()
+    volumeSnapshot.swapVolumeUSD = BigDecimal.zero()
+    volumeSnapshot.totalVolumeUSD = BigDecimal.zero()
+    volumeSnapshot.amountDepositedUSD = BigDecimal.zero()
+    volumeSnapshot.amountWithdrawnUSD = BigDecimal.zero()
+    volumeSnapshot.depositVolumeUSD = BigDecimal.zero()
+    volumeSnapshot.count = BigInt.zero()
+    volumeSnapshot.timestamp = timestamp
+    volumeSnapshot.save()
+  }
+  return volumeSnapshot
 }
 
 function getInfoFromLlamma(snapshot: Snapshot, precision: string): void {
@@ -196,11 +225,11 @@ function makeBands(snapshot: Snapshot, colPrecision: string): void {
   }
 }
 
-export function takeSnapshot(amm: Address, block: ethereum.Block): void {
+export function takeSnapshot(amm: Address, block: ethereum.Block): Snapshot | null {
   const llamma = Amm.load(amm)
   if (!llamma) {
     log.error('Received event from unknown amm {}', [amm.toHexString()])
-    return
+    return null
   }
   // we snapshot the params every hour but the bands daily
   const hour = getIntervalFromTimestamp(block.timestamp, HOUR)
@@ -210,7 +239,7 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): void {
 
   if (!market) {
     log.error('Unable to load market {} for amm {}', [llamma.market.toHexString(), llamma.id.toHexString()])
-    return
+    return null
   }
 
   const policy = MonetaryPolicy.bind(Address.fromBytes(market.monetaryPolicy))
@@ -248,7 +277,7 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): void {
       snapshot.bandSnapshot = false
     }
     snapshot.save()
-    return
+    return snapshot
   }
-  return
+  return snapshot
 }

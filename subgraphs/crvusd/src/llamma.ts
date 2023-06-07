@@ -1,6 +1,14 @@
-import { Amm, LlammaDeposit, LlammaFee, LlammaRate, LlammaWithdrawal, TokenExchange } from '../generated/schema'
+import {
+  Amm,
+  LlammaDeposit,
+  LlammaFee,
+  LlammaRate,
+  LlammaWithdrawal,
+  Market,
+  TokenExchange
+} from '../generated/schema'
 import { SetAdminFee, SetFee } from '../generated/templates/Llamma/Llamma'
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   TokenExchange as TokenExchangeEvent,
   Deposit as DepositEvent,
@@ -8,11 +16,12 @@ import {
   SetRate,
 } from '../generated/crvUSDControllerFactory/Llamma'
 import { getOrCreateUser } from './services/users'
-import { takeSnapshot } from './services/snapshot'
+import { getVolumeSnapshot, takeSnapshot, toDecimal } from './services/snapshot'
 
 export function handleTokenExchange(event: TokenExchangeEvent): void {
-  let swap = new TokenExchange(event.transaction.hash.concatI32(event.logIndex.toI32()))
-  let user = getOrCreateUser(event.params.buyer)
+  const snapshot = takeSnapshot(event.address, event.block)
+  const swap = new TokenExchange(event.transaction.hash.concatI32(event.logIndex.toI32()))
+  const user = getOrCreateUser(event.params.buyer)
   swap.buyer = user.id
   swap.llamma = event.address
   swap.sold_id = event.params.sold_id
@@ -23,7 +32,45 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   swap.blockTimestamp = event.block.timestamp
   swap.transactionHash = event.transaction.hash
   swap.save()
-  takeSnapshot(event.address, event.block)
+
+  const llamma = Amm.load(event.address)
+  if (!llamma) {
+    log.error('Received event from unknown amm {}', [event.address.toHexString()])
+    return
+  }
+  const market = Market.load(llamma.market)
+
+  if (!market) {
+    log.error('Unable to load market {} for amm {}', [llamma.market.toHexString(), llamma.id.toHexString()])
+    return
+  }
+
+  if (!snapshot) {
+    log.error('Unable to generate snapshot to process exchange volume', [])
+    return
+  }
+
+  let soldAmountUsd = BigDecimal.zero()
+  let boughtAmountUsd = BigDecimal.zero()
+  const volumeSnapshot = getVolumeSnapshot(event.block.timestamp, event.address)
+
+  if (llamma.coins[event.params.bought_id.toI32()] == market.collateral) {
+    boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    soldAmountUsd = toDecimal(event.params.tokens_sold, '18')
+  }
+  else {
+    soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    boughtAmountUsd = toDecimal(event.params.tokens_bought, '18')
+  }
+  const volumeUsd = soldAmountUsd.plus(boughtAmountUsd).div(BigDecimal.fromString('2'))
+
+  volumeSnapshot.amountBoughtUSD = volumeSnapshot.amountBoughtUSD.plus(boughtAmountUsd)
+  volumeSnapshot.amountSoldUSD = volumeSnapshot.amountSoldUSD.plus(soldAmountUsd)
+  volumeSnapshot.swapVolumeUSD = volumeSnapshot.swapVolumeUSD.plus(volumeUsd)
+  llamma.totalVolume = llamma.totalVolume.plus(llamma.totalVolume)
+  llamma.totalSwapVolume = llamma.totalSwapVolume.plus(volumeUsd)
+  llamma.save()
+  volumeSnapshot.save()
 }
 
 export function handleWithdraw(event: WithdrawEvent): void {

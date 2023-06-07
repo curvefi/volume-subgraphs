@@ -99,11 +99,29 @@ type Amm @entity {
   priceOracle: Bytes!
   fee: BigInt!
   adminFee: BigInt!
+  totalSwapVolume: BigDecimal!
+  totalDepositVolume: BigDecimal!
+  totalVolume: BigDecimal!
+  volumeSnapshots: [VolumeSnapshot!] @derivedFrom(field: "llamma")
   rates: [LlammaRate!] @derivedFrom(field: "llamma")
   fees: [LlammaFee!] @derivedFrom(field: "llamma")
   exchanges: [TokenExchange!] @derivedFrom(field: "llamma")
   withdrawals: [LlammaWithdrawal!] @derivedFrom(field: "llamma")
   deposits: [LlammaDeposit!] @derivedFrom(field: "llamma")
+}
+
+type VolumeSnapshot @entity {
+  id: ID!
+  llamma: Amm!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
+  swapVolumeUSD: BigDecimal!
+  amountDepositedUSD: BigDecimal!
+  amountWithdrawnUSD: BigDecimal!
+  depositVolumeUSD: BigDecimal!
+  totalVolumeUSD: BigDecimal!
+  count: BigInt!
+  timestamp: BigInt!
 }
 
 type LlammaRate @entity(immutable: true) {
