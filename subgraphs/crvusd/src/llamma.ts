@@ -71,6 +71,7 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
     volumeSnapshot.amountBoughtUSD = volumeSnapshot.amountBoughtUSD.plus(boughtAmountUsd)
     volumeSnapshot.amountSoldUSD = volumeSnapshot.amountSoldUSD.plus(soldAmountUsd)
     volumeSnapshot.swapVolumeUSD = volumeSnapshot.swapVolumeUSD.plus(volumeUsd)
+    volumeSnapshot.count = volumeSnapshot.count.plus(BigInt.fromI32(1))
     volumeSnapshot.save()
   }
   llamma.totalVolume = llamma.totalVolume.plus(volumeUsd)
