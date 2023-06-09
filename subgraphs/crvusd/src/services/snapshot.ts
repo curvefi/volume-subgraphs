@@ -68,9 +68,9 @@ export function toDecimal(number: BigInt, decimals: string): BigDecimal {
   return number.toBigDecimal().div(BigDecimal.fromString('1e' + decimals))
 }
 
-export function getVolumeSnapshot(timestamp: BigInt, llamma: Address): VolumeSnapshot {
-  const day = getIntervalFromTimestamp(timestamp, DAY)
-  const volId = llamma.toHexString() + '-' + day.toString()
+export function getVolumeSnapshot(timestamp: BigInt, period: BigInt, llamma: Address): VolumeSnapshot {
+  const interval = getIntervalFromTimestamp(timestamp, period)
+  const volId = llamma.toHexString() + '-' + period + '-' + interval.toString()
   let volumeSnapshot = VolumeSnapshot.load(volId)
   if (!volumeSnapshot) {
     volumeSnapshot = new VolumeSnapshot(volId)
@@ -84,6 +84,8 @@ export function getVolumeSnapshot(timestamp: BigInt, llamma: Address): VolumeSna
     volumeSnapshot.depositVolumeUSD = BigDecimal.zero()
     volumeSnapshot.count = BigInt.zero()
     volumeSnapshot.timestamp = timestamp
+    volumeSnapshot.roundedTimestamp = interval
+    volumeSnapshot.period = period
     volumeSnapshot.save()
   }
   return volumeSnapshot

@@ -121,6 +121,8 @@ type VolumeSnapshot @entity {
   depositVolumeUSD: BigDecimal!
   totalVolumeUSD: BigDecimal!
   count: BigInt!
+  period: BigInt!
+  roundedTimestamp: BigInt!
   timestamp: BigInt!
 }
 

@@ -17,6 +17,7 @@ import {
 } from '../generated/crvUSDControllerFactory/Llamma'
 import { getOrCreateUser } from './services/users'
 import { getVolumeSnapshot, takeSnapshot, toDecimal } from './services/snapshot'
+import { DAY, HOUR } from './services/time'
 
 export function handleTokenExchange(event: TokenExchangeEvent): void {
   const snapshot = takeSnapshot(event.address, event.block)
@@ -50,27 +51,31 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
     return
   }
 
+
+  const periods = [HOUR, DAY]
+
   let soldAmountUsd = BigDecimal.zero()
   let boughtAmountUsd = BigDecimal.zero()
-  const volumeSnapshot = getVolumeSnapshot(event.block.timestamp, event.address)
-
   if (llamma.coins[event.params.bought_id.toI32()] == market.collateral) {
     boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
     soldAmountUsd = toDecimal(event.params.tokens_sold, '18')
-  }
-  else {
+  } else {
     soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
     boughtAmountUsd = toDecimal(event.params.tokens_bought, '18')
   }
   const volumeUsd = soldAmountUsd.plus(boughtAmountUsd).div(BigDecimal.fromString('2'))
 
-  volumeSnapshot.amountBoughtUSD = volumeSnapshot.amountBoughtUSD.plus(boughtAmountUsd)
-  volumeSnapshot.amountSoldUSD = volumeSnapshot.amountSoldUSD.plus(soldAmountUsd)
-  volumeSnapshot.swapVolumeUSD = volumeSnapshot.swapVolumeUSD.plus(volumeUsd)
-  llamma.totalVolume = llamma.totalVolume.plus(llamma.totalVolume)
+
+  for (let i = 0; i < periods.length; i++) {
+    const volumeSnapshot = getVolumeSnapshot(event.block.timestamp, periods[i], event.address)
+    volumeSnapshot.amountBoughtUSD = volumeSnapshot.amountBoughtUSD.plus(boughtAmountUsd)
+    volumeSnapshot.amountSoldUSD = volumeSnapshot.amountSoldUSD.plus(soldAmountUsd)
+    volumeSnapshot.swapVolumeUSD = volumeSnapshot.swapVolumeUSD.plus(volumeUsd)
+    volumeSnapshot.save()
+  }
+  llamma.totalVolume = llamma.totalVolume.plus(volumeUsd)
   llamma.totalSwapVolume = llamma.totalSwapVolume.plus(volumeUsd)
   llamma.save()
-  volumeSnapshot.save()
 }
 
 export function handleWithdraw(event: WithdrawEvent): void {
