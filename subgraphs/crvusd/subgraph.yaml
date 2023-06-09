@@ -71,6 +71,16 @@ templates:
       abis:
         - name: Controller
           file: ./abis/Controller.json
+        - name: Llamma
+          file: ./abis/Llamma.json
+        - name: Multicall
+          file: ./abis/Multicall.json
+        - name: MonetaryPolicy
+          file: ./abis/MonetaryPolicy.json
+        - name: PegKeeper
+          file: ./abis/PegKeeper.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Borrow(indexed address,uint256,uint256)
           handler: handleBorrow
