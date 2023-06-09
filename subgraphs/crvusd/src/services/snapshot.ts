@@ -70,7 +70,7 @@ export function toDecimal(number: BigInt, decimals: string): BigDecimal {
 
 export function getVolumeSnapshot(timestamp: BigInt, period: BigInt, llamma: Address): VolumeSnapshot {
   const interval = getIntervalFromTimestamp(timestamp, period)
-  const volId = llamma.toHexString() + '-' + period + '-' + interval.toString()
+  const volId = llamma.toHexString() + '-' + period.toString() + '-' + interval.toString()
   let volumeSnapshot = VolumeSnapshot.load(volId)
   if (!volumeSnapshot) {
     volumeSnapshot = new VolumeSnapshot(volId)

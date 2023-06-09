@@ -9,7 +9,8 @@ import {
 } from '../generated/templates/ControllerTemplate/Controller'
 import { getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
-import { log } from '@graphprotocol/graph-ts'
+import { Address, log } from '@graphprotocol/graph-ts'
+import { takeSnapshot } from './services/snapshot'
 
 export function handleBorrow(event: BorrowEvent): void {
   const user = getOrCreateUser(event.params.user)
@@ -40,8 +41,8 @@ export function handleRepay(event: RepayEvent): void {
 }
 
 export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
-  let user = getOrCreateUser(event.params.user)
-  let removal = new Removal(event.transaction.hash.concatI32(event.logIndex.toI32()))
+  const user = getOrCreateUser(event.params.user)
+  const removal = new Removal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   removal.user = user.id
   removal.market = event.address
   removal.collateralDecrease = event.params.collateral_decrease
@@ -103,4 +104,10 @@ export function handleUserState(event: UserStateEvent): void {
   userState.blockTimestamp = event.block.timestamp
   userState.transactionHash = event.transaction.hash
   userState.save()
+
+  // take snasphot
+  const market = Market.load(event.address)
+  if (market) {
+    takeSnapshot(Address.fromBytes(market.amm), event.block)
+  }
 }
