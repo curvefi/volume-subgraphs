@@ -94,6 +94,8 @@ templates:
           handler: handleSetMonetaryPolicy
         - event: UserState(indexed address,uint256,uint256,int256,int256,uint256)
           handler: handleUserState
+        - event: CollectFees(uint256,uint256)
+          handler: handleCollectFees
       file: ./src/controller.ts
   - name: Llamma
     kind: ethereum/contract

@@ -15,6 +15,7 @@ type Market @entity {
   removals: [Removal!] @derivedFrom(field: "market")
   liquidations: [Liquidation!] @derivedFrom(field: "market")
   snapshots: [Snapshot!] @derivedFrom(field: "market")
+  collectedFees: [CollectedFee!] @derivedFrom(field: "market")
 }
 
 type Snapshot @entity(immutable: true) {
@@ -57,6 +58,18 @@ type Snapshot @entity(immutable: true) {
 
   blockNumber: BigInt! #
   timestamp: BigInt! #
+}
+
+type CollectedFee @entity(immutable: true) {
+  id: Bytes!
+  market: Market!
+  borrowingFees: BigDecimal!
+  ammCollateralFees: BigDecimal!
+  ammCollateralFeesUsd: BigDecimal!
+  ammBorrowingFees: BigDecimal!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
 }
 
 type Band @entity(immutable: true) {
