@@ -265,7 +265,7 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): Snapshot | nu
     const policyRate = policy.rate()
     snapshot.futureRate = bigDecimalExponential(toDecimal(policyRate, '18'), YEAR.toBigDecimal())
     snapshot.totalKeeperDebt = toDecimal(getKeepersDebt(Address.fromBytes(market.monetaryPolicy)), '18')
-    snapshot.totalSupply = snapshot.minted.minus(snapshot.redeemed).plus(snapshot.totalKeeperDebt)
+    snapshot.totalSupply = snapshot.minted.minus(snapshot.redeemed)
     const controllerStableBalance = toDecimal(getBalanceOf(CRVUSD, amm), '18')
     const controllerCollatBalance = toDecimal(getBalanceOf(Address.fromBytes(market.collateral), amm), precision)
     snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
