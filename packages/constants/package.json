@@ -18,6 +18,8 @@
     "prepare:aurora": "mustache ../../config/aurora.json index.template.ts > index.ts",
     "prepare:moonbeam": "mustache ../../config/moonbeam.json index.template.ts > index.ts",
     "prepare:celo": "mustache ../../config/celo.json index.template.ts > index.ts",
+    "prepare:harmony": "mustache ../../config/harmony.json index.template.ts > index.ts",
+    "prepare:kava": "mustache ../../config/kava.json index.template.ts > index.ts",
     "deploy:mainnet": "true",
     "deploy:avalanche": "true",
     "deploy:fantom": "true",
@@ -28,6 +30,8 @@
     "deploy:aurora": "true",
     "deploy:moonbeam": "true",
     "deploy:celo": "true",
+    "deploy:harmony": "true",
+    "deploy:kava": "true",
     "stage:mainnet": "true",
     "stage:avalanche": "true",
     "stage:fantom": "true",
@@ -38,6 +42,8 @@
     "stage:aurora": "true",
     "stage:moonbeam": "true",
     "stage:celo": "true",
+    "stage:harmony": "true",
+    "stage:kava": "true",
     "test:mainnet": "true",
     "test:avalanche": "true",
     "test:fantom": "true",
@@ -47,6 +53,8 @@
     "test:optimism": "true",
     "test:aurora": "true",
     "test:moonbeam": "true",
-    "test:celo": "true"
+    "test:celo": "true",
+    "test:harmony": "true",
+    "test:kava": "true"
   }
 }

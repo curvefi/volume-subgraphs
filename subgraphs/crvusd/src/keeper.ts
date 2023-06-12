@@ -38,8 +38,9 @@ export function handleWithdraw(event: WithdrawEvent): void {
 
   const keeper = PegKeeper.load(event.address)
   if (keeper) {
-    keeper.totalProvided = keeper.totalProvided.minus(event.params.amount)
-    keeper.debt = keeper.debt.minus(event.params.amount)
+    const amount = event.params.amount.gt(keeper.debt) ? keeper.debt : event.params.amount
+    keeper.debt = keeper.debt.minus(amount)
+    keeper.totalWithdrawn = keeper.totalWithdrawn.plus(amount)
     withdraw.debt = keeper.debt
     keeper.save()
   } else {

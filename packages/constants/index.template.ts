@@ -100,9 +100,13 @@ class OracleInfo {
   }
 }
 export const T_TOKEN = '0xcdf7028ceab81fa0c6971208e83fa7872994bee5'
+export const CNC_TOKEN = '0x9ae380f0272e2162340a5bb646c354271c0f5cfc'
+export const GEAR_TOKEN = '0xba3335588d9403515223f109edc4eb7269a9ab5d'
 export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
 CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
 CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
+CURVE_ONLY_TOKENS.set(CNC_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
+CURVE_ONLY_TOKENS.set(GEAR_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 
 
 export const TRANSFER_TOPIC = Bytes.fromHexString("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
