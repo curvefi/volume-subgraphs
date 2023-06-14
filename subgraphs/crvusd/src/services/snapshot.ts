@@ -138,6 +138,7 @@ function getInfoFromController(snapshot: Snapshot, precision: string): void {
     ['0x31dc3ca8', 'uint256'], // total_debt()
     ['0x4f02c420', 'uint256'], // minted()
     ['0xe231bff0', 'uint256'], // redeemed()
+    ['1b1800e3cf', 'uint256'], // admin_fees()
   ]
 
   const results = aggregateCalls(Address.fromBytes(snapshot.market), signaturesController)
@@ -150,6 +151,7 @@ function getInfoFromController(snapshot: Snapshot, precision: string): void {
     snapshot.totalDebt = BigDecimal.zero()
     snapshot.minted = BigDecimal.zero()
     snapshot.redeemed = BigDecimal.zero()
+    snapshot.adminBorrowingFees = BigDecimal.zero()
     return
   }
 
@@ -159,6 +161,7 @@ function getInfoFromController(snapshot: Snapshot, precision: string): void {
   snapshot.totalDebt = toDecimal(results[3], precision)
   snapshot.minted = toDecimal(results[4], precision)
   snapshot.redeemed = toDecimal(results[5], precision)
+  snapshot.adminBorrowingFees = toDecimal(results[6], precision)
 }
 
 function getKeepersDebt(policyAddress: Address): BigInt {

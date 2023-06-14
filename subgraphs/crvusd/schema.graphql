@@ -43,6 +43,7 @@ type Snapshot @entity(immutable: true) {
 
   crvUsdAdminFees: BigDecimal! #
   collateralAdminFees: BigDecimal! #
+  adminBorrowingFees: BigDecimal!
   fee: BigDecimal! #
   adminFee: BigDecimal! #
 
