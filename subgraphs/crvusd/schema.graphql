@@ -237,6 +237,7 @@ type PegKeeper @entity {
   id: Bytes!
   policy: MonetaryPolicy!
   active: Boolean!
+  pool: Bytes!
   debt: BigInt!
   totalProvided: BigInt!
   totalWithdrawn: BigInt!
