@@ -130,16 +130,10 @@ export function handleCollectFees(event: CollectFees): void {
     return
   }
   // AMM fees are not logged so we retrieve them from latest snapshot
-  const hour = getIntervalFromTimestamp(event.block.timestamp, HOUR)
-  let id = market.amm.toHexString() + '-' + hour.toString()
-  let latestSnapshot = Snapshot.load(id)
+  const latestSnapshot = takeSnapshot(Address.fromBytes(market.amm), event.block)
   if (!latestSnapshot) {
-    id = market.amm.toHexString() + '-' + hour.minus(HOUR).toString()
-    latestSnapshot = Snapshot.load(id)
-    if (!latestSnapshot) {
-      log.error("Could not find a snapshot within 2 hours for collect fees for {} at {} (time: {})", [event.address.toHexString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
-      return
-    }
+    log.error("Could not find a snapshot within 2 hours for collect fees for {} at {} (time: {})", [event.address.toHexString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
+    return
   }
   const feeCollected = new CollectedFee(event.transaction.hash.concatI32(event.logIndex.toI32()))
   feeCollected.market = event.address
