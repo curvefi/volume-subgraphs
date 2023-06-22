@@ -18,7 +18,7 @@ import {
 } from '../generated/templates/ControllerTemplate/Controller'
 import { getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
-import { Address, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { takeSnapshot, toDecimal } from './services/snapshot'
 import { CollectFees } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
@@ -130,17 +130,25 @@ export function handleCollectFees(event: CollectFees): void {
     return
   }
   // AMM fees are not logged so we retrieve them from latest snapshot
-  const latestSnapshot = takeSnapshot(Address.fromBytes(market.amm), event.block)
+  // we don't want to take a new snapshot as the values would already be null at this block
+  const hour = getIntervalFromTimestamp(event.block.timestamp, HOUR)
+  let back = 0
+  let latestSnapshot: Snapshot | null = null
+  while (!latestSnapshot && (back < 24)) {
+    const id = market.amm.toHexString() + '-' + hour.minus(HOUR.times(BigInt.fromI32(back))).toString()
+    latestSnapshot = Snapshot.load(id)
+    back += 1
+  }
+
   if (!latestSnapshot) {
-    log.error("Could not find a snapshot within 2 hours for collect fees for {} at {} (time: {})", [event.address.toHexString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
-    return
+    log.error("Could not find a snapshot within 24 hours for collect fees for {} at {} (time: {})", [event.address.toHexString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
   }
   const feeCollected = new CollectedFee(event.transaction.hash.concatI32(event.logIndex.toI32()))
   feeCollected.market = event.address
   feeCollected.borrowingFees = toDecimal(event.params.amount, "18")
-  feeCollected.ammCollateralFees = latestSnapshot.collateralAdminFees
-  feeCollected.ammCollateralFeesUsd = latestSnapshot.collateralAdminFees.times(latestSnapshot.oraclePrice)
-  feeCollected.ammBorrowingFees = latestSnapshot.crvUsdAdminFees
+  feeCollected.ammCollateralFees = latestSnapshot ? latestSnapshot.collateralAdminFees : BigDecimal.zero()
+  feeCollected.ammCollateralFeesUsd = latestSnapshot ? latestSnapshot.collateralAdminFees.times(latestSnapshot.oraclePrice) : BigDecimal.zero()
+  feeCollected.ammBorrowingFees = latestSnapshot ? latestSnapshot.crvUsdAdminFees : BigDecimal.zero()
   feeCollected.blockNumber = event.block.number
   feeCollected.blockTimestamp = event.block.timestamp
   feeCollected.transactionHash = event.transaction.hash
