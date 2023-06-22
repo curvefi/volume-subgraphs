@@ -57,6 +57,38 @@
     "type": "event"
   },
   {
+    "name": "PlainPoolDeployed",
+    "inputs": [
+      {
+        "name": "coins",
+        "type": "address[4]",
+        "indexed": false
+      },
+      {
+        "name": "A",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "fee",
+        "type": "uint256",
+        "indexed": false
+      },
+      {
+        "name": "deployer",
+        "type": "address",
+        "indexed": false
+      },
+      {
+        "name": "pool",
+        "type": "address",
+        "indexed": false
+      }
+    ],
+    "anonymous": false,
+    "type": "event"
+  },
+  {
     "name": "MetaPoolDeployed",
     "inputs": [
       {

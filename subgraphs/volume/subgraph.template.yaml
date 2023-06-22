@@ -149,6 +149,8 @@ templates:
       eventHandlers:
         - event: PlainPoolDeployed(address[4],uint256,uint256,address)
           handler: handlePlainPoolDeployed
+        - event: PlainPoolDeployed(address[4],uint256,uint256,address,address)
+          handler: handlePlainPoolDeployed
         - event: MetaPoolDeployed(address,address,uint256,uint256,address)
           handler: handleMetaPoolDeployed
       {{ callHandler }}

@@ -2,6 +2,7 @@ import { MonetaryPolicy, PegKeeper } from '../../generated/schema'
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { MonetaryPolicy as MonetaryPolicyAbi } from '../../generated/templates/MonetaryPolicy/MonetaryPolicy'
 import { PegKeeper as PegKeeperTemplate } from '../../generated/templates'
+import { PegKeeper as PegKeeperAbi } from '../../generated/templates/MonetaryPolicy/PegKeeper'
 
 export function getOrCreatePolicy(policy_address: Address): MonetaryPolicy {
   let policy = MonetaryPolicy.load(policy_address)
@@ -29,9 +30,11 @@ function getPegKeepers(policyContract: MonetaryPolicyAbi, keepers: Bytes[]): Byt
     ])
     PegKeeperTemplate.create(pegKeeper.value)
     const keeper = new PegKeeper(pegKeeper.value)
+    const keeperContract = PegKeeperAbi.bind(pegKeeper.value)
     keeper.active = true
     keeper.policy = policyContract._address
     keeper.debt = BigInt.zero()
+    keeper.pool = keeperContract.pool()
     keeper.totalWithdrawn = BigInt.zero()
     keeper.totalProvided = BigInt.zero()
     keeper.totalProfit = BigInt.zero()
