@@ -26,7 +26,7 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   swap.buyer = user.id
   swap.llamma = event.address
   swap.sold_id = event.params.sold_id
-  swap.tokens_sold = event.params.sold_id
+  swap.tokens_sold = event.params.tokens_sold
   swap.tokens_bought = event.params.tokens_bought
   swap.bought_id = event.params.bought_id
   swap.blockNumber = event.block.number
