@@ -120,17 +120,17 @@ function getInfoFromLlamma(snapshot: Snapshot, precision: string): void {
     return
   }
   snapshot.rate = bigDecimalExponential(toDecimal(results[0], '18'), YEAR.toBigDecimal())
-  snapshot.crvUsdAdminFees = toDecimal(results[1], precision)
+  snapshot.crvUsdAdminFees = toDecimal(results[1], '18')
   snapshot.collateralAdminFees = toDecimal(results[2], precision)
   snapshot.maxBand = results[3]
   snapshot.minBand = results[4]
   snapshot.activeBand = results[5]
-  snapshot.basePrice = toDecimal(results[6], precision)
-  snapshot.ammPrice = toDecimal(results[7], precision)
-  snapshot.oraclePrice = toDecimal(results[8], precision)
+  snapshot.basePrice = toDecimal(results[6], '18')
+  snapshot.ammPrice = toDecimal(results[7], '18')
+  snapshot.oraclePrice = toDecimal(results[8], '18')
 }
 
-function getInfoFromController(snapshot: Snapshot, precision: string): void {
+function getInfoFromController(snapshot: Snapshot): void {
   const signaturesController = [
     ['0x627d2b83', 'uint256'], // liquidation_discount()
     ['0x5449b9cb', 'uint256'], // loan_discount()
@@ -155,13 +155,13 @@ function getInfoFromController(snapshot: Snapshot, precision: string): void {
     return
   }
 
-  snapshot.liquidationDiscount = toDecimal(results[0], precision)
-  snapshot.loanDiscount = toDecimal(results[1], precision)
+  snapshot.liquidationDiscount = toDecimal(results[0], '18')
+  snapshot.loanDiscount = toDecimal(results[1], '18')
   snapshot.nLoans = results[2]
-  snapshot.totalDebt = toDecimal(results[3], precision)
-  snapshot.minted = toDecimal(results[4], precision)
-  snapshot.redeemed = toDecimal(results[5], precision)
-  snapshot.adminBorrowingFees = toDecimal(results[6], precision)
+  snapshot.totalDebt = toDecimal(results[3], '18')
+  snapshot.minted = toDecimal(results[4], '18')
+  snapshot.redeemed = toDecimal(results[5], '18')
+  snapshot.adminBorrowingFees = toDecimal(results[6], '18')
 }
 
 function getKeepersDebt(policyAddress: Address): BigInt {
@@ -260,7 +260,7 @@ export function takeSnapshot(amm: Address, block: ethereum.Block): Snapshot | nu
 
     snapshot.A = llamma.A
     const precision = market.collateralPrecision.toString()
-    getInfoFromController(snapshot, precision)
+    getInfoFromController(snapshot)
     getInfoFromLlamma(snapshot, precision)
     // general parameters
     snapshot.fee = toDecimal(llamma.fee, '18')
