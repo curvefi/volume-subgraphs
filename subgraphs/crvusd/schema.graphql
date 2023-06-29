@@ -355,5 +355,9 @@ type User @entity {
   states: [UserState!]  @derivedFrom(field: "user")
 }
 
-
+type Platform @entity {
+  id: ID!
+  ammAddresses: [Bytes!]!
+  latestSnapshot: BigInt!
+}
 

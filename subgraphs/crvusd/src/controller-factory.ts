@@ -14,8 +14,10 @@ import {
 import { getOrCreatePolicy } from './services/policies'
 import { Llamma as LlamaAbi } from '../generated/templates/Llamma/Llamma'
 import { getDecimals, getName } from './services/erc20'
+import { getPlatform } from './services/platform'
 
 export function handleAddMarket(event: AddMarketEvent): void {
+
   const market = new Market(event.params.controller)
   market.collateral = event.params.collateral
   market.collateralPrecision = getDecimals(event.params.collateral)
@@ -41,6 +43,14 @@ export function handleAddMarket(event: AddMarketEvent): void {
 
   const amm = new Amm(event.params.amm)
   const ammContract = LlamaAbi.bind(event.params.amm)
+
+  const platform = getPlatform()
+
+  const amms = platform.ammAddresses
+  amms.push(event.params.amm)
+  platform.ammAddresses = amms
+  platform.save()
+
   amm.A = ammContract.A()
   amm.coins = new Array<Bytes>()
   amm.coinDecimals = new Array<BigInt>()
