@@ -4,7 +4,7 @@ import {
   LlammaFee,
   LlammaRate,
   LlammaWithdrawal,
-  Market,
+  Market, Snapshot,
   TokenExchange
 } from '../generated/schema'
 import { SetAdminFee, SetFee } from '../generated/templates/Llamma/Llamma'
@@ -16,11 +16,11 @@ import {
   SetRate,
 } from '../generated/crvUSDControllerFactory/Llamma'
 import { getOrCreateUser } from './services/users'
-import { getVolumeSnapshot, takeSnapshot, toDecimal } from './services/snapshot'
-import { DAY, HOUR } from './services/time'
+import { getVolumeSnapshot, takeSnapshots, toDecimal } from './services/snapshot'
+import { DAY, getIntervalFromTimestamp, HOUR } from './services/time'
 
 export function handleTokenExchange(event: TokenExchangeEvent): void {
-  const snapshot = takeSnapshot(event.address, event.block)
+  takeSnapshots(event.block)
   const swap = new TokenExchange(event.transaction.hash.concatI32(event.logIndex.toI32()))
   const user = getOrCreateUser(event.params.buyer)
   swap.buyer = user.id
@@ -46,6 +46,7 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
     return
   }
 
+  const snapshot = Snapshot.load(event.address.toHexString()+ '-' + getIntervalFromTimestamp(event.block.timestamp, HOUR).toString())
   if (!snapshot) {
     log.error('Unable to generate snapshot to process exchange volume', [])
     return
@@ -91,7 +92,7 @@ export function handleWithdraw(event: WithdrawEvent): void {
   withdrawal.blockTimestamp = event.block.timestamp
   withdrawal.transactionHash = event.transaction.hash
   withdrawal.save()
-  takeSnapshot(event.address, event.block)
+  takeSnapshots(event.block)
 }
 
 export function handleDeposit(event: DepositEvent): void {
@@ -107,7 +108,7 @@ export function handleDeposit(event: DepositEvent): void {
   deposit.blockTimestamp = event.block.timestamp
   deposit.transactionHash = event.transaction.hash
   deposit.save()
-  takeSnapshot(event.address, event.block)
+  takeSnapshots(event.block)
 }
 
 export function handleSetRate(event: SetRate): void {

@@ -19,7 +19,7 @@ import {
 import { getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
-import { takeSnapshot, toDecimal } from './services/snapshot'
+import { takeSnapshots, toDecimal } from './services/snapshot'
 import { CollectFees } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
 
@@ -115,12 +115,7 @@ export function handleUserState(event: UserStateEvent): void {
   userState.blockTimestamp = event.block.timestamp
   userState.transactionHash = event.transaction.hash
   userState.save()
-
-  // take snasphot
-  const market = Market.load(event.address)
-  if (market) {
-    takeSnapshot(Address.fromBytes(market.amm), event.block)
-  }
+  takeSnapshots(event.block)
 }
 
 export function handleCollectFees(event: CollectFees): void {

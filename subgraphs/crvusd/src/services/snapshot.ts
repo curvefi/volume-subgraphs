@@ -13,6 +13,7 @@ import { DAY, getIntervalFromTimestamp, HOUR, YEAR } from './time'
 import { Multicall } from '../../generated/templates/Llamma/Multicall'
 import { MonetaryPolicy } from '../../generated/templates/Llamma/MonetaryPolicy'
 import { getBalanceOf, getDecimals } from './erc20'
+import { getPlatform } from './platform'
 
 const MULTICALL = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
 const CRVUSD = Address.fromString('0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E')
@@ -230,59 +231,60 @@ function makeBands(snapshot: Snapshot, colPrecision: string): void {
   }
 }
 
-export function takeSnapshot(amm: Address, block: ethereum.Block): Snapshot | null {
-  const llamma = Amm.load(amm)
-  if (!llamma) {
-    log.error('Received event from unknown amm {}', [amm.toHexString()])
-    return null
-  }
-  // we snapshot the params every hour but the bands daily
-  const hour = getIntervalFromTimestamp(block.timestamp, HOUR)
-  const day = getIntervalFromTimestamp(block.timestamp, DAY)
-  const id = llamma.id.toHexString() + '-' + hour.toString()
-  const market = Market.load(llamma.market)
-
-  if (!market) {
-    log.error('Unable to load market {} for amm {}', [llamma.market.toHexString(), llamma.id.toHexString()])
-    return null
-  }
-
-  const policy = MonetaryPolicy.bind(Address.fromBytes(market.monetaryPolicy))
-  let snapshot = Snapshot.load(id)
-  if (!snapshot) {
-    snapshot = new Snapshot(id)
-    snapshot.market = llamma.market
-    snapshot.llamma = llamma.id
-    snapshot.policy = market.monetaryPolicy
-
-    snapshot.timestamp = block.timestamp
-    snapshot.blockNumber = block.number
-
-    snapshot.A = llamma.A
-    const precision = market.collateralPrecision.toString()
-    getInfoFromController(snapshot)
-    getInfoFromLlamma(snapshot, precision)
-    // general parameters
-    snapshot.fee = toDecimal(llamma.fee, '18')
-    snapshot.adminFee = toDecimal(llamma.adminFee, '18')
-    const policyRate = policy.rate()
-    snapshot.futureRate = bigDecimalExponential(toDecimal(policyRate, '18'), YEAR.toBigDecimal())
-    snapshot.totalKeeperDebt = toDecimal(getKeepersDebt(Address.fromBytes(market.monetaryPolicy)), '18')
-    snapshot.totalSupply = snapshot.minted.minus(snapshot.redeemed)
-    const controllerStableBalance = toDecimal(getBalanceOf(CRVUSD, amm), '18')
-    const controllerCollatBalance = toDecimal(getBalanceOf(Address.fromBytes(market.collateral), amm), precision)
-    snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
-    snapshot.totalCollateral = controllerCollatBalance.minus(snapshot.collateralAdminFees)
-    snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
-    if (hour == day) {
-      snapshot.bandSnapshot = true
-      makeBands(snapshot, precision)
+export function takeSnapshots(block: ethereum.Block): void {
+  const platform = getPlatform()
+  for (let i = 0; i < platform.ammAddresses.length; ++i) {
+    const amm = Address.fromBytes(platform.ammAddresses[i])
+    const llamma = Amm.load(amm)
+    if (!llamma) {
+      log.error('Received event from unknown amm {}', [amm.toHexString()])
+      continue
     }
-    else {
-      snapshot.bandSnapshot = false
+    // we snapshot the params every hour but the bands daily
+    const hour = getIntervalFromTimestamp(block.timestamp, HOUR)
+    const day = getIntervalFromTimestamp(block.timestamp, DAY)
+    const id = llamma.id.toHexString() + '-' + hour.toString()
+    const market = Market.load(llamma.market)
+
+    if (!market) {
+      log.error('Unable to load market {} for amm {}', [llamma.market.toHexString(), llamma.id.toHexString()])
+      continue
     }
-    snapshot.save()
-    return snapshot
+
+    const policy = MonetaryPolicy.bind(Address.fromBytes(market.monetaryPolicy))
+    let snapshot = Snapshot.load(id)
+    if (!snapshot) {
+      snapshot = new Snapshot(id)
+      snapshot.market = llamma.market
+      snapshot.llamma = llamma.id
+      snapshot.policy = market.monetaryPolicy
+
+      snapshot.timestamp = block.timestamp
+      snapshot.blockNumber = block.number
+
+      snapshot.A = llamma.A
+      const precision = market.collateralPrecision.toString()
+      getInfoFromController(snapshot)
+      getInfoFromLlamma(snapshot, precision)
+      // general parameters
+      snapshot.fee = toDecimal(llamma.fee, '18')
+      snapshot.adminFee = toDecimal(llamma.adminFee, '18')
+      const policyRate = policy.rate()
+      snapshot.futureRate = bigDecimalExponential(toDecimal(policyRate, '18'), YEAR.toBigDecimal())
+      snapshot.totalKeeperDebt = toDecimal(getKeepersDebt(Address.fromBytes(market.monetaryPolicy)), '18')
+      snapshot.totalSupply = snapshot.minted.minus(snapshot.redeemed)
+      const controllerStableBalance = toDecimal(getBalanceOf(CRVUSD, amm), '18')
+      const controllerCollatBalance = toDecimal(getBalanceOf(Address.fromBytes(market.collateral), amm), precision)
+      snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
+      snapshot.totalCollateral = controllerCollatBalance.minus(snapshot.collateralAdminFees)
+      snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
+      if (hour == day) {
+        snapshot.bandSnapshot = true
+        makeBands(snapshot, precision)
+      } else {
+        snapshot.bandSnapshot = false
+      }
+      snapshot.save()
+    }
   }
-  return snapshot
 }
