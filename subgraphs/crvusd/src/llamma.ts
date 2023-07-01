@@ -8,7 +8,7 @@ import {
   TokenExchange
 } from '../generated/schema'
 import { SetAdminFee, SetFee } from '../generated/templates/Llamma/Llamma'
-import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   TokenExchange as TokenExchangeEvent,
   Deposit as DepositEvent,
@@ -80,6 +80,46 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   llamma.save()
 }
 
+export function updateLiquiditySnapshot(amountCollateral: BigInt, amountStableCoin: BigInt, timestamp: BigInt, address: Address, deposit: boolean): void {
+
+  const periods = [HOUR, DAY]
+
+  const llamma = Amm.load(address)
+  if (!llamma) {
+    log.error('Received event from unknown amm {}', [address.toHexString()])
+    return
+  }
+
+  const market = Market.load(llamma.market)
+
+  if (!market) {
+    log.error('Unable to load market {} for amm {}', [llamma.market.toHexString(), llamma.id.toHexString()])
+    return
+  }
+
+  const snapshot = Snapshot.load(address.toHexString()+ '-' + getIntervalFromTimestamp(timestamp, HOUR).toString())
+  if (!snapshot) {
+    log.error('Unable to generate snapshot to process liquidity volume', [])
+    return
+  }
+
+  const amountCollateralUsd = toDecimal(amountCollateral, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+  const amountUsd = amountCollateralUsd + toDecimal(amountStableCoin, '18')
+
+  for (let i = 0; i < periods.length; i++) {
+    const volumeSnapshot = getVolumeSnapshot(timestamp, periods[i], address)
+    if (deposit) {
+      volumeSnapshot.amountDepositedUSD = volumeSnapshot.amountDepositedUSD.plus(amountUsd)
+    }
+    else {
+      volumeSnapshot.amountWithdrawnUSD = volumeSnapshot.amountWithdrawnUSD.plus(amountUsd)
+    }
+    volumeSnapshot.count = volumeSnapshot.count.plus(BigInt.fromI32(1))
+    volumeSnapshot.save()
+  }
+
+}
+
 export function handleWithdraw(event: WithdrawEvent): void {
   const withdrawal = new LlammaWithdrawal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   withdrawal.llamma = event.address
@@ -93,6 +133,13 @@ export function handleWithdraw(event: WithdrawEvent): void {
   withdrawal.transactionHash = event.transaction.hash
   withdrawal.save()
   takeSnapshots(event.block)
+  updateLiquiditySnapshot(
+    event.params.amount_collateral,
+    event.params.amount_borrowed,
+    event.block.timestamp,
+    event.address,
+    false
+  )
 }
 
 export function handleDeposit(event: DepositEvent): void {
@@ -109,6 +156,13 @@ export function handleDeposit(event: DepositEvent): void {
   deposit.transactionHash = event.transaction.hash
   deposit.save()
   takeSnapshots(event.block)
+  updateLiquiditySnapshot(
+    event.params.amount,
+    BigInt.zero(),
+    event.block.timestamp,
+    event.address,
+    false
+  )
 }
 
 export function handleSetRate(event: SetRate): void {
