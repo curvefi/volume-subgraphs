@@ -1,5 +1,5 @@
 import { TokenSnapshot } from '../../../generated/schema'
-import { DAY, getIntervalFromTimestamp, YEAR } from 'utils/time'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { TokenRebased } from '../../../generated/Lido/Lido'
 import { BigDecimal } from '@graphprotocol/graph-ts'
 
@@ -20,7 +20,7 @@ export function handleLidoRebase(event: TokenRebased): void {
     .times(decimals)
     .div(event.params.postTotalShares.toBigDecimal())
 
-  const userAPR = YEAR.toBigDecimal()
+  const userAPR = DAY.toBigDecimal()
     .times(postShareRate.minus(preShareRate).div(preShareRate))
     .div(event.params.timeElapsed.toBigDecimal())
   snapshot.price = userAPR
