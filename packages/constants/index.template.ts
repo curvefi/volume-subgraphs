@@ -106,7 +106,7 @@ export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
 CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
 CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 CURVE_ONLY_TOKENS.set(CNC_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
-CURVE_ONLY_TOKENS.set(GEAR_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
+CURVE_ONLY_TOKENS.set(GEAR_TOKEN, new OracleInfo(WETH_ADDRESS, 0))
 
 
 export const TRANSFER_TOPIC = Bytes.fromHexString("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
