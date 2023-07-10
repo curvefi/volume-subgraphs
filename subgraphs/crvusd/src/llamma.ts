@@ -25,10 +25,12 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   const user = getOrCreateUser(event.params.buyer)
   swap.buyer = user.id
   swap.llamma = event.address
-  swap.sold_id = event.params.sold_id
-  swap.tokens_sold = event.params.tokens_sold
-  swap.tokens_bought = event.params.tokens_bought
-  swap.bought_id = event.params.bought_id
+  swap.soldId = event.params.soldId
+  swap.tokensSold = event.params.tokensSold
+  swap.tokensBought = event.params.tokensBought
+  swap.tokensBoughtUSD = BigDecimal.zero()
+  swap.tokensSoldUSD = BigDecimal.zero()
+  swap.boughtId = event.params.boughtId
   swap.blockNumber = event.block.number
   swap.blockTimestamp = event.block.timestamp
   swap.transactionHash = event.transaction.hash
@@ -57,15 +59,18 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
 
   let soldAmountUsd = BigDecimal.zero()
   let boughtAmountUsd = BigDecimal.zero()
-  if (llamma.coins[event.params.bought_id.toI32()] == market.collateral) {
-    boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
-    soldAmountUsd = toDecimal(event.params.tokens_sold, '18')
+  if (llamma.coins[event.params.boughtId.toI32()] == market.collateral) {
+    boughtAmountUsd = toDecimal(event.params.tokensBought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    soldAmountUsd = toDecimal(event.params.tokensSold, '18')
   } else {
-    soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
-    boughtAmountUsd = toDecimal(event.params.tokens_bought, '18')
+    soldAmountUsd = toDecimal(event.params.tokensSold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    boughtAmountUsd = toDecimal(event.params.tokensBought, '18')
   }
   const volumeUsd = soldAmountUsd.plus(boughtAmountUsd).div(BigDecimal.fromString('2'))
 
+  swap.tokensBoughtUSD = boughtAmountUsd
+  swap.tokensSoldUSD = soldAmountUsd
+  swap.save()
 
   for (let i = 0; i < periods.length; i++) {
     const volumeSnapshot = getVolumeSnapshot(event.block.timestamp, periods[i], event.address)
@@ -75,7 +80,6 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
     volumeSnapshot.count = volumeSnapshot.count.plus(BigInt.fromI32(1))
     volumeSnapshot.save()
   }
-  llamma.totalVolume = llamma.totalVolume.plus(volumeUsd)
   llamma.totalSwapVolume = llamma.totalSwapVolume.plus(volumeUsd)
   llamma.save()
 }
