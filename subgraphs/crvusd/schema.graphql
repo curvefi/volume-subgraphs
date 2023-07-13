@@ -1,363 +1,628 @@
 type Market @entity {
+  """ Entity ID """
   id: Bytes!
-  collateral: Bytes! # address
+  """ The address of the collateral token used in this market """
+  collateral: Bytes!
+  """ The number of decimals used by the collateral token """
   collateralPrecision: BigInt!
+  """ The name of the collateral used, obtained from the corresponding ERC20 contract """
   collateralName: String!
+  """ The address of the controller contract for this market """
   controller: Bytes!
+  """ Address of llamma contract associated with this market  """
   amm: Amm!
+  """ Address of monetary policy contract """
   monetaryPolicy: MonetaryPolicy!
-  index: BigInt! # uint256
+  """ The index of the market in the controller factory """
+  index: BigInt!
+  """ The block number where this market contract was deployed """
   blockNumber: BigInt!
+  """ The timestamp of the block where the market contract was deployed """
   blockTimestamp: BigInt!
+  """ The hash of the transaction deploying the market contract """
   transactionHash: Bytes!
+  """ The list of borrow events occurring in this market """
   borrows: [Borrow!] @derivedFrom(field: "market")
+  """ The list of repayment events occurring in this market """
   repayments: [Repayment!] @derivedFrom(field: "market")
+  """ The list of collateral removal events occurring in this market """
   removals: [Removal!] @derivedFrom(field: "market")
+  """ The list of liquidation events occurring in this market """
   liquidations: [Liquidation!] @derivedFrom(field: "market")
+  """ The list of snapshots recording the state of the market at different points in time """
   snapshots: [Snapshot!] @derivedFrom(field: "market")
+  """ The list of events capturing the collection of fees in this market """
   collectedFees: [CollectedFee!] @derivedFrom(field: "market")
 }
 
 type Snapshot @entity(immutable: true) {
+  """ Entity ID """
   id: String!
+  """ The market for which this snapshot was taken """
   market: Market!
+  """ Llamma for the market snapshotted """
   llamma: Amm!
+  """ Monetary policy for the market snapshotted """
   policy: MonetaryPolicy!
 
-  A: BigInt! #
-  rate: BigDecimal! #
-  futureRate: BigDecimal! #
-  liquidationDiscount: BigDecimal! #
-  loanDiscount: BigDecimal! #
+  """ Amplification coefficient """
+  A: BigInt!
+  """ Market borrow rate (annualized) """
+  rate: BigDecimal!
+  """ The future policy rate of the market, annualized, at the time this snapshot was taken """
+  futureRate: BigDecimal!
+  """ The liquidation discount applied in the market at the time this snapshot was taken """
+  liquidationDiscount: BigDecimal!
+  """ The loan discount applied in the market at the time this snapshot was taken """
+  loanDiscount: BigDecimal!
 
-  minted: BigDecimal! #
-  redeemed: BigDecimal! #
-  totalKeeperDebt: BigDecimal! #
-  totalCollateral: BigDecimal! #
-  totalCollateralUsd: BigDecimal! #
-  totalSupply: BigDecimal! #
-  totalStableCoin: BigDecimal! #
+  """ The total amount of crvUSD minted in the market up until the time this snapshot was taken """
+  minted: BigDecimal!
+  """ The total amount of debt redeemed in the market up until the time this snapshot was taken """
+  redeemed: BigDecimal!
+  """ The total debt of all Keepers globally, not specific to this market, at the time this snapshot was taken """
+  totalKeeperDebt: BigDecimal!
+  """ The controller's collateral balance (token balance - collateral denominated admin fees) at the time this snapshot was taken """
+  totalCollateral: BigDecimal!
+  """ The USD value of the controller's collateral balance at the time this snapshot was taken """
+  totalCollateralUsd: BigDecimal!
+  """ The total crvUSD supply for this market (global crvUSD supply is the sum of this for each market + total keepers' debt) at the time this snapshot was taken """
+  totalSupply: BigDecimal!
+  """ The controller's stablecoin balance (crvUSD balance - crvUSD denominated admin fees) at the time this snapshot was taken """
+  totalStableCoin: BigDecimal!
 
-  totalDebt: BigDecimal! #
-  nLoans: BigInt! #
 
-  crvUsdAdminFees: BigDecimal! #
-  collateralAdminFees: BigDecimal! #
+  """ The total amount of debt in the market at the time this snapshot was taken """
+  totalDebt: BigDecimal!
+  """ Number of outstanding loans on the market """
+  nLoans: BigInt!
+
+  """ crvUSD denominated fees from Llamma waiting to be collected """
+  crvUsdAdminFees: BigDecimal!
+  """ Collateral denominated fees from Llamma waiting to be collected """
+  collateralAdminFees: BigDecimal!
+  """ Borrowing fees """
   adminBorrowingFees: BigDecimal!
-  fee: BigDecimal! #
-  adminFee: BigDecimal! #
+  """ Llamma fee """
+  fee: BigDecimal!
+  """ Llamma admin fee """
+  adminFee: BigDecimal!
 
-  ammPrice: BigDecimal! #
-  oraclePrice: BigDecimal! #
-  basePrice: BigDecimal! #
+  """ Llamma collateral market price """
+  ammPrice: BigDecimal!
+  """ Llamma oracle price """
+  oraclePrice: BigDecimal!
+  """ Llamma brice """
+  basePrice: BigDecimal!
 
-  activeBand: BigInt! #
-  minBand: BigInt! #
-  maxBand: BigInt! #
+  """ Active band at snapshot time """
+  activeBand: BigInt!
+  """ Min band at snapshot time """
+  minBand: BigInt!
+  """ Max band at snapshot time """
+  maxBand: BigInt!
+  """ Whether the (hourly) snapshot includes a (daily) band snapshot """
   bandSnapshot: Boolean!
+  """ State of all bands at snapshot time """
   bands: [Band!] @derivedFrom(field: "snapshot")
 
-  blockNumber: BigInt! #
-  timestamp: BigInt! #
+  """ Snapshot block """
+  blockNumber: BigInt!
+  """ Timestamp of the snapshot's block """
+  timestamp: BigInt!
 }
 
 type CollectedFee @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Specifies the market from which the fees were collected """
   market: Market!
+  """ The total borrowing fees collected in terms of USD """
   borrowingFees: BigDecimal!
+  """ Collateral denominated fees collected from the Llamma """
   ammCollateralFees: BigDecimal!
+  """ USD denominated collateral fees collected from the Llamma """
   ammCollateralFeesUsd: BigDecimal!
+  """ USD (stablecoin) fees collected from the Llamma """
   ammBorrowingFees: BigDecimal!
+  """ The block number at which the fee collection event occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction Hash """
   transactionHash: Bytes!
 }
 
 type Band @entity(immutable: true) {
+  """ Entity ID """
   id: String!
+  """ Band index """
   index: BigInt!
+  """ Market snapshot where the band snapshot was taken """
   snapshot: Snapshot!
+  """ bands_x - The amount of stablecoin in the band at the snapshot time """
   stableCoin: BigDecimal!
+  """ bands_y - The amount of collateral in the band at the snapshot time """
   collateral: BigDecimal!
+  """ The USD value of the collateral in the band at the snapshot time """
   collateralUsd: BigDecimal!
+  """ Band higher price range """
   priceOracleUp: BigDecimal!
+  """ Band lower price range """
   priceOracleDown: BigDecimal!
 }
 
 type Mint @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ The address of the controller that received the minted stablecoin """
   addr: Bytes!
+  """ Amount of stablecoin minted """
   amount: BigInt!
+  """ Block at which the mint happened """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Burn @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Address of the controller for which the stablecoin is burned """
   addr: Bytes!
+  """ Amount burned/removed """
   amount: BigInt!
+  """ Block at which the mint happened """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Amm @entity {
+  """ Entity ID """
   id: Bytes!
+  """ Market/Controller the Llamma is associated with """
   market: Market!
+  """ Amplification parameter (A) that dictates the trading curve """
   A: BigInt!
+  """ Stores the addresses of the traded coins """
   coins: [Bytes!]!
+  """ Stores the names of the traded coins """
   coinNames: [String!]!
-  basePrice: BigInt!
+  """ Stores the decimals of the traded coins for precision """
   coinDecimals: [BigInt!]!
+  """ The price of the collateral at the time of market launch """
+  basePrice: BigInt!
+  """ Oracle contract address """
   priceOracle: Bytes!
+  """ Amm fee """
   fee: BigInt!
+  """ Amm admin fee """
   adminFee: BigInt!
+  """ The total trading volume accumulated over the lifetime of the Amm """
   totalSwapVolume: BigDecimal!
-  totalDepositVolume: BigDecimal!
-  totalVolume: BigDecimal!
+  """ Historical snapshots of the Amm trading volume """
   volumeSnapshots: [VolumeSnapshot!] @derivedFrom(field: "llamma")
+  """ Historical records of the Llamma's rates """
   rates: [LlammaRate!] @derivedFrom(field: "llamma")
+  """ Historical records of the Llamma's fees """
   fees: [LlammaFee!] @derivedFrom(field: "llamma")
+  """ Records of all trades executed via the Llamma """
   exchanges: [TokenExchange!] @derivedFrom(field: "llamma")
+  """ Records of all liquidity withdrawals from the Llamma """
   withdrawals: [LlammaWithdrawal!] @derivedFrom(field: "llamma")
+  """ Records of all liquidity deposits to the Llamma """
   deposits: [LlammaDeposit!] @derivedFrom(field: "llamma")
 }
 
 type VolumeSnapshot @entity {
+  """ Entity ID """
   id: ID!
+  """ Llamma the snapshot is for """
   llamma: Amm!
+  """ Total value of tokens sold in USD during the snapshot period """
   amountSoldUSD: BigDecimal!
+  """ Total value of tokens bought in USD during the snapshot period """
   amountBoughtUSD: BigDecimal!
+  """ Swap volume (as average of sold & bought amounts) in USD """
   swapVolumeUSD: BigDecimal!
+  """ Total value of liquidity deposits in USD during the snapshot period """
   amountDepositedUSD: BigDecimal!
+  """ Total value of liquidity withdrawals in USD during the snapshot period """
   amountWithdrawnUSD: BigDecimal!
-  depositVolumeUSD: BigDecimal!
-  totalVolumeUSD: BigDecimal!
+  """ Total number of swaps that occurred during the snapshot period """
   count: BigInt!
+  """ Duration of the snapshot period in seconds """
   period: BigInt!
+  """ Timestamp the snapshot was initiated at, rounded to period """
   roundedTimestamp: BigInt!
+  """ Actual timestamp snapshot was initiated at """
   timestamp: BigInt!
 }
 
 type LlammaRate @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Llamma whose rate was changed """
   llamma: Amm!
+  """ New rate """
   rate: BigInt!
+  """ Rate multiplier, 1 + integral(rate * dt) """
   rateMul: BigInt!
+  """ Block number at which rate was changed """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type LlammaFee @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Llamma whose rate was changed """
   llamma: Amm!
+  """ New admin fee """
   adminFee: BigInt!
+  """ New fee """
   fee: BigInt!
+  """ Block number at which fee was changed """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type LlammaDeposit @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Llamma where deposit occured """
   llamma: Amm!
+  """ Depositing user address """
   provider: User!
+  """ Amount deposited """
   amount: BigInt!
+  """ Lower band in the deposit range """
   n1: BigInt!
+  """ Upper band in the deposit range """
   n2: BigInt!
+  """ Block at which the deposit occured """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type LlammaWithdrawal @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Llamma where withdrawal occured """
   llamma: Amm!
+  """ Withdrawing user address """
   provider: User!
+  """ Amount of stablecoin withdrawn """
   amountBorrowed: BigInt!
+  """ Amount of collateral withdrawn """
   amountCollateral: BigInt!
+  """ Block at which the withdrawal occured """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type TokenExchange @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Buyer address """
   buyer: User!
+  """ Llamma where exchange occured """
   llamma: Amm!
-  sold_id: BigInt!
-  tokens_sold: BigInt!
-  bought_id: BigInt!
-  tokens_bought: BigInt!
+  """ Index of token sold """
+  soldId: BigInt!
+  """ Amount of token sold (token decimals) """
+  tokensSold: BigInt!
+  """ USD value of tokens sold """
+  tokensSoldUSD: BigDecimal!
+  """ Index of token bought """
+  boughtId: BigInt!
+  """ Amount of token bought (token decimals) """
+  tokensBought: BigInt!
+  """ USD value of tokens bought """
+  tokensBoughtUSD: BigDecimal!
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type MonetaryPolicy @entity {
+  """ Entity ID """
   id: Bytes!
+  """ Address of price oracle used by the policy """
   priceOracle: Bytes!
+  """ List of keepers addresses (used for internal loops) """
   keepers: [Bytes!]!
-  pegKeepers: [PegKeeper!] @derivedFrom(field: "policy")
+  """ Peg Keepers associated with this monetary policy """
+  pegKeepers: [PegKeeper!] @derivedFrom(field: "policy") # TODO: Change to many-to-many relationship
+  """ Relationship to rates determined by policy """
   rates: [PolicyRate!] @derivedFrom(field: "policy")
+  """ Relationship to benchmark rates determined by policy """
   benchmarkRates: [BenchmarkRate!] @derivedFrom(field: "policy")
+  """ Relationship to debt fractions determined by policy """
   debtFractions: [DebtFraction!] @derivedFrom(field: "policy")
 }
 
 type BenchmarkRate @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Monetary policy for the rate """
   policy: MonetaryPolicy!
+  """ Rate value """
   rate: BigInt!
+  """ Block at which the rate was set """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type DebtFraction @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Monetary policy for the debt fraction """
   policy: MonetaryPolicy!
+  """ Fraction value """
   target: BigInt!
+  """ Block at which the debt fraction was set """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type PolicyRate @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Monetary policy for the rate """
   policy: MonetaryPolicy!
+  """ Rate value """
   rate: BigInt!
+  """ Block at which the rate was set """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type PegKeeper @entity {
+  """ Entity ID """
   id: Bytes!
+  """ Monetary policy associated with the keeper """
   policy: MonetaryPolicy!
+  """ True if the keeper is still active, False if it has been removed """
   active: Boolean!
+  """ CrvUSD pool that the keeper is associated with """
   pool: Bytes!
+  """ Amount of debt for that particular keeper """
   debt: BigInt!
-  totalProvided: BigInt!
+  """ Amount of coins provided to the pool """
+  totalProvided: BigInt
+  """ Amount of coins withdrawn from the pool """
   totalWithdrawn: BigInt!
+  """ Keeper's profit """
   totalProfit: BigInt!
+  """ Relationship to all events for providing in the pool """
   provides: [Provide!] @derivedFrom(field: "keeper")
+  """ Relationship to all events for withdrawing from the pool """
   withdrawals: [Withdraw!] @derivedFrom(field: "keeper")
+  """ Relationship to all profit withdrawal events """
   profits: [Profit!] @derivedFrom(field: "keeper")
 }
 
 type Provide @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Keeper that initiated the deposit """
   keeper: PegKeeper!
+  """ Amount provided """
   amount: BigInt!
+  """ Debt amount after deposit """
   debt: BigInt!
+  """ Block at which the deposit occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Withdraw @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Keeper that initiated the withdrawal """
   keeper: PegKeeper!
+  """ Amount withdrawn """
   amount: BigInt!
+  """ Debt amount after withdrawal """
   debt: BigInt!
+  """ Block at which the withdrawal occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Profit @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Keeper from which profits were claimed """
   keeper: PegKeeper!
+  """ Amount of profits claimed """
   amount: BigInt!
+  """ Block at which the profit was claimed """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 
 type DebtCeiling @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
-  addr: Bytes! # address
-  debtCeiling: BigInt! # uint256
+  """ Controller affected by new ceiling """
+  addr: Bytes!
+  """ New debt ceiling value """
+  debtCeiling: BigInt!
+  """ Block at which the debt ceiling was updated """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 
 type Borrow @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ Borrower address """
   user: User!
+  """ Market/controller where borrow happened """
   market: Market!
+  """ Amount of collateral increase """
   collateralIncrease: BigInt!
+  """ Amount of loan increase """
   loanIncrease: BigInt!
+  """ Block at which borrow occured """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Repayment @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ The user who made the repayment """
   user: User!
+  """ The market/controller where the repayment was made """
   market: Market!
+  """ The decrease in collateral as a result of the repayment """
   collateralDecrease: BigInt!
+  """ The decrease in loan as a result of the repayment """
   loanDecrease: BigInt!
+  """ The block number at which the repayment occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Removal @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ The user who removed the collateral """
   user: User!
+  """ The market/controller from which the collateral was removed """
   market: Market!
+  """ The amount of collateral removed by the user """
   collateralDecrease: BigInt!
+  """ The block number at which the removal occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type Liquidation @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ The user whose debt was liquidated """
   user: User!
+  """ The user who performed the liquidation """
   liquidator: User!
+  """ The market/controller where the liquidation occurred """
   market: Market!
+  """ The amount of collateral received by the liquidator """
   collateralReceived: BigInt!
+  """ The amount of stablecoin received by the liquidator """
   stablecoinReceived: BigInt!
+  """ The amount of the user's debt that was liquidated """
   debt: BigInt!
+  """ The block number at which the liquidation occurred """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type UserState @entity(immutable: true) {
+  """ Entity ID """
   id: Bytes!
+  """ The user whose state is being represented """
   user: User!
+  """ The market/controller where the state change happened """
   market: Market!
+  """ The amount of collateral the user has provided """
   collateral: BigInt!
+  """ Lower band in the user's borrow range """
   n1: BigInt!
+  """ Upper band in the user's borrow range """
   n2: BigInt!
+  """ Total debt amount of the user """
   debt: BigInt!
+  """ Liquidation discount applicable to the user """
   liquidationDiscount: BigInt!
+  """ The block number at which the user's state was updated """
   blockNumber: BigInt!
+  """ Block timestamp """
   blockTimestamp: BigInt!
+  """ Transaction hash """
   transactionHash: Bytes!
 }
 
 type User @entity {
+  """ Entity ID """
   id: Bytes!
+  """ All borrow events associated with this user """
   borrows: [Borrow!]  @derivedFrom(field: "user")
+  """ All repayment events associated with this user """
   repayments: [Repayment!]  @derivedFrom(field: "user")
+  """ All removal events associated with this user """
   removals: [Removal!]  @derivedFrom(field: "user")
+  """ All liquidation events where this user was liquidated """
   liquidations: [Liquidation!]  @derivedFrom(field: "user")
+  """ All liquidation events where this user was liquidating another user """
+  initiatedLiquidations: [Liquidation!]  @derivedFrom(field: "liquidator")
+  """ All user states associated with this user """
   states: [UserState!]  @derivedFrom(field: "user")
 }
 
 type Platform @entity {
+  """ Platform ID """
   id: ID!
+  """ List of amm addresses for internal use """
   ammAddresses: [Bytes!]!
+  """ Last snapshot timestam for internal use """
   latestSnapshot: BigInt!
 }
 
