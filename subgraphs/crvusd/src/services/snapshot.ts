@@ -79,10 +79,8 @@ export function getVolumeSnapshot(timestamp: BigInt, period: BigInt, llamma: Add
     volumeSnapshot.amountBoughtUSD = BigDecimal.zero()
     volumeSnapshot.amountSoldUSD = BigDecimal.zero()
     volumeSnapshot.swapVolumeUSD = BigDecimal.zero()
-    volumeSnapshot.totalVolumeUSD = BigDecimal.zero()
     volumeSnapshot.amountDepositedUSD = BigDecimal.zero()
     volumeSnapshot.amountWithdrawnUSD = BigDecimal.zero()
-    volumeSnapshot.depositVolumeUSD = BigDecimal.zero()
     volumeSnapshot.count = BigInt.zero()
     volumeSnapshot.timestamp = timestamp
     volumeSnapshot.roundedTimestamp = interval
@@ -186,7 +184,7 @@ function getKeepersDebt(policyAddress: Address): BigInt {
   return totalDebt
 }
 
-function makeBands(snapshot: Snapshot, colPrecision: string): void {
+function makeBands(snapshot: Snapshot): void {
   const minBand = snapshot.minBand.toI32()
   const maxBand = snapshot.maxBand.toI32()
   const multiParamBands: string[][] = []
@@ -209,7 +207,7 @@ function makeBands(snapshot: Snapshot, colPrecision: string): void {
   }
 
   currentBand = minBand
-  let priceOracleUp = toDecimal(results[results.length - 1], colPrecision)
+  let priceOracleUp = toDecimal(results[results.length - 1], '18')
   const amp = snapshot.A.toBigDecimal()
   const multiplier = amp.minus(BIG_DECIMAL_ONE).div(amp)
 
@@ -220,7 +218,7 @@ function makeBands(snapshot: Snapshot, colPrecision: string): void {
     band.index = BigInt.fromI32(currentBand)
     band.stableCoin = toDecimal(results[resultIndex], '18')
     resultIndex += 1
-    band.collateral = toDecimal(results[resultIndex], colPrecision)
+    band.collateral = toDecimal(results[resultIndex], '18')
     band.collateralUsd = band.collateral.times(snapshot.oraclePrice)
     band.priceOracleUp = priceOracleUp
     priceOracleUp = priceOracleUp.times(multiplier)
@@ -280,7 +278,7 @@ export function takeSnapshots(block: ethereum.Block): void {
       snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
       if (hour == day) {
         snapshot.bandSnapshot = true
-        makeBands(snapshot, precision)
+        makeBands(snapshot)
       } else {
         snapshot.bandSnapshot = false
       }

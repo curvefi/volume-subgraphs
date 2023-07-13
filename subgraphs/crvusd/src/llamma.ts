@@ -25,12 +25,12 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   const user = getOrCreateUser(event.params.buyer)
   swap.buyer = user.id
   swap.llamma = event.address
-  swap.soldId = event.params.soldId
-  swap.tokensSold = event.params.tokensSold
-  swap.tokensBought = event.params.tokensBought
+  swap.soldId = event.params.sold_id
+  swap.tokensSold = event.params.tokens_sold
+  swap.tokensBought = event.params.tokens_bought
   swap.tokensBoughtUSD = BigDecimal.zero()
   swap.tokensSoldUSD = BigDecimal.zero()
-  swap.boughtId = event.params.boughtId
+  swap.boughtId = event.params.bought_id
   swap.blockNumber = event.block.number
   swap.blockTimestamp = event.block.timestamp
   swap.transactionHash = event.transaction.hash
@@ -59,12 +59,12 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
 
   let soldAmountUsd = BigDecimal.zero()
   let boughtAmountUsd = BigDecimal.zero()
-  if (llamma.coins[event.params.boughtId.toI32()] == market.collateral) {
-    boughtAmountUsd = toDecimal(event.params.tokensBought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
-    soldAmountUsd = toDecimal(event.params.tokensSold, '18')
+  if (llamma.coins[event.params.bought_id.toI32()] == market.collateral) {
+    boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    soldAmountUsd = toDecimal(event.params.tokens_sold, '18')
   } else {
-    soldAmountUsd = toDecimal(event.params.tokensSold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
-    boughtAmountUsd = toDecimal(event.params.tokensBought, '18')
+    soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    boughtAmountUsd = toDecimal(event.params.tokens_bought, '18')
   }
   const volumeUsd = soldAmountUsd.plus(boughtAmountUsd).div(BigDecimal.fromString('2'))
 
