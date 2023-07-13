@@ -28,17 +28,24 @@ function getPegKeepers(policyContract: MonetaryPolicyAbi, keepers: Bytes[]): Byt
       pegKeeper.value.toHexString(),
       policyContract._address.toHexString(),
     ])
-    PegKeeperTemplate.create(pegKeeper.value)
-    const keeper = new PegKeeper(pegKeeper.value)
-    const keeperContract = PegKeeperAbi.bind(pegKeeper.value)
-    keeper.active = true
-    keeper.policy = policyContract._address
-    keeper.debt = BigInt.zero()
-    keeper.pool = keeperContract.pool()
-    keeper.totalWithdrawn = BigInt.zero()
-    keeper.totalProvided = BigInt.zero()
-    keeper.totalProfit = BigInt.zero()
-    keeper.save()
+    let keeper = PegKeeper.load(pegKeeper.value)
+    if (keeper) {
+      log.info('Keeper {} for policy {} already exists', [      pegKeeper.value.toHexString(),
+        policyContract._address.toHexString(),])
+    }
+    else {
+      PegKeeperTemplate.create(pegKeeper.value)
+      keeper = new PegKeeper(pegKeeper.value)
+      const keeperContract = PegKeeperAbi.bind(pegKeeper.value)
+      keeper.active = true
+      keeper.policy = policyContract._address
+      keeper.debt = BigInt.zero()
+      keeper.pool = keeperContract.pool()
+      keeper.totalWithdrawn = BigInt.zero()
+      keeper.totalProvided = BigInt.zero()
+      keeper.totalProfit = BigInt.zero()
+      keeper.save()
+    }
     // unlikely, but we don't want to risk having duplicates
     if (keepers.indexOf(pegKeeper.value) < 0) {
       keepers.push(pegKeeper.value)
