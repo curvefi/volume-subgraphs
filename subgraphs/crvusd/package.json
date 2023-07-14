@@ -8,7 +8,7 @@
     "create-local": "graph create --node http://localhost:8020/ convex-community/crvusd",
     "remove-local": "graph remove --node http://localhost:8020/ convex-community/crvusd",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 convex-community/crvusd",
-    "test": "graph test"
+    "test": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/crvusd-test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.50.1",
