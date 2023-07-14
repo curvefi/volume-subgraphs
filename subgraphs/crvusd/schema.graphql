@@ -352,7 +352,7 @@ type MonetaryPolicy @entity {
   """ List of keepers addresses (used for internal loops) """
   keepers: [Bytes!]!
   """ Peg Keepers associated with this monetary policy """
-  pegKeepers: [PegKeeper!] @derivedFrom(field: "policy") # TODO: Change to many-to-many relationship
+  pegKeepers: [PolicyPegKeeper!] @derivedFrom(field: "policy")
   """ Relationship to rates determined by policy """
   rates: [PolicyRate!] @derivedFrom(field: "policy")
   """ Relationship to benchmark rates determined by policy """
@@ -360,6 +360,17 @@ type MonetaryPolicy @entity {
   """ Relationship to debt fractions determined by policy """
   debtFractions: [DebtFraction!] @derivedFrom(field: "policy")
 }
+
+
+type PolicyPegKeeper @entity {
+  """ Entity ID (Policy ID + PegKeeper ID)"""
+  id: Bytes!
+  """ PegKeeper used for many to many relationship """
+  pegKeeper: PegKeeper!
+  """ Policy used for many to many relationship """
+  policy: MonetaryPolicy!
+}
+
 
 type BenchmarkRate @entity(immutable: true) {
   """ Entity ID """
@@ -409,8 +420,8 @@ type PolicyRate @entity(immutable: true) {
 type PegKeeper @entity {
   """ Entity ID """
   id: Bytes!
-  """ Monetary policy associated with the keeper """
-  policy: MonetaryPolicy!
+  """ Monetary policies associated with the keeper """
+  policies: [PolicyPegKeeper!] @derivedFrom(field: "pegKeeper")
   """ True if the keeper is still active, False if it has been removed """
   active: Boolean!
   """ CrvUSD pool that the keeper is associated with """

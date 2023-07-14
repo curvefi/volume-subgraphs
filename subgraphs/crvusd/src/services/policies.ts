@@ -1,20 +1,36 @@
-import { MonetaryPolicy, PegKeeper } from '../../generated/schema'
+import {
+  MonetaryPolicy,
+  PegKeeper,
+  PolicyPegKeeper
+} from '../../generated/schema'
 import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { MonetaryPolicy as MonetaryPolicyAbi } from '../../generated/templates/MonetaryPolicy/MonetaryPolicy'
 import { PegKeeper as PegKeeperTemplate } from '../../generated/templates'
 import { PegKeeper as PegKeeperAbi } from '../../generated/templates/MonetaryPolicy/PegKeeper'
 
-export function getOrCreatePolicy(policy_address: Address): MonetaryPolicy {
-  let policy = MonetaryPolicy.load(policy_address)
+export function getOrCreatePolicy(policyAddress: Address): MonetaryPolicy {
+  let policy = MonetaryPolicy.load(policyAddress)
   if (!policy) {
-    const policyContract = MonetaryPolicyAbi.bind(policy_address)
-    policy = new MonetaryPolicy(policy_address)
+    const policyContract = MonetaryPolicyAbi.bind(policyAddress)
+    policy = new MonetaryPolicy(policyAddress)
     policy.priceOracle = policyContract.PRICE_ORACLE()
     policy.keepers = new Array<Bytes>()
     policy.keepers = getPegKeepers(policyContract, policy.keepers)
     policy.save()
   }
   return policy
+}
+
+export function getOrCreatePolicyPegKeeper(policyAddress: Address, keeperAddress: Address): PolicyPegKeeper {
+  const ppkId = policyAddress.concat(keeperAddress)
+  let policyPegKeeper = PolicyPegKeeper.load(ppkId)
+  if (!policyPegKeeper) {
+    policyPegKeeper = new PolicyPegKeeper(ppkId)
+    policyPegKeeper.pegKeeper = keeperAddress
+    policyPegKeeper.policy = policyAddress
+    policyPegKeeper.save()
+  }
+  return policyPegKeeper
 }
 
 function getPegKeepers(policyContract: MonetaryPolicyAbi, keepers: Bytes[]): Bytes[] {
@@ -38,7 +54,6 @@ function getPegKeepers(policyContract: MonetaryPolicyAbi, keepers: Bytes[]): Byt
       keeper = new PegKeeper(pegKeeper.value)
       const keeperContract = PegKeeperAbi.bind(pegKeeper.value)
       keeper.active = true
-      keeper.policy = policyContract._address
       keeper.debt = BigInt.zero()
       keeper.pool = keeperContract.pool()
       keeper.totalWithdrawn = BigInt.zero()
@@ -46,6 +61,7 @@ function getPegKeepers(policyContract: MonetaryPolicyAbi, keepers: Bytes[]): Byt
       keeper.totalProfit = BigInt.zero()
       keeper.save()
     }
+    getOrCreatePolicyPegKeeper(policyContract._address, pegKeeper.value)
     // unlikely, but we don't want to risk having duplicates
     if (keepers.indexOf(pegKeeper.value) < 0) {
       keepers.push(pegKeeper.value)
