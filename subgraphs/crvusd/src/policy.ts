@@ -4,6 +4,7 @@ import {
   SetRate,
   SetTargetDebtFraction,
 } from '../generated/templates/MonetaryPolicy/MonetaryPolicy'
+import { store } from '@graphprotocol/graph-ts'
 import { PegKeeper as PegKeeperAbi } from '../generated/templates/MonetaryPolicy/PegKeeper'
 import { BenchmarkRate, DebtFraction, MonetaryPolicy, PegKeeper } from '../generated/schema'
 import { BigInt, log } from '@graphprotocol/graph-ts'
@@ -48,6 +49,7 @@ export function handleRemovePegKeeper(event: RemovePegKeeper): void {
   }
   keeper.active = false
   keeper.save()
+  store.remove('PolicyPegKeeper', event.address.concat(event.params.peg_keeper).toHexString())
 }
 
 export function handleSetTargetDebtFraction(event: SetTargetDebtFraction): void {

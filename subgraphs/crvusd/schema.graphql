@@ -337,6 +337,7 @@ type TokenExchange @entity(immutable: true) {
   tokensBought: BigInt!
   """ USD value of tokens bought """
   tokensBoughtUSD: BigDecimal!
+  """ Block at which the exchange occured """
   blockNumber: BigInt!
   """ Block timestamp """
   blockTimestamp: BigInt!
@@ -429,7 +430,7 @@ type PegKeeper @entity {
   """ Amount of debt for that particular keeper """
   debt: BigInt!
   """ Amount of coins provided to the pool """
-  totalProvided: BigInt
+  totalProvided: BigInt!
   """ Amount of coins withdrawn from the pool """
   totalWithdrawn: BigInt!
   """ Keeper's profit """
@@ -633,7 +634,7 @@ type Platform @entity {
   id: ID!
   """ List of amm addresses for internal use """
   ammAddresses: [Bytes!]!
-  """ Last snapshot timestam for internal use """
+  """ Last snapshot timestamp for internal use """
   latestSnapshot: BigInt!
 }
 
