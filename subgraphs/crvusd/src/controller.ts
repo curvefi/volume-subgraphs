@@ -22,6 +22,7 @@ import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { takeSnapshots, toDecimal } from './services/snapshot'
 import { CollectFees } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
+import { getOrCreatePolicy } from './services/policies'
 
 export function handleBorrow(event: BorrowEvent): void {
   const user = getOrCreateUser(event.params.user)
@@ -91,7 +92,7 @@ export function handleSetMonetaryPolicy(event: SetMonetaryPolicy): void {
     ])
     return
   }
-  const policy = new MonetaryPolicy(event.params.monetary_policy)
+  const policy = getOrCreatePolicy(event.params.monetary_policy)
   policy.save()
 
   MonetaryPolicyTemplate.create(event.params.monetary_policy)

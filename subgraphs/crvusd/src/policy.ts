@@ -4,10 +4,12 @@ import {
   SetRate,
   SetTargetDebtFraction,
 } from '../generated/templates/MonetaryPolicy/MonetaryPolicy'
+import { store } from '@graphprotocol/graph-ts'
 import { PegKeeper as PegKeeperAbi } from '../generated/templates/MonetaryPolicy/PegKeeper'
 import { BenchmarkRate, DebtFraction, MonetaryPolicy, PegKeeper } from '../generated/schema'
 import { BigInt, log } from '@graphprotocol/graph-ts'
 import { PegKeeper as PegKeeperTemplate } from '../generated/templates'
+import { getOrCreatePolicyPegKeeper } from './services/policies'
 
 export function handleAddPegKeeper(event: AddPegKeeper): void {
   log.info('Added peg keeper {} for policy {}', [event.params.peg_keeper.toHexString(), event.address.toHexString()])
@@ -16,7 +18,6 @@ export function handleAddPegKeeper(event: AddPegKeeper): void {
     PegKeeperTemplate.create(event.params.peg_keeper)
     const keeperContract = PegKeeperAbi.bind(event.params.peg_keeper)
     keeper = new PegKeeper(event.params.peg_keeper)
-    keeper.policy = event.address
     keeper.active = true
     keeper.pool = keeperContract.pool()
     keeper.debt = BigInt.zero()
@@ -25,6 +26,7 @@ export function handleAddPegKeeper(event: AddPegKeeper): void {
     keeper.totalWithdrawn = BigInt.zero()
     keeper.save()
   }
+  getOrCreatePolicyPegKeeper(event.address, event.params.peg_keeper)
   const policy = MonetaryPolicy.load(event.address)
   if (policy) {
     const keepers = policy.keepers
@@ -47,6 +49,7 @@ export function handleRemovePegKeeper(event: RemovePegKeeper): void {
   }
   keeper.active = false
   keeper.save()
+  store.remove('PolicyPegKeeper', event.address.concat(event.params.peg_keeper).toHexString())
 }
 
 export function handleSetTargetDebtFraction(event: SetTargetDebtFraction): void {

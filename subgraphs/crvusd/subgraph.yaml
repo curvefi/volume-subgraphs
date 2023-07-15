@@ -17,6 +17,9 @@ dataSources:
         - Market
         - DebtCeiling
         - Repayment
+        - PegKeeper
+        - PolicyPegKeeper
+        - MonetaryPolicy
         - Amm
         - Borrow
         - Liquidation
@@ -65,6 +68,8 @@ templates:
         - Removal
         - UserState
         - Liquidation
+        - PolicyPegKeeper
+        - PegKeeper
         - DebtCeiling
         - Mint
         - User
@@ -109,6 +114,7 @@ templates:
       entities:
         - Controller
         - Market
+        - PolicyPegKeeper
         - Amm
         - User
         - LlamaRate
@@ -156,6 +162,7 @@ templates:
         - MonetaryPolicy
         - PegKeeper
         - PolicyRate
+        - PolicyPegKeeper
         - Market
         - User
       abis:
@@ -186,6 +193,7 @@ templates:
         - Market
         - Registry
         - MonetaryPolicy
+        - PolicyPegKeeper
         - PegKeeper
       abis:
         - name: PegKeeper

@@ -58,8 +58,6 @@ export function handleAddMarket(event: AddMarketEvent): void {
   amm.basePrice = ammContract.get_base_price()
 
   amm.totalSwapVolume = BigDecimal.zero()
-  amm.totalDepositVolume = BigDecimal.zero()
-  amm.totalVolume = BigDecimal.zero()
 
   const coins = amm.coins
   const coinDecimals = amm.coinDecimals
