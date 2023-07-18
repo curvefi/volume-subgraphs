@@ -105,7 +105,7 @@ export const GEAR_TOKEN = '0xba3335588d9403515223f109edc4eb7269a9ab5d'
 export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
 CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
 CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
-CURVE_ONLY_TOKENS.set(CNC_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
+CURVE_ONLY_TOKENS.set(CNC_TOKEN, new OracleInfo(WETH_ADDRESS, 0))
 CURVE_ONLY_TOKENS.set(GEAR_TOKEN, new OracleInfo(WETH_ADDRESS, 0))
 
 
