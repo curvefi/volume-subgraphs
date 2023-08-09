@@ -537,7 +537,16 @@ export const TRICRYPTO_FACTORY = 'TRICRYPTO_FACTORY'
 
 export const MULTICALL = '{{ multicall }}'
 
+
 // these are pools that have been hacked or went awry and for which
-// we can not calculate stats anymore past a certain date
+// we can not calculate stats anymore past a certain date - we use timestamp
+// rather than blocks because of snapshots which are time based
 export const DEPRECATED_POOLS = new Map<string, BigInt>()
 DEPRECATED_POOLS.set("0x06364f10b501e868329afbc005b3492902d6c763", BigInt.fromI32(1680315890))
+// vyper reentrancy hacks
+DEPRECATED_POOLS.set("0x8301ae4fc9c624d1d396cbdaa1ed877821d7c511", BigInt.fromI32(1690578357)) // CRV/ETH
+DEPRECATED_POOLS.set("0xc897b98272aa23714464ea2a0bd5180f1b8c0025", BigInt.fromI32(1690578357))
+DEPRECATED_POOLS.set("0xc4c319e2d4d66cca4464c0c2b32c9bd23ebe784e", BigInt.fromI32(1690578357))
+DEPRECATED_POOLS.set("0x9848482da3ee3076165ce6497eda906e66bb85c5", BigInt.fromI32(1690578357))
+
+
