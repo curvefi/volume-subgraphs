@@ -11,3 +11,7 @@ export function bytesToAddress(input: Bytes): Address {
 export function BigDecimalToBigInt(input: BigDecimal): BigInt {
   return BigInt.fromString(input.truncate(0).toString())
 }
+
+export function IntToCallData(input: i32): string {
+  return BigInt.fromI32(input).toHexString().slice(2).padStart(64, '0')
+}

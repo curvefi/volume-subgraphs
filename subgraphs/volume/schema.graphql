@@ -117,27 +117,27 @@ type DailyPoolSnapshot @entity {
   """ APR from rebase - if applicable (annualized from daily variation) """
   rebaseApr: BigDecimal!
   """ Gamma param for v2 pools"""
-  gamma: BigInt!
+  gamma: BigInt
   """ Mid fee param for pools that support it"""
-  midFee: BigInt!
+  midFee: BigInt
   """ Out fee param for pools that support it"""
-  outFee: BigInt!
+  outFee: BigInt
   """ Fee gamma param for pools that support it"""
-  feeGamma: BigInt!
+  feeGamma: BigInt
   """ allowed_extra_profit param for pools that support it"""
-  allowedExtraProfit: BigInt!
+  allowedExtraProfit: BigInt
   """ adjustment_step param for pools that support it"""
-  adjustmentStep: BigInt!
+  adjustmentStep: BigInt
   """ ma_half_time param for pools that support it"""
-  maHalfTime: BigInt!
+  maHalfTime: BigInt
   """ price_scale param for pools that support it"""
-  priceScale: BigInt!
+  priceScale: [BigInt!]!
   """ price_oracle param for pools that support it"""
-  priceOracle: BigInt!
+  priceOracle: [BigInt!]!
   """ last_prices param for pools that support it"""
-  lastPrices: BigInt!
+  lastPrices: [BigInt!]!
   """ last_prices_timestamp param for pools that support it"""
-  lastPricesTimestamp: BigInt!
+  lastPricesTimestamp: BigInt
   """ Snapshot timestamp """
   timestamp: BigInt!
 }

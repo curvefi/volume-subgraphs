@@ -354,19 +354,11 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.baseApr = BIG_DECIMAL_ZERO
   dailySnapshot.rebaseApr = BIG_DECIMAL_ZERO
 
-  dailySnapshot.gamma = BIG_INT_ZERO
-  dailySnapshot.timestamp = BIG_INT_ZERO
-  dailySnapshot.midFee = BIG_INT_ZERO
-  dailySnapshot.outFee = BIG_INT_ZERO
-  dailySnapshot.feeGamma = BIG_INT_ZERO
-  dailySnapshot.allowedExtraProfit = BIG_INT_ZERO
-  dailySnapshot.adjustmentStep = BIG_INT_ZERO
-  dailySnapshot.maHalfTime = BIG_INT_ZERO
-  dailySnapshot.priceScale = BIG_INT_ZERO
-  dailySnapshot.priceOracle = BIG_INT_ZERO
-  dailySnapshot.lastPrices = BIG_INT_ZERO
-  dailySnapshot.lastPricesTimestamp = BIG_INT_ZERO
+  dailySnapshot.priceScale = new Array<BigInt>()
+  dailySnapshot.priceOracle = new Array<BigInt>()
+  dailySnapshot.lastPrices = new Array<BigInt>()
 
+  dailySnapshot.timestamp = BIG_INT_ZERO
   return dailySnapshot
 }
 
