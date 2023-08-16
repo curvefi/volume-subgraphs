@@ -1,5 +1,6 @@
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
-import { BIG_INT_ZERO, MULTICALL } from 'const'
+import { BIG_INT_ZERO, MULTICALL, TRICRYPTO2_POOL, TRICRYPTO_FACTORY } from 'const'
+import { IntToCallData } from 'utils'
 import { Multicall } from '../../generated/AddressProvider/Multicall'
 import { Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { BigInt } from '@graphprotocol/graph-ts/index'
@@ -8,7 +9,7 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
   const multicall = Multicall.bind(Address.fromString(MULTICALL))
   const callAddress = ethereum.Value.fromAddress(Address.fromBytes(pool.address))
 
-  const signatures = [
+  const CRYPTO_FACTORY_SIGNATURES = [
     '0xb1373929', // gamma
     '0x92526c0c', // mid_fee
     '0xee8de675', // out_fee
@@ -21,6 +22,30 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
     '0xc146bf94', // last_prices
     '0x6112c747', // last_prices_timestamp
   ]
+
+  const TRICRYPTO_FACTORY_SIGNATURES = [
+    '0xb1373929', // gamma
+    '0x92526c0c', // mid_fee
+    '0xee8de675', // out_fee
+    '0x49fe9e77', // allowed_extra_profit
+    '0x72d4f0e2', // fee_gamma
+    '0x083812e5', // adjustment_step
+    '0xa3f7cdd5' + IntToCallData(0), // price_scale(0)
+    '0xa3f7cdd5' + IntToCallData(1), // price_scale(1)
+    '0x68727653' + IntToCallData(0), // price_oracle(0)
+    '0x68727653' + IntToCallData(1), // price_oracle(1)
+    '0x59189017' + IntToCallData(0), // last_prices(0)
+    '0x59189017' + IntToCallData(1), // last_prices(1)
+    '0x6112c747', // last_prices_timestamp
+  ]
+
+  let signatures = pool.poolType == TRICRYPTO_FACTORY ? TRICRYPTO_FACTORY_SIGNATURES : CRYPTO_FACTORY_SIGNATURES
+  if (pool.address.toHexString() == TRICRYPTO2_POOL) {
+    signatures = TRICRYPTO_FACTORY_SIGNATURES
+    signatures.push('0x662b6274') // tricrypto has ma_half_time
+  } else if (pool.poolType == TRICRYPTO_FACTORY) {
+    signatures.push('0x09c3da6a') // renamed to ma_time on ng contracts
+  }
 
   const params: Array<ethereum.Tuple> = []
   for (let i = 0; i < signatures.length; i++) {
@@ -46,10 +71,33 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
   snapshot.allowedExtraProfit = intResults[3]
   snapshot.feeGamma = intResults[4]
   snapshot.adjustmentStep = intResults[5]
-  snapshot.maHalfTime = intResults[6]
-  snapshot.priceScale = intResults[7]
-  snapshot.priceOracle = intResults[8]
-  snapshot.lastPrices = intResults[9]
-  snapshot.lastPricesTimestamp = intResults[10]
+  if (pool.poolType == TRICRYPTO_FACTORY || pool.address.toHexString() == TRICRYPTO2_POOL) {
+    const priceScale = snapshot.priceScale
+    priceScale.push(intResults[6])
+    priceScale.push(intResults[7])
+    snapshot.priceScale = priceScale
+    const priceOracle = snapshot.priceOracle
+    priceOracle.push(intResults[8])
+    priceOracle.push(intResults[9])
+    snapshot.priceOracle = priceOracle
+    const lastPrices = snapshot.lastPrices
+    lastPrices.push(intResults[10])
+    lastPrices.push(intResults[11])
+    snapshot.lastPrices = lastPrices
+    snapshot.lastPricesTimestamp = intResults[12]
+    snapshot.maHalfTime = intResults[13]
+  } else {
+    snapshot.maHalfTime = intResults[6]
+    const priceScale = snapshot.priceScale
+    priceScale.push(intResults[7])
+    snapshot.priceScale = priceScale
+    const priceOracle = snapshot.priceOracle
+    priceOracle.push(intResults[8])
+    snapshot.priceOracle = priceOracle
+    const lastPrices = snapshot.lastPrices
+    lastPrices.push(intResults[9])
+    snapshot.lastPrices = lastPrices
+    snapshot.lastPricesTimestamp = intResults[10]
+  }
   snapshot.save()
 }
