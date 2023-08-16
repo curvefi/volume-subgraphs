@@ -43,6 +43,8 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
   if (pool.address.toHexString() == TRICRYPTO2_POOL) {
     signatures = TRICRYPTO_FACTORY_SIGNATURES
     signatures.push('0x662b6274') // tricrypto has ma_half_time
+  } else if (pool.poolType == TRICRYPTO_FACTORY) {
+    signatures.push('0x09c3da6a') // renamed to ma_time on ng contracts
   }
 
   const params: Array<ethereum.Tuple> = []
@@ -83,9 +85,7 @@ export function fillV2PoolParamsSnapshot(snapshot: DailyPoolSnapshot, pool: Pool
     lastPrices.push(intResults[11])
     snapshot.lastPrices = lastPrices
     snapshot.lastPricesTimestamp = intResults[12]
-    if (pool.address.toHexString() == TRICRYPTO2_POOL) {
-      snapshot.maHalfTime = intResults[13]
-    }
+    snapshot.maHalfTime = intResults[13]
   } else {
     snapshot.maHalfTime = intResults[6]
     const priceScale = snapshot.priceScale
