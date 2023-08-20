@@ -577,6 +577,8 @@ type Liquidation @entity(immutable: true) {
   collateralReceived: BigInt!
   """ The amount of stablecoin received by the liquidator """
   stablecoinReceived: BigInt!
+  """ The value of the amm's price oracle at the block of liquidation """
+  oraclePrice: BigInt!
   """ The amount of the user's debt that was liquidated """
   debt: BigInt!
   """ The block number at which the liquidation occurred """

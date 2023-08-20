@@ -6,7 +6,9 @@ import {
   Removal,
   Liquidation,
   MonetaryPolicy,
-  Snapshot, CollectedFee
+  Snapshot,
+  CollectedFee,
+  Amm,
 } from '../generated/schema'
 import {
   Borrow as BorrowEvent,
@@ -23,6 +25,7 @@ import { takeSnapshots, toDecimal } from './services/snapshot'
 import { CollectFees } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
 import { getOrCreatePolicy } from './services/policies'
+import { Llamma } from '../generated/templates/Llamma/Llamma'
 
 export function handleBorrow(event: BorrowEvent): void {
   const user = getOrCreateUser(event.params.user)
@@ -79,6 +82,17 @@ export function handleLiquidate(event: LiquidateEvent): void {
   liquidation.blockNumber = event.block.number
   liquidation.blockTimestamp = event.block.timestamp
   liquidation.transactionHash = event.transaction.hash
+
+  const market = Market.load(event.address)
+  let priceOracle = BigInt.zero()
+  if (market) {
+    const llammaContract = Llamma.bind(Address.fromBytes(market.amm))
+    const oracleResult = llammaContract.try_price_oracle()
+    if (!oracleResult.reverted) {
+      priceOracle = oracleResult.value
+    }
+  }
+  liquidation.oraclePrice = priceOracle
   liquidation.save()
 }
 
@@ -122,7 +136,10 @@ export function handleUserState(event: UserStateEvent): void {
 export function handleCollectFees(event: CollectFees): void {
   const market = Market.load(event.address)
   if (!market) {
-    log.error("Unable to find market {} for collect fee events at {}", [event.address.toHexString(), event.transaction.hash.toHexString()])
+    log.error('Unable to find market {} for collect fee events at {}', [
+      event.address.toHexString(),
+      event.transaction.hash.toHexString(),
+    ])
     return
   }
   // AMM fees are not logged so we retrieve them from latest snapshot
@@ -130,20 +147,26 @@ export function handleCollectFees(event: CollectFees): void {
   const hour = getIntervalFromTimestamp(event.block.timestamp, HOUR)
   let back = 0
   let latestSnapshot: Snapshot | null = null
-  while (!latestSnapshot && (back < 24)) {
+  while (!latestSnapshot && back < 24) {
     const id = market.amm.toHexString() + '-' + hour.minus(HOUR.times(BigInt.fromI32(back))).toString()
     latestSnapshot = Snapshot.load(id)
     back += 1
   }
 
   if (!latestSnapshot) {
-    log.error("Could not find a snapshot within 24 hours for collect fees for {} at {} (time: {})", [event.address.toHexString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
+    log.error('Could not find a snapshot within 24 hours for collect fees for {} at {} (time: {})', [
+      event.address.toHexString(),
+      event.transaction.hash.toHexString(),
+      event.block.timestamp.toString(),
+    ])
   }
   const feeCollected = new CollectedFee(event.transaction.hash.concatI32(event.logIndex.toI32()))
   feeCollected.market = event.address
-  feeCollected.borrowingFees = toDecimal(event.params.amount, "18")
+  feeCollected.borrowingFees = toDecimal(event.params.amount, '18')
   feeCollected.ammCollateralFees = latestSnapshot ? latestSnapshot.collateralAdminFees : BigDecimal.zero()
-  feeCollected.ammCollateralFeesUsd = latestSnapshot ? latestSnapshot.collateralAdminFees.times(latestSnapshot.oraclePrice) : BigDecimal.zero()
+  feeCollected.ammCollateralFeesUsd = latestSnapshot
+    ? latestSnapshot.collateralAdminFees.times(latestSnapshot.oraclePrice)
+    : BigDecimal.zero()
   feeCollected.ammBorrowingFees = latestSnapshot ? latestSnapshot.crvUsdAdminFees : BigDecimal.zero()
   feeCollected.blockNumber = event.block.number
   feeCollected.blockTimestamp = event.block.timestamp
