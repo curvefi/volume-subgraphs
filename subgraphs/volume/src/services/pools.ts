@@ -336,14 +336,15 @@ export function getVirtualBaseLendingPool(pool: Address): BasePool {
 
 export function compareAgainstKnownAssetNames(name: string): i32 {
   const stables = ['USD', 'DAI', 'MIM', 'TETHER', 'FRAX']
+  if (name.indexOf('BTC') >= 0) {
+    return 2
+  }
   for (let i = 0; i < stables.length; i++) {
     if (name.indexOf(stables[i]) >= 0) {
       return 0
     }
   }
-  if (name.indexOf('BTC') >= 0) {
-    return 2
-  } else if (name.indexOf('ETH') >= 0) {
+  if (name.indexOf('ETH') >= 0) {
     return 1
   }
   return -1
