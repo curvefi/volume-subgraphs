@@ -617,6 +617,8 @@ type UserState @entity(immutable: true) {
 type User @entity {
   """ Entity ID """
   id: Bytes!
+  """ Total amount of collateral deposited by the user """
+  depositedCollateral: BigInt!
   """ All borrow events associated with this user """
   borrows: [Borrow!]  @derivedFrom(field: "user")
   """ All repayment events associated with this user """

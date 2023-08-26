@@ -1,10 +1,11 @@
 import { User } from '../../generated/schema'
-import { Address } from '@graphprotocol/graph-ts'
+import { Address, BigInt } from '@graphprotocol/graph-ts'
 
 export function getOrCreateUser(user: Address): User {
   let entity = User.load(user)
   if (!entity) {
     entity = new User(user)
+    entity.depositedCollateral = BigInt.zero()
     entity.save()
   }
   return entity
