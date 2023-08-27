@@ -5,7 +5,7 @@ import {
   Market,
   Snapshot,
   Band,
-  VolumeSnapshot
+  VolumeSnapshot,
 } from '../../generated/schema'
 
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
@@ -14,6 +14,7 @@ import { Multicall } from '../../generated/templates/Llamma/Multicall'
 import { MonetaryPolicy } from '../../generated/templates/Llamma/MonetaryPolicy'
 import { getBalanceOf, getDecimals } from './erc20'
 import { getPlatform } from './platform'
+import { takeUserStateSnapshot } from './userstate'
 
 const MULTICALL = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
 const CRVUSD = Address.fromString('0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E')
@@ -40,7 +41,8 @@ export function bigDecimalExponential(rate: BigDecimal, exponent: BigDecimal): B
   return firstTerm.plus(secondTerm).plus(thirdTerm).plus(fourthTerm)
 }
 
-function aggregateCalls(target: Address, inputValueTypes: string[][]): BigInt[] | null {
+// Aggregate calls to single contract
+export function aggregateCalls(target: Address, inputValueTypes: string[][]): BigInt[] | null {
   const params: Array<ethereum.Tuple> = []
   for (let i = 0; i < inputValueTypes.length; i++) {
     params.push(
@@ -278,9 +280,12 @@ export function takeSnapshots(block: ethereum.Block): void {
       snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
       if (hour == day) {
         snapshot.bandSnapshot = true
+        snapshot.userStateSnapshot = true
         makeBands(snapshot)
+        takeUserStateSnapshot(snapshot)
       } else {
         snapshot.bandSnapshot = false
+        snapshot.userStateSnapshot = false
       }
       snapshot.save()
     }

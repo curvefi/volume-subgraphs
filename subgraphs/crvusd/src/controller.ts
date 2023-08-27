@@ -18,7 +18,7 @@ import { Llamma } from '../generated/templates/Llamma/Llamma'
 
 export function handleBorrow(event: BorrowEvent): void {
   const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.plus(event.params.loan_increase)
+  user.depositedCollateral = user.depositedCollateral.plus(event.params.collateral_increase)
   user.save()
   const borrow = new Borrow(event.transaction.hash.concatI32(event.logIndex.toI32()))
   borrow.market = event.address
@@ -34,7 +34,7 @@ export function handleBorrow(event: BorrowEvent): void {
 
 export function handleRepay(event: RepayEvent): void {
   const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.minus(event.params.loan_decrease)
+  user.depositedCollateral = user.depositedCollateral.minus(event.params.collateral_decrease)
   user.save()
   const repay = new Repayment(event.transaction.hash.concatI32(event.logIndex.toI32()))
   repay.user = user.id
@@ -50,7 +50,7 @@ export function handleRepay(event: RepayEvent): void {
 
 export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
   const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.minus(event.params.loan_decrease)
+  user.depositedCollateral = user.depositedCollateral.minus(event.params.collateral_decrease)
   user.save()
   const removal = new Removal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   removal.user = user.id
