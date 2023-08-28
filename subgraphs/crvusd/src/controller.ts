@@ -197,11 +197,12 @@ export function handleCreateLoanExtended(call: Create_loan_extendedCall): void {
       call.to.toHexString(),
       call.transaction.hash.toHexString(),
     ])
+    return
   }
   const precision = market.collateralPrecision.toString()
   leverage.depositedCollateral = toDecimal(call.inputs.collateral, precision)
   // hackish but no other way to retrieve event data
-  let borrow: Borrow
+  let borrow: Borrow | null
   for (let i = 0; i < 1024; i++) {
     borrow = Borrow.load(call.transaction.hash.concatI32(i))
     if (borrow) {
@@ -211,7 +212,7 @@ export function handleCreateLoanExtended(call: Create_loan_extendedCall): void {
   if (borrow) {
     leverage.receivedCollateral = toDecimal(borrow.collateralIncrease, precision)
     leverage.leverage = leverage.receivedCollateral.gt(BigDecimal.zero())
-      ? leverage.depositedCollateral.div(leverage.receivedCollateral)
+      ? leverage.receivedCollateral.div(leverage.depositedCollateral)
       : BigDecimal.zero()
   }
   leverage.save()
