@@ -101,6 +101,9 @@ templates:
           handler: handleUserState
         - event: CollectFees(uint256,uint256)
           handler: handleCollectFees
+      callHandlers:
+        - function: create_loan_extended(uint256,uint256,uint256,address,uint256[])
+          handler: handleCreateLoanExtended
       file: ./src/controller.ts
   - name: Llamma
     kind: ethereum/contract

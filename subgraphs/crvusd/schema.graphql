@@ -35,6 +35,8 @@ type Market @entity {
   collectedFees: [CollectedFee!] @derivedFrom(field: "market")
   """ All user states snapshots associated with this market """
   stateSnapshots: [UserStateSnapshot!]  @derivedFrom(field: "market")
+  """ All leveraged loans taken """
+  leverages: [Leverage!]  @derivedFrom(field: "market")
 }
 
 type Snapshot @entity(immutable: true) {
@@ -689,6 +691,29 @@ type User @entity {
   states: [UserState!]  @derivedFrom(field: "user")
   """ All user states snapshots associated with this user """
   stateSnapshots: [UserStateSnapshot!]  @derivedFrom(field: "user")
+  """ All leveraged loans taken """
+  leverages: [Leverage!]  @derivedFrom(field: "user")
+}
+
+type Leverage @entity {
+  """ Entity ID """
+  id: Bytes!
+  """ The user who used leverage """
+  user: User!
+  """ The market/controller where leverage was used """
+  market: Market!
+  """ Total amount of collateral deposited by the user """
+  depositedCollateral: BigDecimal!
+  """ Final amount of collateral deposited by the user """
+  receivedCollateral: BigDecimal!
+  """ Leverage ratio """
+  leverage: BigDecimal!
+  """ The block number at which the user's state was updated """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Transaction hash """
+  transactionHash: Bytes!
 }
 
 type Platform @entity {

@@ -1,4 +1,14 @@
-import { Market, UserState, Borrow, Repayment, Removal, Liquidation, Snapshot, CollectedFee } from '../generated/schema'
+import {
+  Market,
+  UserState,
+  Borrow,
+  Repayment,
+  Removal,
+  Liquidation,
+  Snapshot,
+  CollectedFee,
+  Leverage,
+} from '../generated/schema'
 import {
   Borrow as BorrowEvent,
   RemoveCollateral as RemoveCollateralEvent,
@@ -11,7 +21,7 @@ import { getOrCreateDeposit, getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { takeSnapshots, toDecimal } from './services/snapshot'
-import { CollectFees } from '../generated/templates/Llamma/Controller'
+import { CollectFees, Create_loan_extendedCall } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
 import { getOrCreatePolicy } from './services/policies'
 import { Llamma } from '../generated/templates/Llamma/Llamma'
@@ -170,4 +180,39 @@ export function handleCollectFees(event: CollectFees): void {
   feeCollected.blockTimestamp = event.block.timestamp
   feeCollected.transactionHash = event.transaction.hash
   feeCollected.save()
+}
+
+export function handleCreateLoanExtended(call: Create_loan_extendedCall): void {
+  const leverage = new Leverage(call.transaction.hash)
+  leverage.transactionHash = call.transaction.hash
+  leverage.blockNumber = call.block.number
+  leverage.blockTimestamp = call.block.timestamp
+  leverage.user = call.from
+  leverage.market = call.to
+  leverage.receivedCollateral = BigDecimal.zero()
+  leverage.leverage = BigDecimal.zero()
+  const market = Market.load(call.to)
+  if (!market) {
+    log.error('Unable to find market {} for leverage tx at {}', [
+      call.to.toHexString(),
+      call.transaction.hash.toHexString(),
+    ])
+  }
+  const precision = market.collateralPrecision.toString()
+  leverage.depositedCollateral = toDecimal(call.inputs.collateral, precision)
+  // hackish but no other way to retrieve event data
+  let borrow: Borrow
+  for (let i = 0; i < 1024; i++) {
+    borrow = Borrow.load(call.transaction.hash.concatI32(i))
+    if (borrow) {
+      break
+    }
+  }
+  if (borrow) {
+    leverage.receivedCollateral = toDecimal(borrow.collateralIncrease, precision)
+    leverage.leverage = leverage.receivedCollateral.gt(BigDecimal.zero())
+      ? leverage.depositedCollateral.div(leverage.receivedCollateral)
+      : BigDecimal.zero()
+  }
+  leverage.save()
 }
