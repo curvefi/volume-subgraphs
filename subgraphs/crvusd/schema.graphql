@@ -652,14 +652,29 @@ type UserStateSnapshot @entity {
   debt: BigDecimal!
   """ User health factor """
   health: BigDecimal!
+  """ Snapshot timestamp """
+  timestamp: BigInt!
 
+}
+
+type DepositedCollateral @entity {
+  """ Entity ID """
+  id: String!
+  """ The user whose collateral we track """
+  user: User!
+  """ The market/controller for the collateral """
+  market: Market!
+  """ Total amount of collateral deposited by the user """
+  depositedCollateral: BigInt!
 }
 
 type User @entity {
   """ Entity ID """
   id: Bytes!
   """ Total amount of collateral deposited by the user """
-  depositedCollateral: BigInt!
+  depositedCollaterals: [DepositedCollateral!] @derivedFrom(field: "user")
+  """ Block when first user action was recorded """
+  firstActionBlock: BigInt!
   """ All borrow events associated with this user """
   borrows: [Borrow!]  @derivedFrom(field: "user")
   """ All repayment events associated with this user """

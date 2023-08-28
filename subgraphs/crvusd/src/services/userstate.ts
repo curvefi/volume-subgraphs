@@ -1,6 +1,6 @@
 import { Market, Snapshot, UserStateSnapshot } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
-import { getOrCreateUser } from './users'
+import { getOrCreateDeposit, getOrCreateUser } from './users'
 import { Multicall } from '../../generated/templates/Llamma/Multicall'
 import { toDecimal } from './snapshot'
 
@@ -83,11 +83,12 @@ export function takeUserStateSnapshot(snapshot: Snapshot): void {
       return
     }
     for (let j = 0; j < batch.length; j++) {
-      const address = batch[j]
-      if (!address) {
+      const userAddressValue = batch[j]
+      if (!userAddressValue) {
         continue
       }
-      const user = getOrCreateUser(address.toAddress())
+      const address = userAddressValue.toAddress()
+      const deposit = getOrCreateDeposit(address, Address.fromBytes(market.id))
       const results = combinedResults.slice(j * 4, (j + 1) * 4)
       const userStateResults = results[0]
       const userStateValues = userStateResults
@@ -100,18 +101,20 @@ export function takeUserStateSnapshot(snapshot: Snapshot): void {
       const ticksResults = results[3]
       const ticksValues = ticksResults ? ticksResults.toBigIntArray() : [BigInt.zero(), BigInt.zero()]
 
-      const userStateSnapshot = new UserStateSnapshot(snapshot.id + '-' + user.id.toHexString())
-      userStateSnapshot.user = user.id
+      const userStateSnapshot = new UserStateSnapshot(snapshot.id + '-' + address.toHexString())
+      userStateSnapshot.user = address
       userStateSnapshot.market = snapshot.market
       userStateSnapshot.snapshot = snapshot.id
       userStateSnapshot.collateral = toDecimal(userStateValues[0], precision)
-      userStateSnapshot.depositedCollateral = toDecimal(user.depositedCollateral, precision)
+      userStateSnapshot.depositedCollateral = toDecimal(deposit.depositedCollateral, precision)
       userStateSnapshot.collateralUp = toDecimal(yUpValues, precision)
-      if (user.depositedCollateral.le(BigInt.zero())) {
+      if (deposit.depositedCollateral.le(BigInt.zero())) {
         userStateSnapshot.loss = BigDecimal.zero()
         userStateSnapshot.lossPct = BigDecimal.zero()
       } else {
-        userStateSnapshot.loss = userStateSnapshot.depositedCollateral.minus(userStateSnapshot.collateralUp)
+        const loss = userStateSnapshot.depositedCollateral.minus(userStateSnapshot.collateralUp)
+        // rounding
+        userStateSnapshot.loss = loss.le(BigDecimal.fromString('0.00000001')) ? BigDecimal.zero() : loss
         userStateSnapshot.lossPct = userStateSnapshot.loss
           .div(userStateSnapshot.depositedCollateral)
           .times(BigDecimal.fromString('100'))
@@ -122,6 +125,7 @@ export function takeUserStateSnapshot(snapshot: Snapshot): void {
       userStateSnapshot.n1 = ticksValues[0]
       userStateSnapshot.n2 = ticksValues[1]
       userStateSnapshot.health = toDecimal(healthValues, '18')
+      userStateSnapshot.timestamp = snapshot.timestamp
       userStateSnapshot.save()
     }
   }

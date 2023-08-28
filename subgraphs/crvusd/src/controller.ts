@@ -7,7 +7,7 @@ import {
   Repay as RepayEvent,
   SetMonetaryPolicy,
 } from '../generated/templates/ControllerTemplate/Controller'
-import { getOrCreateUser } from './services/users'
+import { getOrCreateDeposit, getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { takeSnapshots, toDecimal } from './services/snapshot'
@@ -17,9 +17,10 @@ import { getOrCreatePolicy } from './services/policies'
 import { Llamma } from '../generated/templates/Llamma/Llamma'
 
 export function handleBorrow(event: BorrowEvent): void {
-  const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.plus(event.params.collateral_increase)
-  user.save()
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.plus(event.params.collateral_increase)
+  deposit.save()
   const borrow = new Borrow(event.transaction.hash.concatI32(event.logIndex.toI32()))
   borrow.market = event.address
   borrow.user = user.id
@@ -33,9 +34,10 @@ export function handleBorrow(event: BorrowEvent): void {
 }
 
 export function handleRepay(event: RepayEvent): void {
-  const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.minus(event.params.collateral_decrease)
-  user.save()
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.minus(event.params.collateral_decrease)
+  deposit.save()
   const repay = new Repayment(event.transaction.hash.concatI32(event.logIndex.toI32()))
   repay.user = user.id
   repay.market = event.address
@@ -49,9 +51,10 @@ export function handleRepay(event: RepayEvent): void {
 }
 
 export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
-  const user = getOrCreateUser(event.params.user)
-  user.depositedCollateral = user.depositedCollateral.minus(event.params.collateral_decrease)
-  user.save()
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.minus(event.params.collateral_decrease)
+  deposit.save()
   const removal = new Removal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   removal.user = user.id
   removal.market = event.address
@@ -64,9 +67,9 @@ export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
 }
 
 export function handleLiquidate(event: LiquidateEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
   const liquidation = new Liquidation(event.transaction.hash.concatI32(event.logIndex.toI32()))
-  const liquidator = getOrCreateUser(event.params.liquidator)
+  const liquidator = getOrCreateUser(event.params.liquidator, event.block.number)
   liquidation.user = user.id
   liquidation.market = event.address
   liquidation.collateralReceived = event.params.collateral_received
@@ -110,7 +113,7 @@ export function handleSetMonetaryPolicy(event: SetMonetaryPolicy): void {
 }
 
 export function handleUserState(event: UserStateEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
   const userState = new UserState(event.transaction.hash.concatI32(event.logIndex.toI32()))
 
   userState.user = user.id
