@@ -74,7 +74,7 @@ export function takeUserStateSnapshot(snapshot: Snapshot): void {
       multiParamsUserInfo.push([yUp, 'uint256'])
       targets.push(Address.fromBytes(snapshot.llamma))
       const ticks = '0xb461100d' + paddedUserAddress // read_user_tick_numbers
-      multiParamsUserInfo.push([ticks, 'uint256[2]'])
+      multiParamsUserInfo.push([ticks, 'int256[2]'])
       targets.push(Address.fromBytes(snapshot.llamma))
     }
     const combinedResults = multiCall(targets, multiParamsUserInfo)

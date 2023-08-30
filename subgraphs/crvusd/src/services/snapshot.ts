@@ -278,14 +278,14 @@ export function takeSnapshots(block: ethereum.Block): void {
       snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
       snapshot.totalCollateral = controllerCollatBalance.minus(snapshot.collateralAdminFees)
       snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
+      snapshot.bandSnapshot = false
+      snapshot.userStateSnapshot = false
       if (hour == day) {
         snapshot.bandSnapshot = true
-        snapshot.userStateSnapshot = true
         makeBands(snapshot)
+      } else if (((hour.toI32() - day.toI32()) / HOUR.toI32()) % 4 == 0) {
         takeUserStateSnapshot(snapshot)
-      } else {
-        snapshot.bandSnapshot = false
-        snapshot.userStateSnapshot = false
+        snapshot.userStateSnapshot = true
       }
       snapshot.save()
     }
