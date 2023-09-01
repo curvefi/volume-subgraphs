@@ -4,8 +4,9 @@ import {
   LlammaFee,
   LlammaRate,
   LlammaWithdrawal,
-  Market, Snapshot,
-  TokenExchange
+  Market,
+  Snapshot,
+  TokenExchange,
 } from '../generated/schema'
 import { SetAdminFee, SetFee } from '../generated/templates/Llamma/Llamma'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
@@ -22,7 +23,7 @@ import { DAY, getIntervalFromTimestamp, HOUR } from './services/time'
 export function handleTokenExchange(event: TokenExchangeEvent): void {
   takeSnapshots(event.block)
   const swap = new TokenExchange(event.transaction.hash.concatI32(event.logIndex.toI32()))
-  const user = getOrCreateUser(event.params.buyer)
+  const user = getOrCreateUser(event.params.buyer, event.block.number)
   swap.buyer = user.id
   swap.llamma = event.address
   swap.soldId = event.params.sold_id
@@ -48,22 +49,27 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
     return
   }
 
-  const snapshot = Snapshot.load(event.address.toHexString()+ '-' + getIntervalFromTimestamp(event.block.timestamp, HOUR).toString())
+  const snapshot = Snapshot.load(
+    event.address.toHexString() + '-' + getIntervalFromTimestamp(event.block.timestamp, HOUR).toString()
+  )
   if (!snapshot) {
     log.error('Unable to generate snapshot to process exchange volume', [])
     return
   }
-
 
   const periods = [HOUR, DAY]
 
   let soldAmountUsd = BigDecimal.zero()
   let boughtAmountUsd = BigDecimal.zero()
   if (llamma.coins[event.params.bought_id.toI32()] == market.collateral) {
-    boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    boughtAmountUsd = toDecimal(event.params.tokens_bought, market.collateralPrecision.toString()).times(
+      snapshot.oraclePrice
+    )
     soldAmountUsd = toDecimal(event.params.tokens_sold, '18')
   } else {
-    soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+    soldAmountUsd = toDecimal(event.params.tokens_sold, market.collateralPrecision.toString()).times(
+      snapshot.oraclePrice
+    )
     boughtAmountUsd = toDecimal(event.params.tokens_bought, '18')
   }
   const volumeUsd = soldAmountUsd.plus(boughtAmountUsd).div(BigDecimal.fromString('2'))
@@ -84,8 +90,13 @@ export function handleTokenExchange(event: TokenExchangeEvent): void {
   llamma.save()
 }
 
-export function updateLiquiditySnapshot(amountCollateral: BigInt, amountStableCoin: BigInt, timestamp: BigInt, address: Address, deposit: boolean): void {
-
+export function updateLiquiditySnapshot(
+  amountCollateral: BigInt,
+  amountStableCoin: BigInt,
+  timestamp: BigInt,
+  address: Address,
+  deposit: boolean
+): void {
   const periods = [HOUR, DAY]
 
   const llamma = Amm.load(address)
@@ -101,33 +112,33 @@ export function updateLiquiditySnapshot(amountCollateral: BigInt, amountStableCo
     return
   }
 
-  const snapshot = Snapshot.load(address.toHexString()+ '-' + getIntervalFromTimestamp(timestamp, HOUR).toString())
+  const snapshot = Snapshot.load(address.toHexString() + '-' + getIntervalFromTimestamp(timestamp, HOUR).toString())
   if (!snapshot) {
     log.error('Unable to generate snapshot to process liquidity volume', [])
     return
   }
 
-  const amountCollateralUsd = toDecimal(amountCollateral, market.collateralPrecision.toString()).times(snapshot.oraclePrice)
+  const amountCollateralUsd = toDecimal(amountCollateral, market.collateralPrecision.toString()).times(
+    snapshot.oraclePrice
+  )
   const amountUsd = amountCollateralUsd + toDecimal(amountStableCoin, '18')
 
   for (let i = 0; i < periods.length; i++) {
     const volumeSnapshot = getVolumeSnapshot(timestamp, periods[i], address)
     if (deposit) {
       volumeSnapshot.amountDepositedUSD = volumeSnapshot.amountDepositedUSD.plus(amountUsd)
-    }
-    else {
+    } else {
       volumeSnapshot.amountWithdrawnUSD = volumeSnapshot.amountWithdrawnUSD.plus(amountUsd)
     }
     volumeSnapshot.count = volumeSnapshot.count.plus(BigInt.fromI32(1))
     volumeSnapshot.save()
   }
-
 }
 
 export function handleWithdraw(event: WithdrawEvent): void {
   const withdrawal = new LlammaWithdrawal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   withdrawal.llamma = event.address
-  const user = getOrCreateUser(event.params.provider)
+  const user = getOrCreateUser(event.params.provider, event.block.number)
   withdrawal.provider = user.id
   withdrawal.amountBorrowed = event.params.amount_borrowed
   withdrawal.amountCollateral = event.params.amount_collateral
@@ -149,7 +160,7 @@ export function handleWithdraw(event: WithdrawEvent): void {
 export function handleDeposit(event: DepositEvent): void {
   const deposit = new LlammaDeposit(event.transaction.hash.concatI32(event.logIndex.toI32()))
   deposit.llamma = event.address
-  const user = getOrCreateUser(event.params.provider)
+  const user = getOrCreateUser(event.params.provider, event.block.number)
   deposit.provider = user.id
   deposit.amount = event.params.amount
   deposit.n1 = event.params.n1
@@ -160,13 +171,7 @@ export function handleDeposit(event: DepositEvent): void {
   deposit.transactionHash = event.transaction.hash
   deposit.save()
   takeSnapshots(event.block)
-  updateLiquiditySnapshot(
-    event.params.amount,
-    BigInt.zero(),
-    event.block.timestamp,
-    event.address,
-    false
-  )
+  updateLiquiditySnapshot(event.params.amount, BigInt.zero(), event.block.timestamp, event.address, false)
 }
 
 export function handleSetRate(event: SetRate): void {

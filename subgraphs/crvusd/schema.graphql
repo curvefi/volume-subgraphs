@@ -33,6 +33,10 @@ type Market @entity {
   snapshots: [Snapshot!] @derivedFrom(field: "market")
   """ The list of events capturing the collection of fees in this market """
   collectedFees: [CollectedFee!] @derivedFrom(field: "market")
+  """ All user states snapshots associated with this market """
+  stateSnapshots: [UserStateSnapshot!]  @derivedFrom(field: "market")
+  """ All leveraged loans taken """
+  leverages: [Leverage!]  @derivedFrom(field: "market")
 }
 
 type Snapshot @entity(immutable: true) {
@@ -105,6 +109,11 @@ type Snapshot @entity(immutable: true) {
   bandSnapshot: Boolean!
   """ State of all bands at snapshot time """
   bands: [Band!] @derivedFrom(field: "snapshot")
+
+  """ Whether the (hourly) snapshot includes (daily) user state snapshot """
+  userStateSnapshot: Boolean!
+  """ Snapshots of all users' state for the market """
+  userStates: [UserStateSnapshot!] @derivedFrom(field: "snapshot")
 
   """ Snapshot block """
   blockNumber: BigInt!
@@ -614,9 +623,60 @@ type UserState @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type UserStateSnapshot @entity {
+  """ Entity ID """
+  id: String!
+  """ The user whose state is being represented """
+  user: User!
+  """ The market/controller where the state change happened """
+  market: Market!
+  """ Market snapshot where the user state snapshot was taken """
+  snapshot: Snapshot!
+  """ User current collateral balance """
+  collateral: BigDecimal!
+  """ User deposited collateral balance """
+  depositedCollateral: BigDecimal!
+  """ Amount of collateral in the band n if we adiabatically trade near p_oracle on the way up """
+  collateralUp: BigDecimal!
+  """ Loss on originally provided collateral """
+  loss: BigDecimal!
+  """ Loss on originally provided collateral as percentage """
+  lossPct: BigDecimal!
+  """ User stablecoin balance """
+  stablecoin: BigDecimal!
+  """ Number of bands in position """
+  n: BigInt!
+  """ Lower band in the user's borrow range """
+  n1: BigInt!
+  """ Upper band in the user's borrow range """
+  n2: BigInt!
+  """ Total debt amount of the user """
+  debt: BigDecimal!
+  """ User health factor """
+  health: BigDecimal!
+  """ Snapshot timestamp """
+  timestamp: BigInt!
+
+}
+
+type DepositedCollateral @entity {
+  """ Entity ID """
+  id: String!
+  """ The user whose collateral we track """
+  user: User!
+  """ The market/controller for the collateral """
+  market: Market!
+  """ Total amount of collateral deposited by the user """
+  depositedCollateral: BigInt!
+}
+
 type User @entity {
   """ Entity ID """
   id: Bytes!
+  """ Total amount of collateral deposited by the user """
+  depositedCollaterals: [DepositedCollateral!] @derivedFrom(field: "user")
+  """ Block when first user action was recorded """
+  firstActionBlock: BigInt!
   """ All borrow events associated with this user """
   borrows: [Borrow!]  @derivedFrom(field: "user")
   """ All repayment events associated with this user """
@@ -629,6 +689,31 @@ type User @entity {
   initiatedLiquidations: [Liquidation!]  @derivedFrom(field: "liquidator")
   """ All user states associated with this user """
   states: [UserState!]  @derivedFrom(field: "user")
+  """ All user states snapshots associated with this user """
+  stateSnapshots: [UserStateSnapshot!]  @derivedFrom(field: "user")
+  """ All leveraged loans taken """
+  leverages: [Leverage!]  @derivedFrom(field: "user")
+}
+
+type Leverage @entity {
+  """ Entity ID """
+  id: Bytes!
+  """ The user who used leverage """
+  user: User!
+  """ The market/controller where leverage was used """
+  market: Market!
+  """ Total amount of collateral deposited by the user """
+  depositedCollateral: BigDecimal!
+  """ Final amount of collateral deposited by the user """
+  receivedCollateral: BigDecimal!
+  """ Leverage ratio """
+  leverage: BigDecimal!
+  """ The block number at which the user's state was updated """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Transaction hash """
+  transactionHash: Bytes!
 }
 
 type Platform @entity {

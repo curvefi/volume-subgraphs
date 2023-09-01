@@ -5,10 +5,9 @@ import {
   Repayment,
   Removal,
   Liquidation,
-  MonetaryPolicy,
   Snapshot,
   CollectedFee,
-  Amm,
+  Leverage,
 } from '../generated/schema'
 import {
   Borrow as BorrowEvent,
@@ -18,17 +17,20 @@ import {
   Repay as RepayEvent,
   SetMonetaryPolicy,
 } from '../generated/templates/ControllerTemplate/Controller'
-import { getOrCreateUser } from './services/users'
+import { getOrCreateDeposit, getOrCreateUser } from './services/users'
 import { MonetaryPolicy as MonetaryPolicyTemplate } from '../generated/templates'
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { takeSnapshots, toDecimal } from './services/snapshot'
-import { CollectFees } from '../generated/templates/Llamma/Controller'
+import { CollectFees, Create_loan_extendedCall } from '../generated/templates/Llamma/Controller'
 import { getIntervalFromTimestamp, HOUR } from './services/time'
 import { getOrCreatePolicy } from './services/policies'
 import { Llamma } from '../generated/templates/Llamma/Llamma'
 
 export function handleBorrow(event: BorrowEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.plus(event.params.collateral_increase)
+  deposit.save()
   const borrow = new Borrow(event.transaction.hash.concatI32(event.logIndex.toI32()))
   borrow.market = event.address
   borrow.user = user.id
@@ -42,7 +44,10 @@ export function handleBorrow(event: BorrowEvent): void {
 }
 
 export function handleRepay(event: RepayEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.minus(event.params.collateral_decrease)
+  deposit.save()
   const repay = new Repayment(event.transaction.hash.concatI32(event.logIndex.toI32()))
   repay.user = user.id
   repay.market = event.address
@@ -56,7 +61,10 @@ export function handleRepay(event: RepayEvent): void {
 }
 
 export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
+  const deposit = getOrCreateDeposit(event.params.user, event.address)
+  deposit.depositedCollateral = deposit.depositedCollateral.minus(event.params.collateral_decrease)
+  deposit.save()
   const removal = new Removal(event.transaction.hash.concatI32(event.logIndex.toI32()))
   removal.user = user.id
   removal.market = event.address
@@ -69,9 +77,9 @@ export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
 }
 
 export function handleLiquidate(event: LiquidateEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
   const liquidation = new Liquidation(event.transaction.hash.concatI32(event.logIndex.toI32()))
-  const liquidator = getOrCreateUser(event.params.liquidator)
+  const liquidator = getOrCreateUser(event.params.liquidator, event.block.number)
   liquidation.user = user.id
   liquidation.market = event.address
   liquidation.collateralReceived = event.params.collateral_received
@@ -115,7 +123,7 @@ export function handleSetMonetaryPolicy(event: SetMonetaryPolicy): void {
 }
 
 export function handleUserState(event: UserStateEvent): void {
-  const user = getOrCreateUser(event.params.user)
+  const user = getOrCreateUser(event.params.user, event.block.number)
   const userState = new UserState(event.transaction.hash.concatI32(event.logIndex.toI32()))
 
   userState.user = user.id
@@ -172,4 +180,40 @@ export function handleCollectFees(event: CollectFees): void {
   feeCollected.blockTimestamp = event.block.timestamp
   feeCollected.transactionHash = event.transaction.hash
   feeCollected.save()
+}
+
+export function handleCreateLoanExtended(call: Create_loan_extendedCall): void {
+  const leverage = new Leverage(call.transaction.hash)
+  leverage.transactionHash = call.transaction.hash
+  leverage.blockNumber = call.block.number
+  leverage.blockTimestamp = call.block.timestamp
+  leverage.user = call.from
+  leverage.market = call.to
+  leverage.receivedCollateral = BigDecimal.zero()
+  leverage.leverage = BigDecimal.zero()
+  const market = Market.load(call.to)
+  if (!market) {
+    log.error('Unable to find market {} for leverage tx at {}', [
+      call.to.toHexString(),
+      call.transaction.hash.toHexString(),
+    ])
+    return
+  }
+  const precision = market.collateralPrecision.toString()
+  leverage.depositedCollateral = toDecimal(call.inputs.collateral, precision)
+  // hackish but no other way to retrieve event data
+  let borrow: Borrow | null
+  for (let i = 0; i < 1024; i++) {
+    borrow = Borrow.load(call.transaction.hash.concatI32(i))
+    if (borrow) {
+      break
+    }
+  }
+  if (borrow) {
+    leverage.receivedCollateral = toDecimal(borrow.collateralIncrease, precision)
+    leverage.leverage = leverage.receivedCollateral.gt(BigDecimal.zero())
+      ? leverage.receivedCollateral.div(leverage.depositedCollateral)
+      : BigDecimal.zero()
+  }
+  leverage.save()
 }
