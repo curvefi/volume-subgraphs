@@ -68,7 +68,7 @@ export function takeUserStateSnapshot(snapshot: Snapshot): void {
       multiParamsUserInfo.push([userState, 'uint256[4]'])
       targets.push(Address.fromBytes(snapshot.market))
       const userHealth = '0xe2d8ebee' + paddedUserAddress // health
-      multiParamsUserInfo.push([userHealth, 'uint256'])
+      multiParamsUserInfo.push([userHealth, 'int256'])
       targets.push(Address.fromBytes(snapshot.market))
       const yUp = '0xee4c32ee' + paddedUserAddress // get_y_up
       multiParamsUserInfo.push([yUp, 'uint256'])
