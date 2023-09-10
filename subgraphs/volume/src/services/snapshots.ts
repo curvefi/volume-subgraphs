@@ -41,6 +41,7 @@ import { getBasePool } from './pools'
 import { getDeductibleApr } from './rebase/rebase'
 import { CurveLendingPool } from '../../generated/templates/RegistryTemplate/CurveLendingPool'
 import { fillV2PoolParamsSnapshot } from './multicall'
+import { CurveTricryptoOptimized } from '../../generated/AddressProvider/CurveTricryptoOptimized'
 
 export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boolean): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
@@ -276,8 +277,7 @@ function getLatestDailyVolumeValue(pool: Pool, timestamp: BigInt): BigDecimal {
 }
 
 function getPreviousDayTvl(pool: Pool, timestamp: BigInt): BigDecimal {
-  const snapId = pool.id + '-' + getIntervalFromTimestamp(timestamp.minus(DAY), DAY).toString()
-  const previousDaySnapshot = DailyPoolSnapshot.load(snapId)
+  const previousDaySnapshot = getPreviousDaySnapshot(pool, timestamp)
   if (!previousDaySnapshot) {
     return BIG_DECIMAL_ZERO
   }
@@ -341,7 +341,7 @@ function createNewSnapshot(snapId: string): DailyPoolSnapshot {
   dailySnapshot.tvl = BIG_DECIMAL_ZERO
   dailySnapshot.fee = BIG_DECIMAL_ZERO
   dailySnapshot.adminFee = BIG_DECIMAL_ZERO
-  dailySnapshot.offPegFeeMultiplier = BIG_DECIMAL_ZERO
+  dailySnapshot.offPegFeeMultiplier = null
   dailySnapshot.adminFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.lpFeesUSD = BIG_DECIMAL_ZERO
   dailySnapshot.totalDailyFeesUSD = BIG_DECIMAL_ZERO
@@ -389,6 +389,7 @@ export function takePoolSnapshots(timestamp: BigInt): void {
     const snapId = pool.id + '-' + time.toString()
     if (!DailyPoolSnapshot.load(snapId)) {
       const dailySnapshot = createNewSnapshot(snapId)
+      const previousDaySnapshot = getPreviousDaySnapshot(pool, timestamp)
       dailySnapshot.pool = pool.id
       dailySnapshot.timestamp = time
       const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
@@ -411,10 +412,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       // fetch params
       const AResult = poolContract.try_A()
       dailySnapshot.A = AResult.reverted ? BIG_INT_ZERO : AResult.value
-      const offPegFeeResult = getOffPegFeeMultiplierResult(bytesToAddress(poolAddress))
-      dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted
-        ? BIG_DECIMAL_ZERO
-        : offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+      // we avoid calling the offPegFeeMultiplier function for pools that don't need it
+      if (previousDaySnapshot && previousDaySnapshot.offPegFeeMultiplier) {
+        const offPegFeeResult = getOffPegFeeMultiplierResult(bytesToAddress(poolAddress))
+        dailySnapshot.offPegFeeMultiplier = offPegFeeResult.reverted
+          ? null
+          : offPegFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+      }
 
       // compute base APR
       let baseApr = BIG_DECIMAL_ZERO
@@ -459,10 +463,18 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       const fee = feeResult.reverted ? BIG_DECIMAL_ZERO : feeResult.value.toBigDecimal().div(FEE_PRECISION)
       dailySnapshot.fee = fee
 
+      let adminFee = BIG_DECIMAL_ZERO
       const adminFeeResult = poolContract.try_admin_fee()
-      const adminFee = adminFeeResult.reverted
-        ? BIG_DECIMAL_ZERO
-        : adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+      if (adminFeeResult) {
+        adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+      } else {
+        // tricrypto factory pools have a different admin fee method
+        const ngContract = CurveTricryptoOptimized.bind(Address.fromString(pool.id))
+        const adminFeeResult = ngContract.try_ADMIN_FEE()
+        if (adminFeeResult) {
+          adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
+        }
+      }
 
       let lpFees = BIG_DECIMAL_ZERO
       let adminFees = BIG_DECIMAL_ZERO

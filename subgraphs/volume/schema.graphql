@@ -93,7 +93,7 @@ type DailyPoolSnapshot @entity {
   """ Pool admin fee value """
   adminFee: BigDecimal!
   """ Off peg fee multiplier (for lending pools) """
-  offPegFeeMultiplier: BigDecimal!
+  offPegFeeMultiplier: BigDecimal
   """ Value of fees paid to the DAO (in USD)  """
   adminFeesUSD: BigDecimal!
   """ Value of fees paid to the LPs (in USD)  """
