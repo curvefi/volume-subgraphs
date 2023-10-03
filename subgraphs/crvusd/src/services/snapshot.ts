@@ -273,10 +273,11 @@ export function takeSnapshots(block: ethereum.Block): void {
       snapshot.futureRate = bigDecimalExponential(toDecimal(policyRate, '18'), YEAR.toBigDecimal())
       snapshot.totalKeeperDebt = toDecimal(getKeepersDebt(Address.fromBytes(market.monetaryPolicy)), '18')
       snapshot.totalSupply = snapshot.minted.minus(snapshot.redeemed)
-      const controllerStableBalance = toDecimal(getBalanceOf(CRVUSD, amm), '18')
-      const controllerCollatBalance = toDecimal(getBalanceOf(Address.fromBytes(market.collateral), amm), precision)
-      snapshot.totalStableCoin = controllerStableBalance.minus(snapshot.crvUsdAdminFees)
-      snapshot.totalCollateral = controllerCollatBalance.minus(snapshot.collateralAdminFees)
+      const llammaStableBalance = toDecimal(getBalanceOf(CRVUSD, amm), '18')
+      snapshot.available = toDecimal(getBalanceOf(CRVUSD, Address.fromBytes(llamma.market)), '18')
+      const llammaCollatBalance = toDecimal(getBalanceOf(Address.fromBytes(market.collateral), amm), precision)
+      snapshot.totalStableCoin = llammaStableBalance.minus(snapshot.crvUsdAdminFees)
+      snapshot.totalCollateral = llammaCollatBalance.minus(snapshot.collateralAdminFees)
       snapshot.totalCollateralUsd = snapshot.totalCollateral.times(snapshot.oraclePrice)
       snapshot.bandSnapshot = false
       snapshot.userStateSnapshot = false

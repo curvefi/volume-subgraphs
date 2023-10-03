@@ -66,15 +66,16 @@ type Snapshot @entity(immutable: true) {
   redeemed: BigDecimal!
   """ The total debt of all Keepers globally, not specific to this market, at the time this snapshot was taken """
   totalKeeperDebt: BigDecimal!
-  """ The controller's collateral balance (token balance - collateral denominated admin fees) at the time this snapshot was taken """
+  """ The llamma's collateral balance (token balance - collateral denominated admin fees) at the time this snapshot was taken """
   totalCollateral: BigDecimal!
   """ The USD value of the controller's collateral balance at the time this snapshot was taken """
   totalCollateralUsd: BigDecimal!
   """ The total crvUSD supply for this market (global crvUSD supply is the sum of this for each market + total keepers' debt) at the time this snapshot was taken """
   totalSupply: BigDecimal!
-  """ The controller's stablecoin balance (crvUSD balance - crvUSD denominated admin fees) at the time this snapshot was taken """
+  """ The llamma's stablecoin balance (crvUSD balance - crvUSD denominated admin fees) at the time this snapshot was taken """
   totalStableCoin: BigDecimal!
-
+  """ The amount of stablecoin available to borrow """
+  available: BigDecimal!
 
   """ The total amount of debt in the market at the time this snapshot was taken """
   totalDebt: BigDecimal!
