@@ -208,6 +208,9 @@ export function handleSetAdminFee(event: SetAdminFee): void {
   fee.llamma = event.address
   fee.adminFee = event.params.fee
   fee.fee = BigInt.zero()
+  fee.blockNumber = event.block.number
+  fee.blockTimestamp = event.block.timestamp
+  fee.transactionHash = event.transaction.hash
   const llamma = Amm.load(event.address)
   if (llamma) {
     fee.fee = llamma.fee
