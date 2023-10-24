@@ -48,6 +48,8 @@ dataSources:
           file: ./abis/CurvePoolCoin128.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurveLendingPool
           file: ./abis/CurveLendingPool.json
         - name: CurveLendingPoolCoin128
@@ -90,14 +92,14 @@ templates:
           file: ./abis/YToken.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: MainRegistry
           file: ./abis/MainRegistry.json
         - name: MetaPool
           file: ./abis/MetaPool.json
-        - name: CurvePool
-          file: ./abis/CurvePool.json
         - name: CurveLendingPool
           file: ./abis/CurveLendingPool.json
         - name: CurveLendingPoolCoin128
@@ -187,6 +189,8 @@ templates:
           file: ./abis/MainRegistry.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: MetaPool
           file: ./abis/MetaPool.json
         - name: CurveLendingPool
@@ -233,6 +237,8 @@ templates:
           file: ./abis/StableFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurveLendingPool
           file: ./abis/CurveLendingPool.json
         - name: CurveLendingPoolCoin128
@@ -303,6 +309,8 @@ templates:
           file: ./abis/StableFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: CurveLendingPool
@@ -363,6 +371,8 @@ templates:
           file: ./abis/StableFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: CurveLendingPool
@@ -421,6 +431,8 @@ templates:
           file: ./abis/StableFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: CurveLendingPool
@@ -488,6 +500,8 @@ templates:
           file: ./abis/StableFactory.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveTricryptoOptimized
+          file: ./abis/CurveTricryptoOptimized.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: CurveLendingPool
