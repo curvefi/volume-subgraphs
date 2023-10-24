@@ -523,7 +523,7 @@ export const CURVE_REGISTRY_V1 = Address.fromString('0x90e00ace148ca3b23ac1bc8c2
 export const CRV_FRAX = "0x3175df0976dfa876431c2e9ee6bc45b65d3473cc"
 export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
 export const FRAXBP_ADDRESS = Address.fromString("0xdcef968d416a41cdac0ed8702fac8128a64241a2")
-
+export const CBETH_ADDRESS = Address.fromString("0xBe9895146f7AF43049ca1c1AE358B0541Ea49704")
 export const MATIC_FOUR_EUR_LP_TOKEN_ADDRESS = Address.fromString("0xad326c253a84e9805559b73a08724e11e49ca651")
 
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'

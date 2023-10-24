@@ -158,15 +158,18 @@ export function getCTokenExchangeRate(token: Address): BigDecimal {
   const ctoken = CToken.bind(token)
   const underlyingResult = ctoken.try_underlying()
   const exchangeRateResult = ctoken.try_exchangeRateStored()
-  if (underlyingResult.reverted || exchangeRateResult.reverted) {
+  if (exchangeRateResult.reverted) {
     // if fail we use the beginning rate
-    log.error('Failed to get underlying or rate for ctoken {}', [token.toHexString()])
+    log.error('Failed to get exchange rate for ctoken {}', [token.toHexString()])
     return BigDecimal.fromString('0.02')
   }
-  const underlying = underlyingResult.value
+  let underlyingDecimals: i32 = 18
+  if (!underlyingResult.reverted) {
+    const underlying = underlyingResult.value
+    const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
+    underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
+  }
   const exchangeRate = exchangeRateResult.value
-  const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
-  const underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
   // scaling formula: https://compound.finance/docs/ctokens
   const rateScale = exponentToBigDecimal(BigInt.fromI32(10 + underlyingDecimals))
   return exchangeRate.toBigDecimal().div(rateScale)
@@ -231,6 +234,8 @@ export function getUsdRate(token: Address): BigDecimal {
   } else if (YTOKENS.includes(token.toHexString())) {
     return getYTokenExchangeRate(token)
   } else if (token == CRV_FRAX_ADDRESS) {
+    return getFraxBpVirtualPrice()
+  } else if (token == CBETH_ADDRESS) {
     return getFraxBpVirtualPrice()
   } else if (token == MATIC_FOUR_EUR_LP_TOKEN_ADDRESS) {
     return getFourEurPrice()

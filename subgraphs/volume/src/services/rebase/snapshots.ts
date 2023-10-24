@@ -2,7 +2,17 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { TokenSnapshot } from '../../../generated/schema'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { AToken } from '../../../generated/templates/CurvePoolTemplate/AToken'
-import { BIG_DECIMAL_ZERO, BIG_INT_ZERO, USDN_TOKEN, AETH_TOKEN, LIDO_STETH_CONTRACT } from 'const'
+import {
+  BIG_DECIMAL_ZERO,
+  BIG_INT_ZERO,
+  USDN_TOKEN,
+  AETH_TOKEN,
+  LIDO_STETH_CONTRACT,
+  CBETH_ADDRESS,
+  BIG_DECIMAL_ONE,
+  BIG_DECIMAL_1E18,
+} from 'const'
+import { CBETH } from '../../../generated/AddressProvider/CBETH'
 
 // Used to calculate rebase APR of aTokens
 // We store the total supply / total supply scaled ratio as price
@@ -26,6 +36,23 @@ export function getATokenSnapshotPrice(token: Address, timestamp: BigInt): BigDe
           : totalSupply.toBigDecimal().div(scaledTotalSupply.toBigDecimal())
     }
     snapshot.token = token
+    snapshot.timestamp = timestamp
+    snapshot.save()
+  }
+  return snapshot.price
+}
+
+// Used to calculate rebase APR of CBETH
+export function getCBETHSnapshotRate(timestamp: BigInt): BigDecimal {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const snapshotId = CBETH_ADDRESS.toHexString() + '-' + day.toString() + '-rebase'
+  let snapshot = TokenSnapshot.load(snapshotId)
+  if (!snapshot) {
+    snapshot = new TokenSnapshot(snapshotId)
+    const cbEthContract = CBETH.bind(CBETH_ADDRESS)
+    const exchangeRateResult = cbEthContract.try_exchangeRate()
+    snapshot.price = exchangeRateResult ? exchangeRateResult.value.toBigDecimal() : BIG_DECIMAL_1E18
+    snapshot.token = CBETH_ADDRESS
     snapshot.timestamp = timestamp
     snapshot.save()
   }

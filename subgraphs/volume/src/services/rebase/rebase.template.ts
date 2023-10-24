@@ -1,13 +1,15 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
-  BIG_DECIMAL_ZERO, YC_LENDING_TOKENS
+  BIG_DECIMAL_ZERO, BIG_INT_ZERO, CBETH_ADDRESS, YC_LENDING_TOKENS
 } from 'const'
-import { Pool } from '../../../generated/schema'
+import { Pool, TokenSnapshot } from '../../../generated/schema'
 import { getATokenSnapshotPrice } from './snapshots'
 import { growthRate } from 'utils/maths'
-import { DAY } from 'utils/time'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { getTokenSnapshot } from '../snapshots'
 import { bytesToAddress } from 'utils'
+import { AToken } from '../../../generated/templates/CurvePoolTemplate/AToken'
+import { CBETH } from '../../../generated/AddressProvider/CBETH'
 
 {{{ importChainRebaseAprModule }}}
 

@@ -1,12 +1,13 @@
-import { Pool } from '../../../generated/schema'
+import { Pool, TokenSnapshot } from '../../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { LidoOracle } from '../../../generated/templates/CurvePoolTemplate/LidoOracle'
-import { getAethSnapshotPrice, getLidoSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
+import { getAethSnapshotPrice, getCBETHSnapshotRate, getLidoSnapshotPrice, getUsdnSnapshotPrice } from './snapshots'
 import {
   AETH_POOL,
   ATOKEN_POOLS,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
+  CBETH_ADDRESS,
   LIDO_ORACLE_ADDRESS,
   STETH_POOLS,
   USDN_POOL,
@@ -14,6 +15,7 @@ import {
 } from 'const'
 import { bytesToAddress } from 'utils'
 import { DAY } from 'utils/time'
+import { growthRate } from 'utils/maths'
 import { getATokenDailyApr, getCompOrYPoolApr } from './rebase'
 
 function getLidoApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
@@ -77,6 +79,20 @@ function getAethPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigI
   return growthRate.times(aethRatio)
 }
 
+export function getCbEthDailyApr(timestamp: BigInt): BigDecimal {
+  const previousScale = getCBETHSnapshotRate(timestamp.minus(DAY))
+  const currentScale = getCBETHSnapshotRate(timestamp)
+  return growthRate(currentScale, previousScale)
+}
+
+function getCbEthPoolApr(pool: Pool, reserves: Array<BigDecimal>, timestamp: BigInt, tvl: BigDecimal): BigDecimal {
+  const tokenIndex = pool.coins.indexOf(CBETH_ADDRESS)
+  const cbethRatio = reserves[tokenIndex].div(tvl)
+  const growthRate = getCbEthDailyApr(timestamp)
+  log.info('Deductible APR for CBETH: {} APR, {} Ratio', [growthRate.toString(), cbethRatio.toString()])
+  return growthRate.times(cbethRatio)
+}
+
 export function getMainnetPoolApr(
   pool: Pool,
   reserves: Array<BigDecimal>,
@@ -91,6 +107,8 @@ export function getMainnetPoolApr(
     return getCompOrYPoolApr(pool, reserves, timestamp, tvl)
   } else if (pool.id == USDN_POOL) {
     return getUsdnPoolApr(pool, reserves, timestamp, tvl)
+  } else if (pool.coins.indexOf(CBETH_ADDRESS) >= 0) {
+    return getCbEthPoolApr(pool, reserves, timestamp, tvl)
   } else if (pool.id == AETH_POOL) {
     return getAethPoolApr(pool, reserves, timestamp, tvl)
   }
