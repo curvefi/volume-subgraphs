@@ -488,13 +488,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
       let adminFee = BIG_DECIMAL_ZERO
       const adminFeeResult = poolContract.try_admin_fee()
-      if (adminFeeResult) {
+      if (!adminFeeResult.reverted) {
         adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
       } else {
         // tricrypto factory pools have a different admin fee method
         const ngContract = CurveTricryptoOptimized.bind(Address.fromString(pool.id))
         const adminFeeResult = ngContract.try_ADMIN_FEE()
-        if (adminFeeResult) {
+        if (!adminFeeResult.reverted) {
           adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
         }
       }

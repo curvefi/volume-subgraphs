@@ -51,7 +51,7 @@ export function getCBETHSnapshotRate(timestamp: BigInt): BigDecimal {
     snapshot = new TokenSnapshot(snapshotId)
     const cbEthContract = CBETH.bind(CBETH_ADDRESS)
     const exchangeRateResult = cbEthContract.try_exchangeRate()
-    snapshot.price = exchangeRateResult ? exchangeRateResult.value.toBigDecimal() : BIG_DECIMAL_1E18
+    snapshot.price = exchangeRateResult.reverted ? BIG_DECIMAL_1E18 : exchangeRateResult.value.toBigDecimal()
     snapshot.token = CBETH_ADDRESS
     snapshot.timestamp = timestamp
     snapshot.save()

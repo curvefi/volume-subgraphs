@@ -186,6 +186,19 @@ function getKeepersDebt(policyAddress: Address): BigInt {
   return totalDebt
 }
 
+function toHexSignedAndPadded(value: i32): string {
+  let bigIntValue: BigInt
+  if (value < 0) {
+    // Convert to two's complement if negative
+    bigIntValue = BigInt.fromI32(~(-value - 1))
+  } else {
+    bigIntValue = BigInt.fromI32(value)
+  }
+
+  // Convert to hexadecimal string and pad
+  return bigIntValue.toHexString().padStart(64, '0')
+}
+
 function makeBands(snapshot: Snapshot): void {
   const minBand = snapshot.minBand.toI32()
   const maxBand = snapshot.maxBand.toI32()
@@ -193,14 +206,14 @@ function makeBands(snapshot: Snapshot): void {
   let currentBand = minBand
   while (currentBand <= maxBand) {
     // bands_x signature with input for current band
-    const bandX = '0xebcb0067' + BigInt.fromI32(currentBand).toHexString().slice(2).padStart(64, '0')
+    const bandX = '0xebcb0067' + toHexSignedAndPadded(currentBand)
     multiParamBands.push([bandX, 'uint256'])
     // bands_y signature with input for current band
-    const bandY = '0x31f7e306' + BigInt.fromI32(currentBand).toHexString().slice(2).padStart(64, '0')
+    const bandY = '0x31f7e306' + toHexSignedAndPadded(currentBand)
     multiParamBands.push([bandY, 'uint256'])
     currentBand += 1
   }
-  const priceOracleCallData = '0x2eb858e7' + BigInt.fromI32(minBand).toHexString().slice(2).padStart(64, '0')
+  const priceOracleCallData = '0x2eb858e7' + toHexSignedAndPadded(minBand)
   multiParamBands.push([priceOracleCallData, 'uint256'])
   const results = aggregateCalls(Address.fromBytes(snapshot.llamma), multiParamBands)
   if (!results) {
