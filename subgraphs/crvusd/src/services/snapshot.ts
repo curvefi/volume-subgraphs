@@ -21,6 +21,9 @@ const CRVUSD = Address.fromString('0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E')
 const multicall = Multicall.bind(Address.fromString(MULTICALL))
 export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_DECIMAL_ONE = BigDecimal.fromString('1')
+export const MAX_U256 = BigInt.fromString(
+  '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+)
 
 // a fast approximation of (1 + rate)^exponent
 // https://github.com/messari/subgraphs/blob/fa253e06de13f9b78849efe8da3481d53d92620a/subgraphs/_reference_/src/common/utils/numbers.ts
@@ -187,16 +190,11 @@ function getKeepersDebt(policyAddress: Address): BigInt {
 }
 
 function toHexSignedAndPadded(value: i32): string {
-  let bigIntValue: BigInt
+  let bigIntValue = BigInt.fromI32(value)
   if (value < 0) {
-    // Convert to two's complement if negative
-    bigIntValue = BigInt.fromI32(~(-value - 1))
-  } else {
-    bigIntValue = BigInt.fromI32(value)
+    bigIntValue = MAX_U256.plus(bigIntValue.plus(BigInt.fromI32(1)))
   }
-
-  // Convert to hexadecimal string and pad
-  return bigIntValue.toHexString().padStart(64, '0')
+  return bigIntValue.toHexString().slice(2).padStart(64, '0')
 }
 
 function makeBands(snapshot: Snapshot): void {
