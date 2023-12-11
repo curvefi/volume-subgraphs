@@ -8,7 +8,7 @@ import {
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR } from 'utils/time'
-import { getForexUsdRate, getUsdRate } from 'utils/pricing'
+import { getForexUsdRate, getUsdRate, getPriceVsEthFromCurve } from 'utils/pricing'
 import {
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ONE,
@@ -30,6 +30,8 @@ import {
   SCAM_POOLS,
   CURVE_ONLY_TOKENS,
   DEPRECATED_POOLS,
+  NATIVE_PLACEHOLDER_ADDRESS,
+  NATIVE_PLACEHOLDER,
 } from 'const'
 import { BigDecimalToBigInt, bytesToAddress } from 'utils'
 import { getPlatform } from './platform'
@@ -87,6 +89,14 @@ export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): Tok
   return snapshot
 }
 
+function isEthPool(pool: Pool): i32 {
+  const pairedWeth = pool.coins.indexOf(WETH_ADDRESS)
+  if (pairedWeth >= 0) {
+    return pairedWeth
+  }
+  return pool.coins.indexOf(NATIVE_PLACEHOLDER)
+}
+
 export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: Pool): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, HOUR)
   const snapshotId = asset.toHexString() + '-' + hour.toString()
@@ -94,21 +104,34 @@ export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, pool: 
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
     snapshot.timestamp = hour
-    let price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
-    // for synths and tokens that only trade on curve we use a mapping
-    // get the price of the original asset and multiply that by the pool's price oracle
-    if (price == BIG_DECIMAL_ZERO && CURVE_ONLY_TOKENS.has(asset.toHexString())) {
-      log.warning('Invalid price found for {}', [asset.toHexString()])
-      const oracleInfo = CURVE_ONLY_TOKENS[asset.toHexString()]
-      price = getUsdRate(oracleInfo.pricingToken)
-      const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
-      const priceOracleResult = poolContract.try_price_oracle()
-      let priceOracle = priceOracleResult.reverted
-        ? BIG_DECIMAL_ONE
-        : priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
-      priceOracle =
-        oracleInfo.tokenIndex == 1 && priceOracle != BIG_DECIMAL_ZERO ? priceOracle : BIG_DECIMAL_ONE.div(priceOracle)
-      price = price.times(priceOracle)
+    let price = BIG_DECIMAL_ZERO
+    const ethIndex = isEthPool(pool)
+    if (ethIndex >= 0) {
+      log.info('ETH Pool {}, attempting to get prices from Curve pool', [pool.address.toHexString()])
+      const tokenIndex = pool.coins.indexOf(asset)
+      price = getPriceVsEthFromCurve(
+        Address.fromBytes(pool.address),
+        pool.coinDecimals[tokenIndex].toI32(),
+        tokenIndex,
+        ethIndex
+      )
+    } else {
+      price = FOREX_TOKENS.includes(asset.toHexString()) ? getForexUsdRate(asset.toHexString()) : getUsdRate(asset)
+      // for synths and tokens that only trade on curve we use a mapping
+      // get the price of the original asset and multiply that by the pool's price oracle
+      if (price == BIG_DECIMAL_ZERO && CURVE_ONLY_TOKENS.has(asset.toHexString())) {
+        log.warning('Invalid price found for {}', [asset.toHexString()])
+        const oracleInfo = CURVE_ONLY_TOKENS[asset.toHexString()]
+        price = getUsdRate(oracleInfo.pricingToken)
+        const poolContract = CurvePoolV2.bind(Address.fromString(pool.id))
+        const priceOracleResult = poolContract.try_price_oracle()
+        let priceOracle = priceOracleResult.reverted
+          ? BIG_DECIMAL_ONE
+          : priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+        priceOracle =
+          oracleInfo.tokenIndex == 1 && priceOracle != BIG_DECIMAL_ZERO ? priceOracle : BIG_DECIMAL_ONE.div(priceOracle)
+        price = price.times(priceOracle)
+      }
     }
     snapshot.token = asset
     snapshot.price = price
@@ -465,13 +488,13 @@ export function takePoolSnapshots(timestamp: BigInt): void {
 
       let adminFee = BIG_DECIMAL_ZERO
       const adminFeeResult = poolContract.try_admin_fee()
-      if (adminFeeResult) {
+      if (!adminFeeResult.reverted) {
         adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
       } else {
         // tricrypto factory pools have a different admin fee method
         const ngContract = CurveTricryptoOptimized.bind(Address.fromString(pool.id))
         const adminFeeResult = ngContract.try_ADMIN_FEE()
-        if (adminFeeResult) {
+        if (!adminFeeResult.reverted) {
           adminFee = adminFeeResult.value.toBigDecimal().div(FEE_PRECISION)
         }
       }

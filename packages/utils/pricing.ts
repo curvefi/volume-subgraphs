@@ -6,6 +6,7 @@ import {
   CRV_FRAX_ADDRESS,
   FRAXBP_ADDRESS,
   BIG_DECIMAL_ZERO,
+  CRVUSD_TOKEN_ADDRESS,
   BIG_INT_ZERO,
   CTOKENS,
   SIDECHAIN_SUBSTITUTES,
@@ -34,6 +35,8 @@ import { CToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/CTo
 import { YToken } from 'curve-volume/generated/templates/CurvePoolTemplateV2/YToken'
 import { ChainlinkAggregator } from 'curve-volume/generated/templates/CurvePoolTemplateV2/ChainlinkAggregator'
 import { CurvePoolV2 } from 'curve-volume/generated/templates/RegistryTemplate/CurvePoolV2'
+import { Pool } from 'curve-volume/generated/schema'
+import { CurveTricryptoOptimized } from 'curve-volume/generated/templates/TriCryptoOptimizedTemplateV2/CurveTricryptoOptimized'
 
 export function getRateFromUniFork(token: Address, numeraire: Address, factoryContract: Address): BigDecimal {
   const factory = Factory.bind(factoryContract)
@@ -132,6 +135,11 @@ export function getForexUsdRate(token: string): BigDecimal {
   return conversionRate
 }
 
+export function getCrvUsdPrice(): BigDecimal {
+  // TODO: use oracle
+  return BIG_DECIMAL_ONE
+}
+
 // Computes the value of one unit of Token A in units of Token B
 // Only works if both tokens have an ETH pair on Sushi
 export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDecimal {
@@ -158,15 +166,18 @@ export function getCTokenExchangeRate(token: Address): BigDecimal {
   const ctoken = CToken.bind(token)
   const underlyingResult = ctoken.try_underlying()
   const exchangeRateResult = ctoken.try_exchangeRateStored()
-  if (underlyingResult.reverted || exchangeRateResult.reverted) {
+  if (exchangeRateResult.reverted) {
     // if fail we use the beginning rate
-    log.error('Failed to get underlying or rate for ctoken {}', [token.toHexString()])
+    log.error('Failed to get exchange rate for ctoken {}', [token.toHexString()])
     return BigDecimal.fromString('0.02')
   }
-  const underlying = underlyingResult.value
+  let underlyingDecimals: i32 = 18
+  if (!underlyingResult.reverted) {
+    const underlying = underlyingResult.value
+    const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
+    underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
+  }
   const exchangeRate = exchangeRateResult.value
-  const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
-  const underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
   // scaling formula: https://compound.finance/docs/ctokens
   const rateScale = exponentToBigDecimal(BigInt.fromI32(10 + underlyingDecimals))
   return exchangeRate.toBigDecimal().div(rateScale)
@@ -221,6 +232,65 @@ export function get3CrvVirtualPrice(): BigDecimal {
   return vPrice
 }
 
+export function getPriceVsEthFromCurve(
+  poolAddress: Address,
+  tokenDecimals: i32,
+  tokenIndex: i32,
+  ethIndex: i32
+): BigDecimal {
+  const poolContractV2 = CurvePoolV2.bind(poolAddress)
+  const priceOracleResult = poolContractV2.try_price_oracle()
+
+  if (!priceOracleResult.reverted) {
+    const ethPrice = getEthRate(WETH_ADDRESS)
+    const oraclePrice = priceOracleResult.value.toBigDecimal()
+    if (ethIndex == 0) {
+      return oraclePrice.div(BIG_DECIMAL_1E18).times(ethPrice)
+    } else {
+      return oraclePrice.div(BigDecimal.fromString('1e' + tokenDecimals.toString())).div(ethPrice)
+    }
+  }
+  const poolContractNg = CurveTricryptoOptimized.bind(poolAddress)
+  // if eth is numeraire token, we get token price in eth and multiply by eth price
+  if (ethIndex == 0) {
+    const tokenPriceInEthResult = poolContractNg.try_price_oracle(BigInt.fromI32(tokenIndex - 1))
+    if (tokenPriceInEthResult.reverted) {
+      return BIG_DECIMAL_ZERO
+    }
+    const ethPrice = getEthRate(WETH_ADDRESS)
+    return ethPrice != BIG_DECIMAL_ZERO
+      ? tokenPriceInEthResult.value.toBigDecimal().div(BIG_DECIMAL_1E18).times(ethPrice)
+      : BIG_DECIMAL_ZERO
+  }
+  // if token is numeraire, we get eth price in token and divide by eth usd price
+  else if (tokenIndex == 0) {
+    const ethPriceInTokenResult = poolContractNg.try_price_oracle(BigInt.fromI32(ethIndex - 1))
+    if (ethPriceInTokenResult.reverted) {
+      return BIG_DECIMAL_ZERO
+    }
+    const ethPrice = getEthRate(WETH_ADDRESS)
+    return ethPrice != BIG_DECIMAL_ZERO
+      ? ethPriceInTokenResult.value.toBigDecimal().div(BIG_DECIMAL_1E18).div(ethPrice)
+      : BIG_DECIMAL_ZERO
+  }
+  // if neither tokens are numeraire we first need to work with their price in third token
+  else if (tokenIndex != 0 && ethIndex != 0) {
+    const ethPriceInNumeraireResult = poolContractNg.try_price_oracle(BigInt.fromI32(ethIndex - 1))
+    const tokenPriceInNumeraireResult = poolContractNg.try_price_oracle(BigInt.fromI32(tokenIndex - 1))
+
+    if (
+      ethPriceInNumeraireResult.reverted ||
+      tokenPriceInNumeraireResult.reverted ||
+      ethPriceInNumeraireResult.value == BIG_INT_ZERO
+    ) {
+      return BIG_DECIMAL_ZERO
+    }
+    const ethPrice = getEthRate(WETH_ADDRESS)
+    return tokenPriceInNumeraireResult.value.div(ethPriceInNumeraireResult.value).toBigDecimal().times(ethPrice)
+  }
+  return BIG_DECIMAL_ZERO
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
   if (SIDECHAIN_SUBSTITUTES.has(token.toHexString())) {
@@ -234,6 +304,8 @@ export function getUsdRate(token: Address): BigDecimal {
     return getFraxBpVirtualPrice()
   } else if (token == MATIC_FOUR_EUR_LP_TOKEN_ADDRESS) {
     return getFourEurPrice()
+  } else if (token == CRVUSD_TOKEN_ADDRESS) {
+    return getCrvUsdPrice()
   } else if (token == THREE_CRV_ADDRESS) {
     return get3CrvVirtualPrice()
   } else if (token != USDT_ADDRESS) {

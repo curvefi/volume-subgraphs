@@ -21,6 +21,9 @@ const CRVUSD = Address.fromString('0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E')
 const multicall = Multicall.bind(Address.fromString(MULTICALL))
 export const BIG_DECIMAL_TWO = BigDecimal.fromString('2')
 export const BIG_DECIMAL_ONE = BigDecimal.fromString('1')
+export const MAX_U256 = BigInt.fromString(
+  '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+)
 
 // a fast approximation of (1 + rate)^exponent
 // https://github.com/messari/subgraphs/blob/fa253e06de13f9b78849efe8da3481d53d92620a/subgraphs/_reference_/src/common/utils/numbers.ts
@@ -186,6 +189,14 @@ function getKeepersDebt(policyAddress: Address): BigInt {
   return totalDebt
 }
 
+function toHexSignedAndPadded(value: i32): string {
+  let bigIntValue = BigInt.fromI32(value)
+  if (value < 0) {
+    bigIntValue = MAX_U256.plus(bigIntValue.plus(BigInt.fromI32(1)))
+  }
+  return bigIntValue.toHexString().slice(2).padStart(64, '0')
+}
+
 function makeBands(snapshot: Snapshot): void {
   const minBand = snapshot.minBand.toI32()
   const maxBand = snapshot.maxBand.toI32()
@@ -193,14 +204,14 @@ function makeBands(snapshot: Snapshot): void {
   let currentBand = minBand
   while (currentBand <= maxBand) {
     // bands_x signature with input for current band
-    const bandX = '0xebcb0067' + BigInt.fromI32(currentBand).toHexString().slice(2).padStart(64, '0')
+    const bandX = '0xebcb0067' + toHexSignedAndPadded(currentBand)
     multiParamBands.push([bandX, 'uint256'])
     // bands_y signature with input for current band
-    const bandY = '0x31f7e306' + BigInt.fromI32(currentBand).toHexString().slice(2).padStart(64, '0')
+    const bandY = '0x31f7e306' + toHexSignedAndPadded(currentBand)
     multiParamBands.push([bandY, 'uint256'])
     currentBand += 1
   }
-  const priceOracleCallData = '0x2eb858e7' + BigInt.fromI32(minBand).toHexString().slice(2).padStart(64, '0')
+  const priceOracleCallData = '0x2eb858e7' + toHexSignedAndPadded(minBand)
   multiParamBands.push([priceOracleCallData, 'uint256'])
   const results = aggregateCalls(Address.fromBytes(snapshot.llamma), multiParamBands)
   if (!results) {

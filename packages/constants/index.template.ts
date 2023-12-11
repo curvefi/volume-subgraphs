@@ -51,6 +51,8 @@ export const USDT_ADDRESS = Address.fromString(USDT_TOKEN)
 export const WBTC_ADDRESS = Address.fromString(WBTC_TOKEN)
 export const FXS_TOKEN = '0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0'
 export const CVXFXS_TOKEN = '0xfeef77d3f69374f66429c91d732a244f074bdf74'
+export const CVXFXN_TOKEN = "0x183395DbD0B5e93323a7286D1973150697FFFCB3".toLowerCase()
+export const FXN_TOKEN = '0x365AccFCa291e7D3914637ABf1F7635dB165Bb09'.toLowerCase()
 
 // for Forex and EUR pool, map lp token to Chainlink price feed
 export const EURT_LP_TOKEN = '0xfd5db7463a3ab53fd211b4af195c5bccc1a03890'
@@ -104,6 +106,7 @@ export const CNC_TOKEN = '0x9ae380f0272e2162340a5bb646c354271c0f5cfc'
 export const GEAR_TOKEN = '0xba3335588d9403515223f109edc4eb7269a9ab5d'
 export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
 CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
+CURVE_ONLY_TOKENS.set(CVXFXN_TOKEN, new OracleInfo(Address.fromString(FXN_TOKEN), 1))
 CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 CURVE_ONLY_TOKENS.set(CNC_TOKEN, new OracleInfo(WETH_ADDRESS, 0))
 CURVE_ONLY_TOKENS.set(GEAR_TOKEN, new OracleInfo(WETH_ADDRESS, 0))
@@ -357,14 +360,15 @@ export const REBASING_POOL_IMPLEMENTATION_ADDRESSES = REBASING_POOL_IMPLEMENTATI
 export const LIDO_ORACLE_ADDRESS = Address.fromString("0x442af784A788A5bd6F42A01Ebe9F287a871243fb")
 export const CONCENTRATED_LIDO_POOL = "0x828b154032950c8ff7cf8085d841723db2696056"
 export const LIDO_POOL = "0xdc24316b9ae028f1497c275eb9192a3ea0f67022"
-export const STETH_POOLS = [LIDO_POOL, CONCENTRATED_LIDO_POOL]
+export const STETH_NG = "0x21e27a5e5513d6e65c4f830167390997aa84843a"
+export const STETH_POOLS = [LIDO_POOL, CONCENTRATED_LIDO_POOL, STETH_NG]
 export const ATOKEN_POOLS = ["0xeb16ae0052ed37f479f7fe63849198df1765a733",
                              "0xdebf20617708857ebe4f679508e7b7863a8a8eee"]
 
 export const YTOKEN_POOLS = ["0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
 "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
 ]
-
+export const CRVUSD_TOKEN_ADDRESS = Address.fromString("0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E")
 export const YTOKENS = [ "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
   "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
   "0x83f798e925bcd4017eb265844fddabb448f1707d",
@@ -523,7 +527,7 @@ export const CURVE_REGISTRY_V1 = Address.fromString('0x90e00ace148ca3b23ac1bc8c2
 export const CRV_FRAX = "0x3175df0976dfa876431c2e9ee6bc45b65d3473cc"
 export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
 export const FRAXBP_ADDRESS = Address.fromString("0xdcef968d416a41cdac0ed8702fac8128a64241a2")
-
+export const CBETH_ADDRESS = Address.fromString("0xBe9895146f7AF43049ca1c1AE358B0541Ea49704")
 export const MATIC_FOUR_EUR_LP_TOKEN_ADDRESS = Address.fromString("0xad326c253a84e9805559b73a08724e11e49ca651")
 
 export const METAPOOL_FACTORY = 'METAPOOL_FACTORY'
